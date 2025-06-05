@@ -53,7 +53,7 @@
       const flockName = e.features[0].properties.name;
       new mapboxgl.Popup()
         .setLngLat(e.lngLat)
-        .setHTML(`<strong>${flockName}</strong><br><a href="https://yourformlink.com?flock=${encodeURIComponent(flockName)}" target="_blank">Log Eggs</a>`)
+        .setHTML(`<strong>${flockName}</strong><br><a href="https://docs.google.com/forms/d/e/1FAIpQLSdAdNW9yLYTneG2Txs25oTloRkBZzU1VzpnRd9MpvB8ARpPFQ/viewform?usp=pp_url&entry.1709649130=${encodeURIComponent(flockName)}" target="_blank">Log Eggs</a>`)
         .addTo(map);
     });
 
