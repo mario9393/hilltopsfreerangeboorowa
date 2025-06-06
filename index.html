@@ -65,9 +65,15 @@
     });
 
     map.on('click', 'flock-boundaries', function(e) {
-      const flockName = e.features[0].properties.name;
-      let popupContent = `<strong>${flockName}</strong><br>
-                          <a href="eggs.html?flock=${encodeURIComponent(flockName)}" target="_blank">Log Eggs</a><br>`;
+  const flockName = e.features[0].properties.name;
+  const shortId = flockName.replace("Flock ", "F"); // Flock 24 → F24
+
+  // Start with both logging links
+  let popupContent = `
+    <strong>${flockName}</strong><br>
+    <a href="eggs.html?flock=${shortId}" target="_blank">🥚 Log Eggs</a><br>
+    <a href="feed.html?feederGroup=${shortId}" target="_blank">🍽️ Log Feed</a><br>
+  `;
 
       
       if (flockName === "Flock 41") {
