@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chicken Feed Logging</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Log Chicken Feed</h1>
+    <form id="feedForm">
+      <label for="feederId">Feeder ID</label>
+      <select id="feederId" required></select>
+
+      <label for="date">Date</label>
+      <input type="date" id="date" required />
+
+      <label for="beforeFill">Level Before Fill (%)</label>
+      <input type="number" id="beforeFill" min="0" max="100" required />
+
+      <label for="afterFill">Level After Fill (%)</label>
+      <input type="number" id="afterFill" min="0" max="100" required />
+
+      <div id="calculatedFields">
+        <p><strong>Amount Filled (kg):</strong> <span id="amountFilled">-</span></p>
+        <p><strong>Days Until Empty:</strong> <span id="daysUntilEmpty">-</span></p>
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+    <div id="message"></div>
+  </div>
+  <script src="feeder_data.js"></script>
+  <script src="feed.js"></script>
+</body>
+</html>
