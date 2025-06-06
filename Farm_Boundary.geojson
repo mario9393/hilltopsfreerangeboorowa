@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Farm Boundary"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              148.704,
+              -34.354
+            ],
+            [
+              148.707,
+              -34.354
+            ],
+            [
+              148.707,
+              -34.351
+            ],
+            [
+              148.704,
+              -34.351
+            ],
+            [
+              148.704,
+              -34.354
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
