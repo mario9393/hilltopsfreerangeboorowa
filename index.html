@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Hilltops Farm Map</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoibWFyaW85MyIsImEiOiJjbWJqNXlmeWEwZG82MmxvOWtnOGdydTAzIn0.7Fh4y-mK5LdDDLGj8UI4Iw';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/satellite-streets-v12',
+    center: [148.706, -34.353],
+    zoom: 16
+  });
+
+  map.on('load', () => {
+    map.addSource('flocks', {
+      type: 'geojson',
+      data: 'Hilltops_Farm_Map.geojson'
+    });
+
+    map.addLayer({
+      id: 'flock-boundaries',
+      type: 'fill',
+      source: 'flocks',
+      paint: {
+        'fill-color': '#088',
+        'fill-opacity': 0.5
+      }
+    });
+
+    map.addLayer({
+      id: 'flock-boundaries-outline',
+      type: 'line',
+      source: 'flocks',
+      paint: {
+        'line-color': '#000',
+        'line-width': 1
+      }
+    });
+
+    map.addSource('farm-boundary', {
+      type: 'geojson',
+      data: 'Farm_Boundary.geojson'
+    });
+
+    map.addLayer({
+      id: 'farm-boundary-outline',
+      type: 'line',
+      source: 'farm-boundary',
+      paint: {
+        'line-color': '#FFD700',
+        'line-width': 3
+      }
+    });
+
+    map.on('click', 'flock-boundaries', function(e) {
+      const flockName = e.features[0].properties.name;
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(`<strong>${flockName}</strong><br><a href="https://docs.google.com/forms/d/e/1FAIpQLSdAdNW9yLYTneG2Txs25oTloRkBZzU1VzpnRd9MpvB8ARpPFQ/viewform?usp=pp_url&entry.1709649130=${encodeURIComponent(flockName)}" target="_blank">Log Eggs</a>`)
+        .addTo(map);
+    });
+
+    map.on('mouseenter', 'flock-boundaries', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'flock-boundaries', () => {
+      map.getCanvas().style.cursor = '';
+    });
+  });
+</script>
+</body>
+</html>
