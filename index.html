@@ -67,7 +67,7 @@
     map.on('click', 'flock-boundaries', function(e) {
       const flockName = e.features[0].properties.name;
       let popupContent = `<strong>${flockName}</strong><br>
-                          <a href="https://docs.google.com/forms/d/e/1FAIpQLSdAdNW9yLYTneG2Txs25oTloRkBZzU1VzpnRd9MpvB8ARpPFQ/viewform?usp=pp_url&entry.1709649130=${encodeURIComponent(flockName)}" target="_blank">Log Eggs</a><br>`;
+                          <a href="eggs.html?flock=${encodeURIComponent(flockName)}" target="_blank">Log Eggs</a><br>`;
 
       
       if (flockName === "Flock 41") {
