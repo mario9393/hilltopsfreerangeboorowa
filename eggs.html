@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Egg Collection Log</title>
+  <link rel="stylesheet" href="style_eggs.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Egg Collection Log</h1>
+    <form id="eggForm">
+      <label>Date</label>
+      <input type="date" id="date" required />
+
+      <label>Time</label>
+      <input type="time" id="time" required />
+
+      <label>Flock ID</label>
+      <select id="flockId" required>
+        <option disabled selected value="">-- select --</option>
+        <option>Flock 24</option><option>Flock 29</option><option>Flock 32</option><option>Flock 34</option>
+        <option>Flock 35</option><option>Flock 36</option><option>Flock 37</option><option>Flock 38</option>
+        <option>Flock 39</option><option>Flock 40</option><option>Flock 41</option><option>Flock 42</option>
+        <option>Flock 43</option><option>Flock 44</option>
+      </select>
+
+      <label>Name of Collector(s)</label>
+      <input type="text" id="collector" required />
+
+      <label>Team ID</label>
+      <select id="teamId" required>
+        <option disabled selected value="">-- select --</option>
+        <option>A</option><option>B</option><option>C</option>
+      </select>
+
+      <label>Clean Eggs</label>
+      <input type="number" id="clean" required />
+      <label>Dirty Eggs</label>
+      <input type="number" id="dirty" required />
+      <label>Ground Eggs</label>
+      <input type="number" id="ground" required />
+      <label>Broken Eggs</label>
+      <input type="number" id="broken" required />
+      <label>Giant Eggs</label>
+      <input type="number" id="giant" required />
+
+      <p><strong>Total Eggs:</strong> <span id="total">0</span></p>
+
+      <label>Number of Dead Chickens</label>
+      <input type="number" id="dead" required />
+
+      <label>Water Tank Observations</label>
+      <input type="text" id="water" required />
+
+      <label>Feeder Observations</label>
+      <input type="text" id="feeder" required />
+
+      <label>Dog Fed?</label>
+      <select id="dog" required>
+        <option disabled selected value="">-- select --</option>
+        <option>Yes</option><option>No</option>
+      </select>
+
+      <label>Time Leaving Flock</label>
+      <input type="time" id="leaveTime" required />
+
+      <button type="submit">Submit</button>
+    </form>
+    <div id="message"></div>
+  </div>
+  <script src="eggs.js"></script>
+</body>
+</html>
