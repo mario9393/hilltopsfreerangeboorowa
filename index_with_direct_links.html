@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Hilltops Farm Map with Direct Links</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoibWFyaW85MyIsImEiOiJjbWJqNXlmeWEwZG82MmxvOWtnOGdydTAzIn0.7Fh4y-mK5LdDDLGj8UI4Iw';
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/satellite-streets-v12',
+    center: [148.705, -34.35],
+    zoom: 15
+  });
+
+  map.on('load', () => {
+    map.addSource('flocks', {
+      type: 'geojson',
+      data: 'Hilltops_Farm_Map.geojson'
+    });
+
+    map.addLayer({
+      id: 'flock-boundaries',
+      type: 'fill',
+      source: 'flocks',
+      paint: {
+        'fill-color': '#088',
+        'fill-opacity': 0.5
+      }
+    });
+
+    map.addLayer({
+      id: 'flock-boundaries-outline',
+      type: 'line',
+      source: 'flocks',
+      paint: {
+        'line-color': '#000',
+        'line-width': 1
+      }
+    });
+
+    map.addSource('farm-boundary', {
+      type: 'geojson',
+      data: 'Farm_Boundary.geojson'
+    });
+
+    map.addLayer({
+      id: 'farm-boundary-outline',
+      type: 'line',
+      source: 'farm-boundary',
+      paint: {
+        'line-color': '#FFD700',
+        'line-width': 3
+      }
+    });
+
+    map.on('click', 'flock-boundaries', function(e) {
+      const flockName = e.features[0].properties.name;
+      let popupContent = `<strong>${flockName}</strong><br>
+                          <a href="https://docs.google.com/forms/d/e/1FAIpQLSdAdNW9yLYTneG2Txs25oTloRkBZzU1VzpnRd9MpvB8ARpPFQ/viewform?usp=pp_url&entry.1709649130=${encodeURIComponent(flockName)}" target="_blank">Log Eggs</a><br>`;
+
+      
+      if (flockName === "Flock 41") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.35350395742505,148.70613618452722" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "42") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.353783991560746,148.70604882766176" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Tank B") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.35143587667763,148.6987137974139" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Tank A") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.35137401347586,148.6986512545408" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 35") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.351618437332725,148.69684778316122" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 34") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.35255659050747,148.69533928215532" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 29") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.35001877036088,148.70124177501768" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 40") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.34844037919998,148.70237406084183" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 38") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.348235441382045,148.70087515586653" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 32") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.345812883086076,148.69974567196596" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 39") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.350954086550445,148.70489765503604" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 44") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.34844658835689,148.70562745781936" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 36") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.35293350336138,148.70380456612915" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 37") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.350833455402196,148.70809353863316" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 43") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.35376810592933,148.70658630145914" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      if (flockName === "Flock 24") {
+        popupContent += '<a href="https://www.google.com/maps/dir/?api=1&destination=-34.35309416512425,148.70067945203922" target="_blank">📍 Get Directions</a>';
+      }
+    
+
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(popupContent)
+        .addTo(map);
+    });
+
+    map.on('mouseenter', 'flock-boundaries', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', 'flock-boundaries', () => {
+      map.getCanvas().style.cursor = '';
+    });
+  });
+</script>
+</body>
+</html>
