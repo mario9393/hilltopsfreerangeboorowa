@@ -37,5 +37,20 @@
   </div>
   <script src="feeder_data.js"></script>
   <script src="feed.js"></script>
+  
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const feederSelect = document.getElementById("feederId");
+    const flockInput = document.getElementById("flockId");
+
+    feederSelect.addEventListener("change", () => {
+      const selectedOption = feederSelect.selectedOptions[0];
+      if (selectedOption) {
+        flockInput.value = selectedOption.dataset.flockId || "";
+      }
+    });
+  });
+</script>
+  
 </body>
 </html>
