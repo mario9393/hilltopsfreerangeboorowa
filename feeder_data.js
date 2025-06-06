@@ -1,338 +1,72 @@
 const FEEDERS = [
-  {
-    "feederId":"F24-F1",
-    "flockId":"F24",
-    "lat":" 34\u00b021'10.58\"S",
-    "lng":"148\u00b042'1.45\"E"
-  },
-  {
-    "feederId":"F24-F2",
-    "flockId":"F24",
-    "lat":" 34\u00b021'10.58\"S",
-    "lng":"148\u00b042'1.45\"E"
-  },
-  {
-    "feederId":"F24-F3",
-    "flockId":"F24",
-    "lat":" 34\u00b021'10.58\"S",
-    "lng":"148\u00b042'1.45\"E"
-  },
-  {
-    "feederId":"F29-F1",
-    "flockId":"F29",
-    "lat":" 34\u00b020'59.32\"S",
-    "lng":"148\u00b042'4.43\"E"
-  },
-  {
-    "feederId":"F29-F2",
-    "flockId":"F29",
-    "lat":" 34\u00b020'59.32\"S",
-    "lng":"148\u00b042'4.43\"E"
-  },
-  {
-    "feederId":"F29-F3",
-    "flockId":"F29",
-    "lat":" 34\u00b020'59.32\"S",
-    "lng":"148\u00b042'4.43\"E"
-  },
-  {
-    "feederId":"F32-F1",
-    "flockId":"F32",
-    "lat":" 34\u00b020'45.29\"S",
-    "lng":"148\u00b041'59.92\"E"
-  },
-  {
-    "feederId":"F32-F2",
-    "flockId":"F32",
-    "lat":" 34\u00b020'45.29\"S",
-    "lng":"148\u00b041'59.92\"E"
-  },
-  {
-    "feederId":"F32-F3",
-    "flockId":"F32",
-    "lat":" 34\u00b020'45.29\"S",
-    "lng":"148\u00b041'59.92\"E"
-  },
-  {
-    "feederId":"F34-F1",
-    "flockId":"F34",
-    "lat":" 34\u00b021'9.87\"S",
-    "lng":"148\u00b041'43.03\"E"
-  },
-  {
-    "feederId":"F34-F2",
-    "flockId":"F34",
-    "lat":" 34\u00b021'9.87\"S",
-    "lng":"148\u00b041'43.03\"E"
-  },
-  {
-    "feederId":"F34-F3",
-    "flockId":"F34",
-    "lat":" 34\u00b021'9.87\"S",
-    "lng":"148\u00b041'43.03\"E"
-  },
-  {
-    "feederId":"F35-F1",
-    "flockId":"F35",
-    "lat":" 34\u00b021'6.49\"S",
-    "lng":"148\u00b041'48.51\"E"
-  },
-  {
-    "feederId":"F35-F2",
-    "flockId":"F35",
-    "lat":" 34\u00b021'6.49\"S",
-    "lng":"148\u00b041'48.51\"E"
-  },
-  {
-    "feederId":"F35-F3",
-    "flockId":"F35",
-    "lat":" 34\u00b021'6.49\"S",
-    "lng":"148\u00b041'48.51\"E"
-  },
-  {
-    "feederId":"F35-F4",
-    "flockId":"F35",
-    "lat":" 34\u00b021'6.49\"S",
-    "lng":"148\u00b041'48.51\"E"
-  },
-  {
-    "feederId":"F36-F1",
-    "flockId":"F36",
-    "lat":" 34\u00b021'10.52\"S",
-    "lng":"148\u00b042'13.14\"E"
-  },
-  {
-    "feederId":"F36-F2",
-    "flockId":"F36",
-    "lat":" 34\u00b021'10.52\"S",
-    "lng":"148\u00b042'13.14\"E"
-  },
-  {
-    "feederId":"F36-F3",
-    "flockId":"F36",
-    "lat":" 34\u00b021'10.52\"S",
-    "lng":"148\u00b042'13.14\"E"
-  },
-  {
-    "feederId":"F36-F4",
-    "flockId":"F36",
-    "lat":" 34\u00b021'10.52\"S",
-    "lng":"148\u00b042'13.14\"E"
-  },
-  {
-    "feederId":"F37-F1",
-    "flockId":"F37",
-    "lat":" 34\u00b021'3.93\"S",
-    "lng":"148\u00b042'28.59\"E"
-  },
-  {
-    "feederId":"F37-F2",
-    "flockId":"F37",
-    "lat":" 34\u00b021'3.93\"S",
-    "lng":"148\u00b042'28.59\"E"
-  },
-  {
-    "feederId":"F37-F3",
-    "flockId":"F37",
-    "lat":" 34\u00b021'3.93\"S",
-    "lng":"148\u00b042'28.59\"E"
-  },
-  {
-    "feederId":"F38-F1",
-    "flockId":"F38",
-    "lat":" 34\u00b020'53.79\"S",
-    "lng":"148\u00b042'4.04\"E"
-  },
-  {
-    "feederId":"F38-F2",
-    "flockId":"F38",
-    "lat":" 34\u00b020'53.79\"S",
-    "lng":"148\u00b042'4.04\"E"
-  },
-  {
-    "feederId":"F38-F3",
-    "flockId":"F38",
-    "lat":" 34\u00b020'53.79\"S",
-    "lng":"148\u00b042'4.04\"E"
-  },
-  {
-    "feederId":"F39-F1",
-    "flockId":"F39",
-    "lat":" 34\u00b021'2.87\"S",
-    "lng":"148\u00b042'17.63\"E"
-  },
-  {
-    "feederId":"F39-F2",
-    "flockId":"F39",
-    "lat":" 34\u00b021'2.87\"S",
-    "lng":"148\u00b042'17.63\"E"
-  },
-  {
-    "feederId":"F39-F3",
-    "flockId":"F39",
-    "lat":" 34\u00b021'2.87\"S",
-    "lng":"148\u00b042'17.63\"E"
-  },
-  {
-    "feederId":"F39-F4",
-    "flockId":"F39",
-    "lat":" 34\u00b021'2.87\"S",
-    "lng":"148\u00b042'17.63\"E"
-  },
-  {
-    "feederId":"F40-F1",
-    "flockId":"F40",
-    "lat":" 34\u00b020'54.61\"S",
-    "lng":"148\u00b042'9.24\"E"
-  },
-  {
-    "feederId":"F40-F2",
-    "flockId":"F40",
-    "lat":" 34\u00b020'54.61\"S",
-    "lng":"148\u00b042'9.24\"E"
-  },
-  {
-    "feederId":"F40-F3",
-    "flockId":"F40",
-    "lat":" 34\u00b020'54.61\"S",
-    "lng":"148\u00b042'9.24\"E"
-  },
-  {
-    "feederId":"F40-F4",
-    "flockId":"F40",
-    "lat":" 34\u00b020'54.61\"S",
-    "lng":"148\u00b042'9.24\"E"
-  },
-  {
-    "feederId":"F41-F1",
-    "flockId":"F41",
-    "lat":" 34\u00b021'12.24\"S",
-    "lng":"148\u00b042'22.21\"E"
-  },
-  {
-    "feederId":"F41-F2",
-    "flockId":"F41",
-    "lat":" 34\u00b021'12.24\"S",
-    "lng":"148\u00b042'22.21\"E"
-  },
-  {
-    "feederId":"F41-F3",
-    "flockId":"F41",
-    "lat":" 34\u00b021'12.24\"S",
-    "lng":"148\u00b042'22.21\"E"
-  },
-  {
-    "feederId":"F41-F4",
-    "flockId":"F41",
-    "lat":" 34\u00b021'12.24\"S",
-    "lng":"148\u00b042'22.21\"E"
-  },
-  {
-    "feederId":"F41-F5",
-    "flockId":"F41",
-    "lat":" 34\u00b021'12.24\"S",
-    "lng":"148\u00b042'22.21\"E"
-  },
-  {
-    "feederId":"F42-F1",
-    "flockId":"F42",
-    "lat":" 34\u00b021'13.98\"S",
-    "lng":"148\u00b042'21.33\"E"
-  },
-  {
-    "feederId":"F42-F2",
-    "flockId":"F42",
-    "lat":" 34\u00b021'13.98\"S",
-    "lng":"148\u00b042'21.33\"E"
-  },
-  {
-    "feederId":"F42-F3",
-    "flockId":"F42",
-    "lat":" 34\u00b021'13.98\"S",
-    "lng":"148\u00b042'21.33\"E"
-  },
-  {
-    "feederId":"F42-F4",
-    "flockId":"F42",
-    "lat":" 34\u00b021'13.98\"S",
-    "lng":"148\u00b042'21.33\"E"
-  },
-  {
-    "feederId":"F42-F5",
-    "flockId":"F42",
-    "lat":" 34\u00b021'13.98\"S",
-    "lng":"148\u00b042'21.33\"E"
-  },
-  {
-    "feederId":"F43-F1",
-    "flockId":"F43",
-    "lat":" 34\u00b021'14.16\"S",
-    "lng":"148\u00b042'23.50\"E"
-  },
-  {
-    "feederId":"F43-F2",
-    "flockId":"F43",
-    "lat":" 34\u00b021'14.16\"S",
-    "lng":"148\u00b042'23.50\"E"
-  },
-  {
-    "feederId":"F43-F3",
-    "flockId":"F43",
-    "lat":" 34\u00b021'14.16\"S",
-    "lng":"148\u00b042'23.50\"E"
-  },
-  {
-    "feederId":"F43-F4",
-    "flockId":"F43",
-    "lat":" 34\u00b021'14.16\"S",
-    "lng":"148\u00b042'23.50\"E"
-  },
-  {
-    "feederId":"F43-F5",
-    "flockId":"F43",
-    "lat":" 34\u00b021'14.16\"S",
-    "lng":"148\u00b042'23.50\"E"
-  },
-  {
-    "feederId":"F43-F6",
-    "flockId":"F43",
-    "lat":" 34\u00b021'14.16\"S",
-    "lng":"148\u00b042'23.50\"E"
-  },
-  {
-    "feederId":"F43-F7",
-    "flockId":"F43",
-    "lat":" 34\u00b021'14.16\"S",
-    "lng":"148\u00b042'23.50\"E"
-  },
-  {
-    "feederId":"F44-F1",
-    "flockId":"F44",
-    "lat":" 34\u00b020'54.88\"S",
-    "lng":"148\u00b042'20.18\"E"
-  },
-  {
-    "feederId":"F44-F2",
-    "flockId":"F44",
-    "lat":" 34\u00b020'54.88\"S",
-    "lng":"148\u00b042'20.18\"E"
-  },
-  {
-    "feederId":"F44-F3",
-    "flockId":"F44",
-    "lat":" 34\u00b020'54.88\"S",
-    "lng":"148\u00b042'20.18\"E"
-  },
-  {
-    "feederId":"F44-F4",
-    "flockId":"F44",
-    "lat":" 34\u00b020'54.88\"S",
-    "lng":"148\u00b042'20.18\"E"
-  },
-  {
-    "feederId":"F44-F5",
-    "flockId":"F44",
-    "lat":" 34\u00b020'54.88\"S",
-    "lng":"148\u00b042'20.18\"E"
-  }
+  { feederId: "F1", flockId: "Flock 24", lat: -34.35309416512425, lng: 148.70067945203922 },
+  { feederId: "F2", flockId: "Flock 24", lat: -34.35309416512425, lng: 148.70067945203922 },
+  { feederId: "F3", flockId: "Flock 24", lat: -34.35309416512425, lng: 148.70067945203922 },
+
+  { feederId: "F4", flockId: "Flock 29", lat: -34.35001877036088, lng: 148.70124177501768 },
+  { feederId: "F5", flockId: "Flock 29", lat: -34.35001877036088, lng: 148.70124177501768 },
+  { feederId: "F6", flockId: "Flock 29", lat: -34.35001877036088, lng: 148.70124177501768 },
+
+  { feederId: "F7", flockId: "Flock 32", lat: -34.345812883086076, lng: 148.69974567196596 },
+  { feederId: "F8", flockId: "Flock 32", lat: -34.345812883086076, lng: 148.69974567196596 },
+  { feederId: "F9", flockId: "Flock 32", lat: -34.345812883086076, lng: 148.69974567196596 },
+
+  { feederId: "F10", flockId: "Flock 34", lat: -34.35255659050747, lng: 148.69533928215532 },
+  { feederId: "F11", flockId: "Flock 34", lat: -34.35255659050747, lng: 148.69533928215532 },
+  { feederId: "F12", flockId: "Flock 34", lat: -34.35255659050747, lng: 148.69533928215532 },
+
+  { feederId: "F13", flockId: "Flock 35", lat: -34.351618437332725, lng: 148.69684778316122 },
+  { feederId: "F14", flockId: "Flock 35", lat: -34.351618437332725, lng: 148.69684778316122 },
+  { feederId: "F15", flockId: "Flock 35", lat: -34.351618437332725, lng: 148.69684778316122 },
+  { feederId: "F16", flockId: "Flock 35", lat: -34.351618437332725, lng: 148.69684778316122 },
+  
+  { feederId: "F17", flockId: "Flock 36", lat: -34.35293350336138, lng: 148.70380456612915 },
+  { feederId: "F18", flockId: "Flock 36", lat: -34.35293350336138, lng: 148.70380456612915 },
+  { feederId: "F19", flockId: "Flock 36", lat: -34.35293350336138, lng: 148.70380456612915 },
+  { feederId: "F20", flockId: "Flock 36", lat: -34.35293350336138, lng: 148.70380456612915 },
+  
+  { feederId: "F21", flockId: "Flock 37", lat: -34.350833455402196, lng: 148.70809353863316 },
+  { feederId: "F22", flockId: "Flock 37", lat: -34.350833455402196, lng: 148.70809353863316 },
+  { feederId: "F23", flockId: "Flock 37", lat: -34.350833455402196, lng: 148.70809353863316 },
+
+  { feederId: "F24", flockId: "Flock 38", lat: -34.348235441382045, lng: 148.70087515586653 },
+  { feederId: "F25", flockId: "Flock 38", lat: -34.348235441382045, lng: 148.70087515586653 },
+  { feederId: "F26", flockId: "Flock 38", lat: -34.348235441382045, lng: 148.70087515586653 },
+
+  { feederId: "F27", flockId: "Flock 39", lat: -34.350954086550445, lng: 148.70489765503604 },
+  { feederId: "F28", flockId: "Flock 39", lat: -34.350954086550445, lng: 148.70489765503604 },
+  { feederId: "F29", flockId: "Flock 39", lat: -34.350954086550445, lng: 148.70489765503604 },
+  { feederId: "F30", flockId: "Flock 39", lat: -34.350954086550445, lng: 148.70489765503604 },
+  
+  { feederId: "F31", flockId: "Flock 40", lat: -34.34844037919998, lng: 148.70237406084183 },
+  { feederId: "F32", flockId: "Flock 40", lat: -34.34844037919998, lng: 148.70237406084183 },
+  { feederId: "F33", flockId: "Flock 40", lat: -34.34844037919998, lng: 148.70237406084183 },
+  { feederId: "F34", flockId: "Flock 40", lat: -34.34844037919998, lng: 148.70237406084183 },
+  
+  { feederId: "F35", flockId: "Flock 41", lat: -34.35350395742505, lng: 148.70613618452722 },
+  { feederId: "F36", flockId: "Flock 41", lat: -34.35350395742505, lng: 148.70613618452722 },
+  { feederId: "F37", flockId: "Flock 41", lat: -34.35350395742505, lng: 148.70613618452722 },
+  { feederId: "F38", flockId: "Flock 41", lat: -34.35350395742505, lng: 148.70613618452722 },
+  { feederId: "F39", flockId: "Flock 41", lat: -34.35350395742505, lng: 148.70613618452722 },
+  
+  { feederId: "F40", flockId: "Flock 42", lat: -34.353783991560746, lng: 148.70604882766176 },
+  { feederId: "F41", flockId: "Flock 42", lat: -34.353783991560746, lng: 148.70604882766176 },
+  { feederId: "F42", flockId: "Flock 42", lat: -34.353783991560746, lng: 148.70604882766176 },
+  { feederId: "F43", flockId: "Flock 42", lat: -34.353783991560746, lng: 148.70604882766176 },
+  { feederId: "F44", flockId: "Flock 42", lat: -34.353783991560746, lng: 148.70604882766176 },
+
+  { feederId: "F45", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
+  { feederId: "F46", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
+  { feederId: "F47", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
+  { feederId: "F48", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
+  { feederId: "F49", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
+  { feederId: "F50", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
+  { feederId: "F51  ", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
+
+  { feederId: "F52", flockId: "Flock 44", lat: -34.34844658835689, lng: 148.70562745781936 },
+  { feederId: "F53", flockId: "Flock 44", lat: -34.34844658835689, lng: 148.70562745781936 },
+  { feederId: "F54", flockId: "Flock 44", lat: -34.34844658835689, lng: 148.70562745781936 },
+  { feederId: "F55", flockId: "Flock 44", lat: -34.34844658835689, lng: 148.70562745781936 },
+  { feederId: "F56", flockId: "Flock 44", lat: -34.34844658835689, lng: 148.70562745781936 }
 ];
+
