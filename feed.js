@@ -1,6 +1,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const feederSelect = document.getElementById("feederId");
+  const flockIdInput = document.getElementById("flockId"); // NEW: input element to show flock ID
   const dateInput = document.getElementById("date");
   const beforeFillInput = document.getElementById("beforeFill");
   const afterFillInput = document.getElementById("afterFill");
@@ -22,6 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   dateInput.valueAsDate = new Date();
+
+  // ✅ Auto-fill flock ID when feeder is selected
+  feederSelect.addEventListener("change", () => {
+    const selectedOption = feederSelect.selectedOptions[0];
+    flockIdInput.value = selectedOption.dataset.flockId;
+  });
 
   function calculate() {
     const before = parseFloat(beforeFillInput.value);
@@ -63,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "Level Before Fill (%)": before,
       "Level After Fill (%)": after,
       "Amount Filled (kg)": amountFilled.toFixed(1),
-      "Daily Requirement (kg)": DAILY_REQUIREMENT.toFixed(1),
+      "Daily Feed Requirement (kg)": DAILY_REQUIREMENT.toFixed(1),
       "Days Until Empty": daysUntilEmpty.toFixed(1)
     };
 
