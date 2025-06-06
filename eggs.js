@@ -10,7 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const broken = document.getElementById("broken");
   const giant = document.getElementById("giant");
   const totalSpan = document.getElementById("total");
-
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const flock = urlParams.get("flock");
+  if (flock) {
+    document.getElementById("flockId").value = flock;
+  }
+  
   function updateTotal() {
     const total = [clean, dirty, ground, broken, giant].reduce((sum, field) => {
       return sum + (parseInt(field.value) || 0);
