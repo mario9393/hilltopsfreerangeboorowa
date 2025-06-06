@@ -61,7 +61,7 @@ const FEEDERS = [
   { feederId: "F48", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
   { feederId: "F49", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
   { feederId: "F50", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
-  { feederId: "F51  ", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
+  { feederId: "F51", flockId: "Flock 43", lat: -34.35376810592933, lng: 148.70658630145914 },
 
   { feederId: "F52", flockId: "Flock 44", lat: -34.34844658835689, lng: 148.70562745781936 },
   { feederId: "F53", flockId: "Flock 44", lat: -34.34844658835689, lng: 148.70562745781936 },
