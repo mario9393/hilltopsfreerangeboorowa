@@ -67,7 +67,6 @@
     map.on('click', 'flock-boundaries', function(e) {
   const flockName = e.features[0].properties.name;
   const shortId = flockName.replace("Flock ", "F"); // Flock 24 → F24
-  popupContent += `<a href="feed.html?flock=${encodeURIComponent(flockName)}&feeders=${shortId}" target="_blank">🍽️ Log Feed</a><br>`;
 
   // Start with both logging links
   let popupContent = `
