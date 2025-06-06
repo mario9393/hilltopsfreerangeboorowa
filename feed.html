@@ -35,22 +35,38 @@
     </form>
     <div id="message"></div>
   </div>
+
   <script src="feeder_data.js"></script>
   <script src="feed.js"></script>
-  
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const feederSelect = document.getElementById("feederId");
-    const flockInput = document.getElementById("flockId");
 
-    feederSelect.addEventListener("change", () => {
-      const selectedOption = feederSelect.selectedOptions[0];
-      if (selectedOption) {
-        flockInput.value = selectedOption.dataset.flockId || "";
-      }
+  <!-- 🔐 Auto-select feeder and flock if `feederGroup` is in URL -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const feederGroup = params.get("feederGroup"); // e.g. F32
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const feederSelect = document.getElementById("feederId");
+      const flockInput = document.getElementById("flockId");
+
+      // Wait for feeder options to be loaded
+      setTimeout(() => {
+        if (feederGroup) {
+          const flockName = "Flock " + feederGroup.replace("F", "");
+          const match = [...feederSelect.options].find(opt => opt.dataset.flockId === flockName);
+          if (match) {
+            match.selected = true;
+            flockInput.value = match.dataset.flockId;
+          }
+        }
+      }, 150); // enough delay to wait for FEEDERS to load
+
+      feederSelect.addEventListener("change", () => {
+        const selectedOption = feederSelect.selectedOptions[0];
+        if (selectedOption) {
+          flockInput.value = selectedOption.dataset.flockId || "";
+        }
+      });
     });
-  });
-</script>
-  
+  </script>
 </body>
 </html>
