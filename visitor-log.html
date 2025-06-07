@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hilltops Visitor Log</title>
   <style>
     body {
@@ -31,6 +31,9 @@
       height: 200px;
       touch-action: none;
     }
+    #farmNamesGroup {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -39,11 +42,17 @@
     <input type="text" name="name" placeholder="Full Name" required>
     <input type="tel" name="phone" placeholder="Phone Number" required>
     <input type="text" name="datetime" id="datetime" readonly>
-    <select name="contact" required>
-      <option value="">Contact with other farms in previous 48hours?</option>
+
+    <select name="contact" id="contactSelect" required>
+      <option value="">Contact with other farms in previous 48 hours?</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
     </select>
+
+    <div id="farmNamesGroup">
+      <input type="text" name="farmNames" id="farmNames" placeholder="Name of other farm(s)">
+    </div>
+
     <select name="purpose" required>
       <option value="">Purpose of Visit</option>
       <option value="Work">Work</option>
@@ -51,13 +60,16 @@
       <option value="Delivery">Delivery</option>
       <option value="Other">Other</option>
     </select>
+
     <p style="margin-top: 20px; font-weight: bold;">
       I have received and agree to follow the biosecurity measures explained to me, as required under the Salmonella Enteritidis Control Order 2019. (Sign if agreed)
     </p>
+
     <label>Signature:</label>
     <canvas id="signature-pad"></canvas>
     <button type="button" onclick="clearSignature()">Clear Signature</button>
     <input type="hidden" name="signature" id="signature">
+
     <button type="submit">Submit</button>
   </form>
 
@@ -67,11 +79,26 @@
     const canvas = document.getElementById('signature-pad');
     const signaturePad = new SignaturePad(canvas);
     const signatureInput = document.getElementById('signature');
+    const contactSelect = document.getElementById('contactSelect');
+    const farmNamesGroup = document.getElementById('farmNamesGroup');
+    const farmNamesInput = document.getElementById('farmNames');
     document.getElementById('datetime').value = new Date().toLocaleString();
 
     function clearSignature() {
       signaturePad.clear();
     }
+
+    // Show/hide and require farm name input
+    contactSelect.addEventListener('change', () => {
+      if (contactSelect.value === 'Yes') {
+        farmNamesGroup.style.display = 'block';
+        farmNamesInput.required = true;
+      } else {
+        farmNamesGroup.style.display = 'none';
+        farmNamesInput.required = false;
+        farmNamesInput.value = '';
+      }
+    });
 
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -96,6 +123,7 @@
       alert('Form submitted!');
       form.reset();
       signaturePad.clear();
+      farmNamesGroup.style.display = 'none';
     });
   </script>
 </body>
