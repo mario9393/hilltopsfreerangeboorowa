@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hilltops Visitor Exit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: auto;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h2>Hilltops Visitor Exit Log</h2>
+  <form id="exitForm">
+    <input type="tel" name="phone" placeholder="Phone Number" required>
+    <input type="text" name="date" id="date" readonly>
+    <input type="text" name="timeout" id="timeout" readonly>
+    <button type="submit">Submit Exit</button>
+  </form>
+  <p id="message"></p>
+
+  <script>
+    const form = document.getElementById("exitForm");
+    const dateInput = document.getElementById("date");
+    const timeoutInput = document.getElementById("timeout");
+
+    const now = new Date();
+    dateInput.value = now.toISOString().split('T')[0];
+    timeoutInput.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = {
+        phone: form.phone.value,
+        date: form.date.value,
+        timeout: form.timeout.value
+      };
+
+      try {
+        await fetch("YOUR_GOOGLE_SCRIPT_WEB_APP_URL", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        document.getElementById("message").textContent = "✅ Exit logged successfully.";
+        form.reset();
+      } catch (err) {
+        document.getElementById("message").textContent = "❌ Failed to log exit.";
+      }
+    });
+  </script>
+</body>
+</html>
