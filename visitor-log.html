@@ -81,7 +81,7 @@
       const plainFormData = Object.fromEntries(formData.entries());
       const jsonFormData = JSON.stringify(plainFormData);
 
-      await fetch('YOUR_GOOGLE_SCRIPT_WEB_APP_URL', {
+      await fetch('https://script.google.com/macros/s/AKfycbyBdrzZQPoPquSLxhCoETx_wxWE9u525em9ztqiPQYtCITuDAVwnyNfe-RkOm1Z4god/exec', {
         method: 'POST',
         body: jsonFormData,
         headers: {
