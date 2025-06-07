@@ -71,7 +71,7 @@ map.on('load', () => {
 
     let popupContent = `
       <strong>${flockName}</strong><br>
-      <a href="eggs.html?flock=${shortId}" target="_blank">🥚 Log Eggs</a><br>
+      <a href="eggs.html?flock=${encodeURIComponent(flockName)}" target="_blank">🥚 Log Eggs</a>
       <a href="feed.html?feederGroup=${shortId}" target="_blank">🍽️ Log Feed</a><br>
     `;
 
