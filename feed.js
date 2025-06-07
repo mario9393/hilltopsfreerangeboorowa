@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "Level Before Fill (%)": before,
       "Level After Fill (%)": after,
       "Amount Filled (kg)": amountFilled.toFixed(1),
-      "Daily Feed Requirement (kg)": DAILY_REQUIREMENT.toFixed(1),
+      "Daily Requirement (kg)": DAILY_REQUIREMENT.toFixed(1),
       "Days Until Empty": daysUntilEmpty.toFixed(1)
     };
 
