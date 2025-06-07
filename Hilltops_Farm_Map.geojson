@@ -41,7 +41,7 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "42"
+        "name": "Flock 42"
       },
       "geometry": {
         "type": "Polygon",
