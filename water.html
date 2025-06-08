@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Water Tank Log</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f2f2f2; }
+    form { background: white; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
+    input, select, button {
+      width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h2>💧 Water Tank Log</h2>
+  <form id="waterForm">
+    <input type="text" name="flockId" id="flockId" placeholder="Flock ID" required readonly>
+    <input type="date" name="date" id="date" required>
+    <input type="time" name="time" id="time" required>
+    <input type="number" name="level" id="level" placeholder="Fill Level (%)" min="0" max="100" required>
+    <input type="text" name="submitter" placeholder="Submitted by" required>
+    <button type="submit">Submit</button>
+    <p id="message"></p>
+  </form>
+
+  <script>
+    const form = document.getElementById("waterForm");
+    const urlParams = new URLSearchParams(window.location.search);
+    const flock = urlParams.get("flock");
+    if (flock) document.getElementById("flockId").value = flock;
+
+    const now = new Date();
+    document.getElementById("date").value = now.toISOString().split("T")[0];
+    document.getElementById("time").value = now.toTimeString().slice(0, 5);
+
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbzd_hPSBnFLuLZZsgJMPYpq5FAqMuw3ovqU02dfjH-zO1oKy36xtkH4j7R7H1cmI3hH/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        document.getElementById("message").textContent = "✅ Submitted successfully.";
+        form.reset();
+        document.getElementById("flockId").value = flock;
+      } catch (err) {
+        document.getElementById("message").textContent = "❌ Submission failed.";
+      }
+    });
+  </script>
+</body>
+</html>
