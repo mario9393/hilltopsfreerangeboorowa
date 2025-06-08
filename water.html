@@ -2,55 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Water Tank Log</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f2f2f2; }
-    form { background: white; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
-    input, select, button {
-      width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc;
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    h2 {
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h2>💧 Water Tank Log</h2>
-  <form id="waterForm">
-    <input type="text" name="flockId" id="flockId" placeholder="Flock ID" required readonly>
-    <input type="date" name="date" id="date" required>
-    <input type="time" name="time" id="time" required>
-    <input type="number" name="level" id="level" placeholder="Fill Level (%)" min="0" max="100" required>
-    <input type="text" name="submitter" placeholder="Submitted by" required>
-    <button type="submit">Submit</button>
-    <p id="message"></p>
-  </form>
+<h2>💧 Water Tank Log</h2>
+<form id="waterForm">
+  <input type="text" id="flockId" name="flockId" readonly>
+  <input type="date" id="date" name="date" required>
+  <input type="time" id="time" name="time" required>
 
-  <script>
-    const form = document.getElementById("waterForm");
-    const urlParams = new URLSearchParams(window.location.search);
-    const flock = urlParams.get("flock");
-    if (flock) document.getElementById("flockId").value = flock;
+  <input type="number" id="waterLevel" name="waterLevel" placeholder="Fill Level (%)" required>
+  <input type="number" id="litersRemaining" name="litersRemaining" placeholder="Liters Remaining (auto)" readonly>
+  <input type="number" id="dailyRequirement" name="dailyRequirement" placeholder="Daily Water Requirement (L)" readonly>
+  <input type="number" id="daysRemaining" name="daysRemaining" placeholder="Estimated Days Remaining" readonly>
 
-    const now = new Date();
-    document.getElementById("date").value = now.toISOString().split("T")[0];
-    document.getElementById("time").value = now.toTimeString().slice(0, 5);
+  <input type="text" name="submittedBy" placeholder="Submitted by" required>
+  <button type="submit">Submit</button>
+</form>
+<p id="msg" style="text-align:center; font-weight:bold;"></p>
 
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const payload = Object.fromEntries(formData.entries());
+<script>
+  const form = document.getElementById('waterForm');
+  const flockInput = document.getElementById('flockId');
+  const dateInput = document.getElementById('date');
+  const timeInput = document.getElementById('time');
+  const waterLevelInput = document.getElementById('waterLevel');
+  const litersInput = document.getElementById('litersRemaining');
+  const dailyReqInput = document.getElementById('dailyRequirement');
+  const daysRemainInput = document.getElementById('daysRemaining');
+  const msg = document.getElementById('msg');
 
-      try {
-        await fetch("https://script.google.com/macros/s/AKfycbzd_hPSBnFLuLZZsgJMPYpq5FAqMuw3ovqU02dfjH-zO1oKy36xtkH4j7R7H1cmI3hH/exec", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        document.getElementById("message").textContent = "✅ Submitted successfully.";
-        form.reset();
-        document.getElementById("flockId").value = flock;
-      } catch (err) {
-        document.getElementById("message").textContent = "❌ Submission failed.";
-      }
-    });
-  </script>
+  const dailyWaterNeed = 2400 * 0.112; // 268.8L
+  dailyReqInput.value = dailyWaterNeed;
+
+  // Autofill date and time
+  const now = new Date();
+  dateInput.valueAsDate = now;
+  timeInput.value = now.toTimeString().slice(0,5);
+
+  // Get Flock from URL
+  const params = new URLSearchParams(window.location.search);
+  const flock = params.get('flock');
+  if (flock) flockInput.value = flock;
+
+  // Calculate on input
+  waterLevelInput.addEventListener('input', () => {
+    const level = parseFloat(waterLevelInput.value);
+    if (!isNaN(level)) {
+      const liters = (level / 100) * 1000;
+      litersInput.value = liters.toFixed(1);
+      daysRemainInput.value = (liters / dailyWaterNeed).toFixed(1);
+    } else {
+      litersInput.value = '';
+      daysRemainInput.value = '';
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbzd_hPSBnFLuLZZsgJMPYpq5FAqMuw3ovqU02dfjH-zO1oKy36xtkH4j7R7H1cmI3hH/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      msg.textContent = "✅ Submitted Successfully!";
+      form.reset();
+    } catch (err) {
+      msg.textContent = "❌ Failed to submit.";
+    }
+  });
+</script>
 </body>
 </html>
