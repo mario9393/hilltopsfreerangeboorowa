@@ -1,107 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Water Tank Log</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
       padding: 20px;
+      background-color: #f7f7f7;
     }
     form {
-      background: #fff;
+      background: white;
       padding: 20px;
       border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       max-width: 500px;
       margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     input, button {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
-      border: 1px solid #ccc;
       border-radius: 5px;
+      border: 1px solid #ccc;
     }
-    h2 {
-      text-align: center;
+    label {
+      font-weight: bold;
+    }
+    p {
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-<h2>💧 Water Tank Log</h2>
-<form id="waterForm">
-  <input type="text" id="flockId" name="flockId" readonly>
-  <input type="date" id="date" name="date" required>
-  <input type="time" id="time" name="time" required>
+  <h2>💧 Water Tank Log</h2>
 
-  <input type="number" id="waterLevel" name="waterLevel" placeholder="Fill Level (%)" required>
-  <input type="number" id="litersRemaining" name="litersRemaining" placeholder="Liters Remaining (auto)" readonly>
-  <input type="number" id="dailyRequirement" name="dailyRequirement" placeholder="Daily Water Requirement (L)" readonly>
-  <input type="number" id="daysRemaining" name="daysRemaining" placeholder="Estimated Days Remaining" readonly>
+  <form id="waterForm">
+    <label for="flockId">Flock ID</label>
+    <input type="text" id="flockId" name="flockId" readonly>
 
-  <input type="text" name="submittedBy" placeholder="Submitted by" required>
-  <button type="submit">Submit</button>
-</form>
-<p id="msg" style="text-align:center; font-weight:bold;"></p>
+    <label for="date">Date</label>
+    <input type="date" id="date" name="date" required>
 
-<script>
-  const form = document.getElementById('waterForm');
-  const flockInput = document.getElementById('flockId');
-  const dateInput = document.getElementById('date');
-  const timeInput = document.getElementById('time');
-  const waterLevelInput = document.getElementById('waterLevel');
-  const litersInput = document.getElementById('litersRemaining');
-  const dailyReqInput = document.getElementById('dailyRequirement');
-  const daysRemainInput = document.getElementById('daysRemaining');
-  const msg = document.getElementById('msg');
+    <label for="time">Time</label>
+    <input type="time" id="time" name="time" required>
 
-  const dailyWaterNeed = 2400 * 0.112; // 268.8L
-  dailyReqInput.value = dailyWaterNeed;
+    <label for="level">Fill Level (%)</label>
+    <input type="number" id="level" name="level" min="0" max="100" required>
 
-  // Autofill date and time
-  const now = new Date();
-  dateInput.valueAsDate = now;
-  timeInput.value = now.toTimeString().slice(0,5);
+    <label for="submittedBy">Submitted by</label>
+    <input type="text" id="submittedBy" name="submittedBy" required>
 
-  // Get Flock from URL
-  const params = new URLSearchParams(window.location.search);
-  const flock = params.get('flock');
-  if (flock) flockInput.value = flock;
+    <p>Liters Remaining: <span id="litersRemaining">-</span> L</p>
+    <p>Daily Requirement: 268.8 L</p>
+    <p>Estimated Days Remaining: <span id="daysRemaining">-</span> days</p>
 
-  // Calculate on input
-  waterLevelInput.addEventListener('input', () => {
-    const level = parseFloat(waterLevelInput.value);
-    if (!isNaN(level)) {
-      const liters = (level / 100) * 1000;
-      litersInput.value = liters.toFixed(1);
-      daysRemainInput.value = (liters / dailyWaterNeed).toFixed(1);
-    } else {
-      litersInput.value = '';
-      daysRemainInput.value = '';
+    <button type="submit">Submit</button>
+    <p id="message"></p>
+  </form>
+
+  <script>
+    // Autofill flock ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const flock = urlParams.get("flock");
+    if (flock) {
+      document.getElementById("flockId").value = flock;
     }
-  });
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    // Autofill date and time
+    const now = new Date();
+    document.getElementById("date").valueAsDate = now;
+    document.getElementById("time").value = now.toTimeString().slice(0,5);
 
-    const data = Object.fromEntries(new FormData(form).entries());
+    // Live calculation
+    const levelInput = document.getElementById("level");
+    const litersRemainingSpan = document.getElementById("litersRemaining");
+    const daysRemainingSpan = document.getElementById("daysRemaining");
 
-    try {
-      await fetch("https://script.google.com/macros/s/AKfycbzd_hPSBnFLuLZZsgJMPYpq5FAqMuw3ovqU02dfjH-zO1oKy36xtkH4j7R7H1cmI3hH/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-      msg.textContent = "✅ Submitted Successfully!";
-      form.reset();
-    } catch (err) {
-      msg.textContent = "❌ Failed to submit.";
-    }
-  });
-</script>
+    levelInput.addEventListener("input", () => {
+      const percent = parseFloat(levelInput.value) || 0;
+      const liters = (percent / 100) * 1000;
+      const days = liters / 268.8;
+      litersRemainingSpan.textContent = liters.toFixed(1);
+      daysRemainingSpan.textContent = days.toFixed(1);
+    });
+
+    // Submission
+    const form = document.getElementById("waterForm");
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const data = {
+        date: form.date.value,
+        time: form.time.value,
+        flockId: form.flockId.value,
+        level: form.level.value,
+        submittedBy: form.submittedBy.value
+      };
+
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbxRiVx-WaterLog-SHEET-ID/exec", {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        document.getElementById("message").textContent = "✅ Water tank log submitted!";
+        form.reset();
+        litersRemainingSpan.textContent = "-";
+        daysRemainingSpan.textContent = "-";
+      } catch (err) {
+        document.getElementById("message").textContent = "❌ Submission failed.";
+      }
+    });
+  </script>
 </body>
 </html>
