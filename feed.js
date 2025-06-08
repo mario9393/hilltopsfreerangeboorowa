@@ -1,7 +1,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const feederSelect = document.getElementById("feederId");
-  const flockIdInput = document.getElementById("flockId"); // NEW: input element to show flock ID
+  const flockIdInput = document.getElementById("flockId");
   const dateInput = document.getElementById("date");
   const beforeFillInput = document.getElementById("beforeFill");
   const afterFillInput = document.getElementById("afterFill");
@@ -11,6 +11,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const FEEDER_CAPACITY = 1500;
   const DAILY_REQUIREMENT = 2400 * 0.118;
+
+  // NEW: Additional inputs
+  const cleanedInsideInput = document.getElementById("cleanedInside");
+  const stateBeforeCleaningInput = document.getElementById("stateBeforeCleaning");
+  const stateAfterCleaningInput = document.getElementById("stateAfterCleaning");
+  const stateIfNotCleanedInput = document.getElementById("stateIfNotCleaned");
+  const needCleaningLaterInput = document.getElementById("needCleaningLater");
+  const slotsCheckedInput = document.getElementById("slotsChecked");
+  const slotsConditionInput = document.getElementById("slotsCondition");
+  const submittedByInput = document.getElementById("submittedBy");
 
   FEEDERS.forEach(f => {
     const option = document.createElement("option");
@@ -24,10 +34,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   dateInput.valueAsDate = new Date();
 
-  // ✅ Auto-fill flock ID when feeder is selected
   feederSelect.addEventListener("change", () => {
     const selectedOption = feederSelect.selectedOptions[0];
     flockIdInput.value = selectedOption.dataset.flockId;
+  });
+
+  cleanedInsideInput.addEventListener("change", () => {
+    const isYes = cleanedInsideInput.value === "Yes";
+    document.getElementById("ifCleanedFields").style.display = isYes ? "block" : "none";
+    document.getElementById("ifNotCleanedFields").style.display = isYes ? "none" : "block";
   });
 
   function calculate() {
@@ -71,7 +86,17 @@ document.addEventListener("DOMContentLoaded", () => {
       "Level After Fill (%)": after,
       "Amount Filled (kg)": amountFilled.toFixed(1),
       "Daily Requirement (kg)": DAILY_REQUIREMENT.toFixed(1),
-      "Days Until Empty": daysUntilEmpty.toFixed(1)
+      "Days Until Empty": daysUntilEmpty.toFixed(1),
+
+      // NEW FIELDS
+      "Cleaned Inside Feeder Tank": cleanedInsideInput.value,
+      "State Before Cleaning": stateBeforeCleaningInput.value,
+      "State After Cleaning": stateAfterCleaningInput.value,
+      "State If Not Cleaned": stateIfNotCleanedInput.value,
+      "Require Cleaning Later": needCleaningLaterInput.value,
+      "Cleaned & Checked Feeding Slots": slotsCheckedInput.value,
+      "Feeding Slots Condition": slotsConditionInput.value,
+      "Submitted By": submittedByInput.value
     };
 
     try {
@@ -82,6 +107,9 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify(payload)
       });
       messageDiv.textContent = "✅ Feed log submitted!";
+      document.getElementById("feedForm").reset();
+      amountFilledSpan.textContent = "-";
+      daysUntilEmptySpan.textContent = "-";
     } catch (err) {
       messageDiv.textContent = "❌ Error submitting log.";
     }
