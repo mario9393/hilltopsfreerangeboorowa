@@ -54,8 +54,8 @@
     <label for="time">Time</label>
     <input type="time" id="time" name="time" required>
 
-    <label for="submittedBy">Submitted by</label>
-    <input type="text" id="submittedBy" name="submittedBy" required>
+    <label for="submitter">Submitted by</label>
+    <input type="text" id="submitter" name="submitter" required>
     
     <label for="level">Fill Level (%)</label>
     <input type="number" id="level" name="level" min="0" max="100" required>
@@ -104,7 +104,7 @@
         time: form.time.value,
         flockId: form.flockId.value,
         level: form.level.value,
-        submittedBy: form.submittedBy.value
+        submitter: form.submitter.value
       };
 
       try {
