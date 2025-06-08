@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,6 +30,66 @@
         <p><strong>Days Until Empty:</strong> <span id="daysUntilEmpty">-</span></p>
       </div>
 
+      <label for="cleanedTank">Cleaned inside the Feeder Tank?</label>
+      <select id="cleanedTank" required>
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <div id="ifCleaned" style="display:none">
+        <label for="stateBefore">How was the state inside before cleaning?</label>
+        <select id="stateBefore">
+          <option value="">Select</option>
+          <option value="Ok">Ok</option>
+          <option value="Bad">Bad</option>
+          <option value="Very Bad">Very Bad</option>
+        </select>
+
+        <label for="stateAfter">How is the current state after cleaning?</label>
+        <select id="stateAfter">
+          <option value="">Select</option>
+          <option value="Good">Good</option>
+          <option value="Require more cleaning later">Require more cleaning later</option>
+        </select>
+      </div>
+
+      <div id="ifNotCleaned" style="display:none">
+        <label for="stateNow">How is the state inside the Feeder?</label>
+        <select id="stateNow">
+          <option value="">Select</option>
+          <option value="Ok">Ok</option>
+          <option value="Bad">Bad</option>
+          <option value="Very Bad">Very Bad</option>
+        </select>
+
+        <label for="requireCleaning">Require to clean it later?</label>
+        <select id="requireCleaning">
+          <option value="">Select</option>
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+          <option value="Yes Immediately">Yes Immediately</option>
+        </select>
+      </div>
+
+      <label for="slotsChecked">Cleaned & Checked Feeding Slots?</label>
+      <select id="slotsChecked" required>
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label for="slotsCondition">Feeding Slots Condition</label>
+      <select id="slotsCondition" required>
+        <option value="">Select</option>
+        <option value="Good">Good</option>
+        <option value="Good but broken from 1 Side">Good but broken from 1 Side</option>
+        <option value="Broken require immediate fixing">Broken require immediate fixing</option>
+      </select>
+
+      <label for="submittedBy">Submitted By</label>
+      <input type="text" id="submittedBy" name="submittedBy" required />
+
       <button type="submit">Submit</button>
     </form>
     <div id="message"></div>
@@ -39,16 +98,14 @@
   <script src="feeder_data.js"></script>
   <script src="feed.js"></script>
 
-  <!-- 🔐 Auto-select feeder and flock if `feederGroup` is in URL -->
   <script>
     const params = new URLSearchParams(window.location.search);
-    const feederGroup = params.get("feederGroup"); // e.g. F32
+    const feederGroup = params.get("feederGroup");
 
     window.addEventListener("DOMContentLoaded", () => {
       const feederSelect = document.getElementById("feederId");
       const flockInput = document.getElementById("flockId");
 
-      // Wait for feeder options to be loaded
       setTimeout(() => {
         if (feederGroup) {
           const flockName = "Flock " + feederGroup.replace("F", "");
@@ -58,13 +115,20 @@
             flockInput.value = match.dataset.flockId;
           }
         }
-      }, 150); // enough delay to wait for FEEDERS to load
+      }, 150);
 
       feederSelect.addEventListener("change", () => {
         const selectedOption = feederSelect.selectedOptions[0];
         if (selectedOption) {
           flockInput.value = selectedOption.dataset.flockId || "";
         }
+      });
+
+      // Show/hide cleaning questions based on selection
+      const cleanedTank = document.getElementById("cleanedTank");
+      cleanedTank.addEventListener("change", () => {
+        document.getElementById("ifCleaned").style.display = cleanedTank.value === "Yes" ? "block" : "none";
+        document.getElementById("ifNotCleaned").style.display = cleanedTank.value === "No" ? "block" : "none";
       });
     });
   </script>
