@@ -61,6 +61,7 @@
       <option value="Other">Other</option>
     </select>
 
+    <!-- Hidden Location Fields -->
     <input type="hidden" name="latitude" id="latitude">
     <input type="hidden" name="longitude" id="longitude">
 
@@ -102,24 +103,37 @@
       }
     });
 
+    // Get location on load
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
         document.getElementById('latitude').value = position.coords.latitude;
         document.getElementById('longitude').value = position.coords.longitude;
       }, error => {
-        alert("Location permission is required to submit the visitor log near the entrance.");
+        alert("⚠️ Location permission is required to submit the visitor log near the entrance.");
       });
     } else {
       alert("Geolocation is not supported by this browser.");
     }
 
+    // Form submission
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
+
       if (signaturePad.isEmpty()) {
         alert('Please provide a signature.');
         return;
       }
+
+      const lat = document.getElementById('latitude').value;
+      const lng = document.getElementById('longitude').value;
+
+      if (!lat || !lng) {
+        alert('⚠️ Location not captured. Please allow GPS access and try again near the entrance.');
+        return;
+      }
+
       signatureInput.value = signaturePad.toDataURL();
+
       const formData = new FormData(form);
       const plainFormData = Object.fromEntries(formData.entries());
       const jsonFormData = JSON.stringify(plainFormData);
@@ -133,7 +147,7 @@
         }
       });
 
-      alert('Form submitted!');
+      alert('✅ Form submitted successfully!');
       form.reset();
       signaturePad.clear();
       farmNamesGroup.style.display = 'none';
