@@ -61,7 +61,6 @@
       <option value="Other">Other</option>
     </select>
 
-    <!-- Hidden Location Fields -->
     <input type="hidden" name="latitude" id="latitude">
     <input type="hidden" name="longitude" id="longitude">
 
@@ -103,13 +102,12 @@
       }
     });
 
-    // Capture geolocation
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
         document.getElementById('latitude').value = position.coords.latitude;
         document.getElementById('longitude').value = position.coords.longitude;
       }, error => {
-        alert("⚠️ Location permission is required to submit the visitor log near the entrance.");
+        alert("Location permission is required to submit the visitor log near the entrance.");
       });
     } else {
       alert("Geolocation is not supported by this browser.");
@@ -117,27 +115,16 @@
 
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
-
       if (signaturePad.isEmpty()) {
         alert('Please provide a signature.');
         return;
       }
-
-      const lat = document.getElementById('latitude').value;
-      const lng = document.getElementById('longitude').value;
-
-      if (!lat || !lng) {
-        alert('⚠️ Location not captured. Please allow GPS access and try again near the entrance.');
-        return;
-      }
-
       signatureInput.value = signaturePad.toDataURL();
-
       const formData = new FormData(form);
       const plainFormData = Object.fromEntries(formData.entries());
       const jsonFormData = JSON.stringify(plainFormData);
 
-      await fetch('https://script.google.com/macros/s/AKfycbxhHc2D4rd7F5tDBaF6Nk0CTm634sjbC9cCEgKhYu48VTEkixHGXHqF6lRT9iEp5vyz2Q/exec', {
+      await fetch('https://script.google.com/macros/s/AKfycbz3HShO42UTtAWY6bdrVCVVL3MAyqzNUUZkj4W6C5252yd9uwdofDvV2-eLimVj7rrn/exec', {
         method: 'POST',
         mode: 'no-cors',
         body: jsonFormData,
@@ -146,7 +133,7 @@
         }
       });
 
-      alert('✅ Form submitted successfully!');
+      alert('Form submitted!');
       form.reset();
       signaturePad.clear();
       farmNamesGroup.style.display = 'none';
