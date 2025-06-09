@@ -61,6 +61,9 @@
       <option value="Other">Other</option>
     </select>
 
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
+
     <p style="margin-top: 20px; font-weight: bold;">
       I have received and agree to follow the biosecurity measures explained to me, as required under the Salmonella Enteritidis Control Order 2019. (Sign if agreed)
     </p>
@@ -88,7 +91,6 @@
       signaturePad.clear();
     }
 
-    // Show/hide and require farm name input
     contactSelect.addEventListener('change', () => {
       if (contactSelect.value === 'Yes') {
         farmNamesGroup.style.display = 'block';
@@ -99,6 +101,17 @@
         farmNamesInput.value = '';
       }
     });
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+        document.getElementById('latitude').value = position.coords.latitude;
+        document.getElementById('longitude').value = position.coords.longitude;
+      }, error => {
+        alert("Location permission is required to submit the visitor log near the entrance.");
+      });
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
 
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
