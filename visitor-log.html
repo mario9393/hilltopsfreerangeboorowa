@@ -103,7 +103,7 @@
       }
     });
 
-    // Get location on load
+    // Capture geolocation
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
         document.getElementById('latitude').value = position.coords.latitude;
@@ -115,7 +115,6 @@
       alert("Geolocation is not supported by this browser.");
     }
 
-    // Form submission
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -138,7 +137,7 @@
       const plainFormData = Object.fromEntries(formData.entries());
       const jsonFormData = JSON.stringify(plainFormData);
 
-      await fetch('https://script.google.com/macros/s/AKfycbyH89QwKT8Qz_fC2sBgjMZEfYyzCE-QEeGguEIWwM6O3YmnZdIKHKhVx_y7hepEedXo/exec', {
+      await fetch('https://script.google.com/macros/s/AKfycby9e-NyDdUCtB-LILUQTWdqr89T0rryBVQrBiq2khqEZOBuW1JGHWKUSgfpSUd_IUYP/exec', {
         method: 'POST',
         mode: 'no-cors',
         body: jsonFormData,
