@@ -30,41 +30,41 @@
         <p><strong>Days Until Empty:</strong> <span id="daysUntilEmpty">-</span></p>
       </div>
 
-      <label for="cleanedTank">Cleaned inside the Feeder Tank?</label>
-      <select id="cleanedTank" required>
+      <label for="cleanedInside">Cleaned inside the Feeder Tank?</label>
+      <select id="cleanedInside" required>
         <option value="">Select</option>
         <option value="Yes">Yes</option>
         <option value="No">No</option>
       </select>
 
-      <div id="ifCleaned" style="display:none">
-        <label for="stateBefore">How was the state inside before cleaning?</label>
-        <select id="stateBefore">
+      <div id="ifCleanedFields" style="display:none">
+        <label for="stateBeforeCleaning">How was the state inside before cleaning?</label>
+        <select id="stateBeforeCleaning">
           <option value="">Select</option>
           <option value="Ok">Ok</option>
           <option value="Bad">Bad</option>
           <option value="Very Bad">Very Bad</option>
         </select>
 
-        <label for="stateAfter">How is the current state after cleaning?</label>
-        <select id="stateAfter">
+        <label for="stateAfterCleaning">How is the current state after cleaning?</label>
+        <select id="stateAfterCleaning">
           <option value="">Select</option>
           <option value="Good">Good</option>
           <option value="Require more cleaning later">Require more cleaning later</option>
         </select>
       </div>
 
-      <div id="ifNotCleaned" style="display:none">
-        <label for="stateNow">How is the state inside the Feeder?</label>
-        <select id="stateNow">
+      <div id="ifNotCleanedFields" style="display:none">
+        <label for="stateIfNotCleaned">How is the state inside the Feeder?</label>
+        <select id="stateIfNotCleaned">
           <option value="">Select</option>
           <option value="Ok">Ok</option>
           <option value="Bad">Bad</option>
           <option value="Very Bad">Very Bad</option>
         </select>
 
-        <label for="requireCleaning">Require to clean it later?</label>
-        <select id="requireCleaning">
+        <label for="needCleaningLater">Require to clean it later?</label>
+        <select id="needCleaningLater">
           <option value="">Select</option>
           <option value="No">No</option>
           <option value="Yes">Yes</option>
@@ -88,7 +88,7 @@
       </select>
 
       <label for="submittedBy">Submitted By</label>
-      <input type="text" id="submittedBy" name="submittedBy" required />
+      <input type="text" id="submittedBy" required />
 
       <button type="submit">Submit</button>
     </form>
@@ -97,40 +97,5 @@
 
   <script src="feeder_data.js"></script>
   <script src="feed.js"></script>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const feederGroup = params.get("feederGroup");
-
-    window.addEventListener("DOMContentLoaded", () => {
-      const feederSelect = document.getElementById("feederId");
-      const flockInput = document.getElementById("flockId");
-
-      setTimeout(() => {
-        if (feederGroup) {
-          const flockName = "Flock " + feederGroup.replace("F", "");
-          const match = [...feederSelect.options].find(opt => opt.dataset.flockId === flockName);
-          if (match) {
-            match.selected = true;
-            flockInput.value = match.dataset.flockId;
-          }
-        }
-      }, 150);
-
-      feederSelect.addEventListener("change", () => {
-        const selectedOption = feederSelect.selectedOptions[0];
-        if (selectedOption) {
-          flockInput.value = selectedOption.dataset.flockId || "";
-        }
-      });
-
-      // Show/hide cleaning questions based on selection
-      const cleanedTank = document.getElementById("cleanedTank");
-      cleanedTank.addEventListener("change", () => {
-        document.getElementById("ifCleaned").style.display = cleanedTank.value === "Yes" ? "block" : "none";
-        document.getElementById("ifNotCleaned").style.display = cleanedTank.value === "No" ? "block" : "none";
-      });
-    });
-  </script>
 </body>
 </html>
