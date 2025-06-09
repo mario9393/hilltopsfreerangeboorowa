@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
   const feederSelect = document.getElementById("feederId");
   const flockIdInput = document.getElementById("flockId");
@@ -12,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const FEEDER_CAPACITY = 1500;
   const DAILY_REQUIREMENT = 2400 * 0.118;
 
-  // NEW: Additional inputs
   const cleanedInsideInput = document.getElementById("cleanedInside");
   const stateBeforeCleaningInput = document.getElementById("stateBeforeCleaning");
   const stateAfterCleaningInput = document.getElementById("stateAfterCleaning");
@@ -65,30 +63,18 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("feedForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const feederId = feederSelect.value;
     const selectedOption = feederSelect.selectedOptions[0];
-    const flockId = selectedOption.dataset.flockId;
-    const lat = selectedOption.dataset.lat;
-    const lng = selectedOption.dataset.lng;
-    const date = dateInput.value;
-    const before = beforeFillInput.value;
-    const after = afterFillInput.value;
-    const amountFilled = ((after - before) / 100) * FEEDER_CAPACITY;
-    const daysUntilEmpty = ((after / 100) * FEEDER_CAPACITY) / DAILY_REQUIREMENT;
-
     const payload = {
-      "Feeder ID": feederId,
-      "Flock ID": flockId,
-      "Latitude": lat,
-      "Longitude": lng,
-      "Date": date,
-      "Level Before Fill (%)": before,
-      "Level After Fill (%)": after,
-      "Amount Filled (kg)": amountFilled.toFixed(1),
+      "Feeder ID": feederSelect.value,
+      "Flock ID": selectedOption.dataset.flockId,
+      "Latitude": selectedOption.dataset.lat,
+      "Longitude": selectedOption.dataset.lng,
+      "Date": dateInput.value,
+      "Level Before Fill (%)": beforeFillInput.value,
+      "Level After Fill (%)": afterFillInput.value,
+      "Amount Filled (kg)": (((afterFillInput.value - beforeFillInput.value) / 100) * FEEDER_CAPACITY).toFixed(1),
       "Daily Requirement (kg)": DAILY_REQUIREMENT.toFixed(1),
-      "Days Until Empty": daysUntilEmpty.toFixed(1),
-
-      // NEW FIELDS
+      "Days Until Empty": (((afterFillInput.value / 100) * FEEDER_CAPACITY) / DAILY_REQUIREMENT).toFixed(1),
       "Cleaned Inside Feeder Tank": cleanedInsideInput.value,
       "State Before Cleaning": stateBeforeCleaningInput.value,
       "State After Cleaning": stateAfterCleaningInput.value,
