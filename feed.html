@@ -97,5 +97,33 @@
 
   <script src="feeder_data.js"></script>
   <script src="feed.js"></script>
+  <script>
+  const params = new URLSearchParams(window.location.search);
+  const feederGroup = params.get("feederGroup");
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const feederSelect = document.getElementById("feederId");
+    const flockInput = document.getElementById("flockId");
+
+    // Wait a bit for FEEDERS to load
+    setTimeout(() => {
+      if (feederGroup) {
+        const firstMatch = [...feederSelect.options].find(
+          opt => opt.value.startsWith(feederGroup)
+        );
+        if (firstMatch) {
+          firstMatch.selected = true;
+          feederSelect.dispatchEvent(new Event("change")); // trigger flock ID autofill
+        }
+      } else {
+        // Fallback to first item if no feederGroup provided
+        if (feederSelect.options.length > 0) {
+          feederSelect.selectedIndex = 0;
+          feederSelect.dispatchEvent(new Event("change"));
+        }
+      }
+    }, 200);
+  });
+</script>
 </body>
 </html>
