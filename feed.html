@@ -99,30 +99,26 @@
   <script src="feed.js"></script>
   <script>
   const params = new URLSearchParams(window.location.search);
-  const feederGroup = params.get("feederGroup");
+  const feederIdParam = params.get("feederId");
 
   window.addEventListener("DOMContentLoaded", () => {
     const feederSelect = document.getElementById("feederId");
     const flockInput = document.getElementById("flockId");
 
-    // Wait a bit for FEEDERS to load
     setTimeout(() => {
-      if (feederGroup) {
-        const firstMatch = [...feederSelect.options].find(
-          opt => opt.value.startsWith(feederGroup)
-        );
-        if (firstMatch) {
-          firstMatch.selected = true;
-          feederSelect.dispatchEvent(new Event("change")); // trigger flock ID autofill
-        }
-      } else {
-        // Fallback to first item if no feederGroup provided
-        if (feederSelect.options.length > 0) {
-          feederSelect.selectedIndex = 0;
-          feederSelect.dispatchEvent(new Event("change"));
+      if (feederIdParam) {
+        const match = [...feederSelect.options].find(opt => opt.value === feederIdParam);
+        if (match) {
+          match.selected = true;
+          feederSelect.dispatchEvent(new Event("change")); // auto-fill flock ID
         }
       }
     }, 200);
+
+    feederSelect.addEventListener("change", () => {
+      const selected = feederSelect.selectedOptions[0];
+      flockInput.value = selected?.dataset.flockId || "";
+    });
   });
 </script>
 </body>
