@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Packing Station Verification</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Packing Station Egg Verification</h1>
+
+    <!-- Section 1: Auto Total -->
+    <div id="autoTotalSection">
+      <label>Total Eggs Submitted by Collectors:</label>
+      <input type="number" id="autoTotalEggs" readonly value="9532" />
+    </div>
+
+    <!-- Section 2: Supervisor Review -->
+    <div>
+      <label>Does the above number match the eggs physically received?</label>
+      <select id="matchConfirmation" required>
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+
+    <div id="correctionFields" style="display:none;">
+      <label>Enter actual number of eggs received:</label>
+      <input type="number" id="correctedEggs" min="0" />
+
+      <label>Reason for mismatch or comments:</label>
+      <textarea id="mismatchReason"></textarea>
+    </div>
+
+    <!-- Section 3: Categorization -->
+    <h3>Sort the eggs into categories</h3>
+    <label>Cleaned Eggs (trays):</label>
+    <input type="number" id="cleanedEggs" min="0" />
+
+    <label>Dirty/Ground/Broken Eggs (trays):</label>
+    <input type="number" id="dirtyEggs" min="0" />
+
+    <label>Giant Eggs (trays):</label>
+    <input type="number" id="giantEggs" min="0" />
+
+    <!-- Section 4: Upload Photos -->
+    <h3>Upload proof photos</h3>
+    <input type="file" accept="image/*" multiple id="photoUpload" />
+
+    <!-- Section 5: Signature -->
+    <h3>Supervisor Verification</h3>
+    <label>Supervisor Name:</label>
+    <input type="text" id="supervisorName" required />
+
+    <label>Signature:</label>
+    <canvas id="signaturePad" width="300" height="100" style="border:1px solid #000;"></canvas>
+    <button type="button" id="clearSignature">Clear</button>
+
+    <br /><br />
+    <button type="submit" id="submitForm">Submit</button>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    const matchDropdown = document.getElementById('matchConfirmation');
+    const correctionFields = document.getElementById('correctionFields');
+
+    matchDropdown.addEventListener('change', () => {
+      correctionFields.style.display = matchDropdown.value === 'No' ? 'block' : 'none';
+    });
+
+    // Signature pad setup
+    const canvas = document.getElementById("signaturePad");
+    const ctx = canvas.getContext("2d");
+    let drawing = false;
+
+    canvas.addEventListener("mousedown", () => drawing = true);
+    canvas.addEventListener("mouseup", () => drawing = false);
+    canvas.addEventListener("mousemove", draw);
+
+    function draw(e) {
+      if (!drawing) return;
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "black";
+
+      const rect = canvas.getBoundingClientRect();
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    }
+
+    document.getElementById("clearSignature").addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+    });
+  </script>
+</body>
+</html>
