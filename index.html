@@ -62,7 +62,7 @@ map.on('load', () => {
     'format',
     ['get', 'name'], { 'font-scale': 1.2 },
     ['case',
-     ['has', 'age_weeks'],
+     ['!=', ['get', 'age_weeks'], ''],
     ['concat', '\n🐣 Age: ', ['to-string', ['get', 'age_weeks']]],
     ''
   ],
