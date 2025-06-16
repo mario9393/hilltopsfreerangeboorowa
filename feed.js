@@ -20,6 +20,43 @@ document.addEventListener("DOMContentLoaded", () => {
   const slotsConditionInput = document.getElementById("slotsCondition");
   const submittedByInput = document.getElementById("submittedBy");
 
+  let submitterLat = "";
+  let submitterLng = "";
+  let proximityStatus = "Unknown";
+
+  // Helper to calculate distance between two coordinates (in meters)
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  // Ask for GPS access once when page loads
+  function requestLocation() {
+    if (!navigator.geolocation) {
+      messageDiv.textContent = "❌ GPS not supported.";
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(pos => {
+      submitterLat = pos.coords.latitude;
+      submitterLng = pos.coords.longitude;
+      messageDiv.textContent = "📍 Location detected.";
+    }, () => {
+      proximityStatus = "Location Denied";
+      messageDiv.textContent = "❌ Please allow location access.";
+    });
+  }
+
+  // Call location request on page load
+  requestLocation();
+
   FEEDERS.forEach(f => {
     const option = document.createElement("option");
     option.value = f.feederId;
@@ -64,11 +101,19 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     const selectedOption = feederSelect.selectedOptions[0];
+    const feederLat = parseFloat(selectedOption.dataset.lat);
+    const feederLng = parseFloat(selectedOption.dataset.lng);
+
+    if (submitterLat && submitterLng) {
+      const distance = getDistance(submitterLat, submitterLng, feederLat, feederLng);
+      proximityStatus = distance <= 100 ? "Near" : "Away"; // adjust 100m if needed
+    }
+
     const payload = {
       "Feeder ID": feederSelect.value,
       "Flock ID": selectedOption.dataset.flockId,
-      "Latitude": selectedOption.dataset.lat,
-      "Longitude": selectedOption.dataset.lng,
+      "Latitude": feederLat,
+      "Longitude": feederLng,
       "Date": dateInput.value,
       "Level Before Fill (%)": beforeFillInput.value,
       "Level After Fill (%)": afterFillInput.value,
@@ -82,7 +127,10 @@ document.addEventListener("DOMContentLoaded", () => {
       "Require Cleaning Later": needCleaningLaterInput.value,
       "Cleaned & Checked Feeding Slots": slotsCheckedInput.value,
       "Feeding Slots Condition": slotsConditionInput.value,
-      "Submitted By": submittedByInput.value
+      "Submitted By": submittedByInput.value,
+      "Submitter Latitude": submitterLat || "",
+      "Submitter Longitude": submitterLng || "",
+      "Proximity Status": proximityStatus
     };
 
     try {
@@ -96,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("feedForm").reset();
       amountFilledSpan.textContent = "-";
       daysUntilEmptySpan.textContent = "-";
+      requestLocation(); // Ask for fresh location for next entry
     } catch (err) {
       messageDiv.textContent = "❌ Error submitting log.";
     }
