@@ -8,6 +8,7 @@
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <script src="feeder_data.js"></script>
+  <script src="flock_age.js"></script> <!-- ✅ New -->
   <style>
     body { margin:0; padding:0; }
     #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -51,7 +52,41 @@ map.on('load', () => {
       'line-width': 1
     }
   });
+  // ✅ Add symbol labels with age
+  map.addLayer({
+    id: 'flock-labels',
+    type: 'symbol',
+    source: 'flocks',
+    layout: {
+      'text-field': [
+        'format',
+        ['get', 'name'], { 'font-scale': 1.2 },
+        '\n🐣 Age: ',
+        ['to-string', ['get', 'age_weeks']], { 'font-scale': 1.0 }
+      ],
+      'text-size': 14,
+      'text-offset': [0, 0.6],
+      'text-anchor': 'top',
+      'text-allow-overlap': true
+    },
+    paint: {
+      'text-color': '#000',
+      'text-halo-color': '#fff',
+      'text-halo-width': 1
+    }
+  });
 
+  // ✅ Inject ages dynamically
+  fetch('Hilltops_Farm_Map.geojson')
+    .then(res => res.json())
+    .then(data => {
+      for (const feature of data.features) {
+        const flockId = feature.properties.name;
+        feature.properties.age_weeks = getChickenAgeWeeks(flockId);
+      }
+      map.getSource('flocks').setData(data);
+  });
+  
   map.addSource('farm-boundary', {
     type: 'geojson',
     data: 'Farm_Boundary.geojson'
