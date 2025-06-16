@@ -82,7 +82,11 @@ map.on('load', () => {
     .then(data => {
       for (const feature of data.features) {
         const flockId = feature.properties.name;
-        feature.properties.age_weeks = getChickenAgeWeeks(flockId);
+    if (!["Tank A", "Tank B"].includes(flockId)) {
+    feature.properties.age_weeks = getChickenAgeWeeks(flockId);
+    } else {
+    feature.properties.age_weeks = ""; // Blank = no label shown
+    }
       }
       map.getSource('flocks').setData(data);
   });
