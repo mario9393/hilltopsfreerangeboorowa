@@ -58,12 +58,17 @@ map.on('load', () => {
     type: 'symbol',
     source: 'flocks',
     layout: {
-      'text-field': [
-        'format',
-        ['get', 'name'], { 'font-scale': 1.2 },
-        '\n🐣 Age: ',
-        ['to-string', ['get', 'age_weeks']], { 'font-scale': 1.0 }
-      ],
+  'text-field': [
+    'format',
+    ['get', 'name'], { 'font-scale': 1.2 },
+    ['case',
+     ['has', 'age_weeks'],
+    ['concat', '\n🐣 Age: ', ['to-string', ['get', 'age_weeks']]],
+    ''
+  ],
+  { 'font-scale': 1.0 }
+],
+
       'text-size': 14,
       'text-offset': [0, 0.6],
       'text-anchor': 'top',
