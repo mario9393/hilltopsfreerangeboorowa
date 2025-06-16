@@ -69,59 +69,111 @@
   </form>
 
   <script>
-    // Autofill flock ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const flock = urlParams.get("flock");
-    if (flock) {
-      document.getElementById("flockId").value = flock;
+  const urlParams = new URLSearchParams(window.location.search);
+  const flock = urlParams.get("flock");
+  if (flock) {
+    document.getElementById("flockId").value = flock;
+  }
+
+  const flockCoordinates = {
+    "Flock 24": { lat: -34.352939, lng: 148.700403 },
+    "Flock 29": { lat: -34.349811, lng: 148.701231 },
+    "Flock 32": { lat: -34.345914, lng: 148.699978 },
+    "Flock 34": { lat: -34.352742, lng: 148.695286 },
+    "Flock 35": { lat: -34.351803, lng: 148.696808 },
+    "Flock 36": { lat: -34.352922, lng: 148.703650 },
+    "Flock 37": { lat: -34.351092, lng: 148.707942 },
+    "Flock 38": { lat: -34.348275, lng: 148.701122 },
+    "Flock 39": { lat: -34.350797, lng: 148.704897 },
+    "Flock 40": { lat: -34.348503, lng: 148.702567 },
+    "Flock 41": { lat: -34.353400, lng: 148.706169 },
+    "Flock 42": { lat: -34.353883, lng: 148.705925 },
+    "Flock 43": { lat: -34.353933, lng: 148.706528 },
+    "Flock 44": { lat: -34.348578, lng: 148.705606 }
+  };
+
+  let submitLat = "", submitLng = "", proximityStatus = "Unknown";
+
+  const now = new Date();
+  document.getElementById("date").valueAsDate = now;
+  document.getElementById("time").value = now.toTimeString().slice(0, 5);
+
+  // Calculate liters & days remaining
+  const levelInput = document.getElementById("level");
+  const litersRemainingSpan = document.getElementById("litersRemaining");
+  const daysRemainingSpan = document.getElementById("daysRemaining");
+
+  levelInput.addEventListener("input", () => {
+    const percent = parseFloat(levelInput.value) || 0;
+    const liters = (percent / 100) * 1000;
+    const days = liters / 268.8;
+    litersRemainingSpan.textContent = liters.toFixed(1);
+    daysRemainingSpan.textContent = days.toFixed(1);
+  });
+
+  // Get user's location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      submitLat = pos.coords.latitude;
+      submitLng = pos.coords.longitude;
+      document.getElementById("message").textContent = "📍 Location captured.";
+    }, () => {
+      proximityStatus = "Location Denied";
+      document.getElementById("message").textContent = "❌ Location access denied.";
+    });
+  }
+
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon/2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  const form = document.getElementById("waterForm");
+  form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const flockId = form.flockId.value;
+    const target = flockCoordinates[flockId];
+
+    if (submitLat && submitLng && target) {
+      const dist = getDistance(submitLat, submitLng, target.lat, target.lng);
+      proximityStatus = dist <= 100 ? "Near" : "Away";
     }
 
-    // Autofill date and time
-    const now = new Date();
-    document.getElementById("date").valueAsDate = now;
-    document.getElementById("time").value = now.toTimeString().slice(0,5);
+    const data = {
+      date: form.date.value,
+      time: form.time.value,
+      flockId: flockId,
+      level: form.level.value,
+      submitter: form.submitter.value,
+      "Submitter Latitude": submitLat,
+      "Submitter Longitude": submitLng,
+      "Proximity Status": proximityStatus
+    };
 
-    // Live calculation
-    const levelInput = document.getElementById("level");
-    const litersRemainingSpan = document.getElementById("litersRemaining");
-    const daysRemainingSpan = document.getElementById("daysRemaining");
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbzp7-OWSlUkjOlcD_Nqri4TLL7RTGjik-ixUEt-LP7M7aJaKDf9nSlYxShnjBFbYwZEcg/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      document.getElementById("message").textContent = "✅ Water tank log submitted!";
+      form.reset();
+      litersRemainingSpan.textContent = "-";
+      daysRemainingSpan.textContent = "-";
+    } catch (err) {
+      document.getElementById("message").textContent = "❌ Submission failed.";
+    }
+  });
+</script>
 
-    levelInput.addEventListener("input", () => {
-      const percent = parseFloat(levelInput.value) || 0;
-      const liters = (percent / 100) * 1000;
-      const days = liters / 268.8;
-      litersRemainingSpan.textContent = liters.toFixed(1);
-      daysRemainingSpan.textContent = days.toFixed(1);
-    });
-
-    // Submission
-    const form = document.getElementById("waterForm");
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      const data = {
-        date: form.date.value,
-        time: form.time.value,
-        flockId: form.flockId.value,
-        level: form.level.value,
-        submitter: form.submitter.value
-      };
-
-      try {
-        await fetch("https://script.google.com/macros/s/AKfycbzp7-OWSlUkjOlcD_Nqri4TLL7RTGjik-ixUEt-LP7M7aJaKDf9nSlYxShnjBFbYwZEcg/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-        document.getElementById("message").textContent = "✅ Water tank log submitted!";
-        form.reset();
-        litersRemainingSpan.textContent = "-";
-        daysRemainingSpan.textContent = "-";
-      } catch (err) {
-        document.getElementById("message").textContent = "❌ Submission failed.";
-      }
-    });
-  </script>
 </body>
 </html>
