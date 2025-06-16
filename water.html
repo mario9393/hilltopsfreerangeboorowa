@@ -64,6 +64,16 @@
     <p>Daily Requirement: 268.8 L</p>
     <p>Estimated Days Remaining: <span id="daysRemaining">-</span> days</p>
 
+    <label for="observation">Any Observations? (Leaks, broken pipes/taps)</label>
+    <input type="text" id="observation" name="observation" placeholder="e.g. pipe leaking, tap broken" />
+    <label for="severity">Issue Severity</label>
+    <select id="severity" name="severity">
+    <option value="">None</option>
+    <option value="Minor">Minor</option>
+    <option value="Major">Major</option>
+    <option value="High Alert">High Alert</option>
+    </select>
+    
     <button type="submit">Submit</button>
     <p id="message"></p>
   </form>
@@ -153,6 +163,8 @@
       flockId: flockId,
       level: form.level.value,
       submitter: form.submitter.value,
+      observation: form.observation.value,
+      severity: form.severity.value,
       "Submitter Latitude": submitLat,
       "Submitter Longitude": submitLng,
       "Proximity Status": proximityStatus
