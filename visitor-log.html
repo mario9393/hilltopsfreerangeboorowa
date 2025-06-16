@@ -74,7 +74,17 @@
     <canvas id="signature-pad"></canvas>
     <button type="button" onclick="clearSignature()">Clear Signature</button>
     <input type="hidden" name="signature" id="signature">
+    
+    <p>
+    Please read the NSW Salmonella Enteritidis Control Order here:
+    <a href="https://www.dpi.nsw.gov.au/__data/assets/pdf_file/0011/1565894/Biosecurity-Salmonella-Enteritidis-Control-Order-2024.pdf" target="_blank">Read the full Control Order</a>
+    </p>
 
+    <label>
+    <input type="checkbox" id="agreeOrder" required>
+    I have read and understood the NSW SE Control Order and agree to comply.
+    </label>
+    
     <button type="submit">Submit</button>
   </form>
 
@@ -115,31 +125,38 @@
       alert("Geolocation is not supported by this browser.");
     }
 
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      if (signaturePad.isEmpty()) {
-        alert('Please provide a signature.');
-        return;
-      }
-      signatureInput.value = signaturePad.toDataURL();
-      const formData = new FormData(form);
-      const plainFormData = Object.fromEntries(formData.entries());
-      const jsonFormData = JSON.stringify(plainFormData);
+  form.addEventListener('submit', async function(e) {
+  e.preventDefault();
 
-      await fetch('https://script.google.com/macros/s/AKfycbxhHc2D4rd7F5tDBaF6Nk0CTm634sjbC9cCEgKhYu48VTEkixHGXHqF6lRT9iEp5vyz2Q/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        body: jsonFormData,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+  if (!document.getElementById('agreeOrder').checked) {
+    alert('Please read and agree to the SE Control Order before submitting.');
+    return;
+  }
 
-      alert('Form submitted!');
-      form.reset();
-      signaturePad.clear();
-      farmNamesGroup.style.display = 'none';
-    });
+  if (signaturePad.isEmpty()) {
+    alert('Please provide a signature.');
+    return;
+  }
+
+  signatureInput.value = signaturePad.toDataURL();
+  const formData = new FormData(form);
+  const plainFormData = Object.fromEntries(formData.entries());
+  const jsonFormData = JSON.stringify(plainFormData);
+
+  await fetch('https://script.google.com/macros/s/AKfycbxhHc2D4rd7F5tDBaF6Nk0CTm634sjbC9cCEgKhYu48VTEkixHGXHqF6lRT9iEp5vyz2Q/exec', {
+    method: 'POST',
+    mode: 'no-cors',
+    body: jsonFormData,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+
+  alert('Form submitted!');
+  form.reset();
+  signaturePad.clear();
+  farmNamesGroup.style.display = 'none';
+  });
   </script>
 </body>
 </html>
