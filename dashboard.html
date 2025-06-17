@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farm Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    h1 { text-align: center; margin-bottom: 30px; }
+    .chart-container { width: 100%; max-width: 800px; margin: auto; margin-bottom: 50px; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    canvas { max-width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>Hilltops Farm Live Dashboard</h1>
+
+  <div class="chart-container">
+    <h2>🥚 Egg Count per Flock (Today)</h2>
+    <canvas id="eggFlockChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h2>🍽️ Feed Levels per Feeder (Today)</h2>
+    <canvas id="feedLevelChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h2>💧 Water Levels per Flock (Today)</h2>
+    <canvas id="waterLevelChart"></canvas>
+  </div>
+
+  <script>
+    async function fetchSheetData(sheetUrl) {
+      const res = await fetch(sheetUrl);
+      const text = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const rows = Array.from(doc.querySelectorAll('table tr'))
+        .map(tr => Array.from(tr.children).map(td => td.innerText));
+      return rows;
+    }
+
+    function groupAndSum(data, indexKey, indexValue) {
+      const totals = {};
+      for (let i = 1; i < data.length; i++) {
+        const key = data[i][indexKey];
+        const value = parseFloat(data[i][indexValue]) || 0;
+        totals[key] = (totals[key] || 0) + value;
+      }
+      return totals;
+    }
+
+    async function drawCharts() {
+      const eggSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQRb3Xhvuu0KTGYETnei-bDwxd1we6bL7SwLDZzZEelb8Q_DkhJT4YcXHZJsiI7HmNOamK-KRMCz1C2/pubhtml';
+      const feedSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQINARyh9GBZ04CbNhrweG37B14hIuPcP_qZTQHQ0wdmJvx0qqhBUXuSqESfg9djz4nBEkzgMUfvJcL/pubhtml';
+      const waterSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQb8TqZrPKm1NKov2s1Y3kHgOLmuqfVJ1a9fbo0b7M1wMDnQ4sx3NWB8UihRzDmLs4jO5UtiLLaMqj8/pubhtml';
+
+      const eggData = await fetchSheetData(eggSheet);
+      const feedData = await fetchSheetData(feedSheet);
+      const waterData = await fetchSheetData(waterSheet);
+
+      const eggTotals = groupAndSum(eggData, 0, 1); // Flock, Egg Count
+      const feedLevels = groupAndSum(feedData, 1, 4); // Feeder ID, Level After Fill
+      const waterLevels = groupAndSum(waterData, 1, 2); // Flock, Water Level %
+
+      const eggChart = new Chart(document.getElementById('eggFlockChart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(eggTotals),
+          datasets: [{
+            label: 'Eggs Collected',
+            data: Object.values(eggTotals),
+            backgroundColor: 'rgba(255, 159, 64, 0.7)'
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      const feedChart = new Chart(document.getElementById('feedLevelChart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(feedLevels),
+          datasets: [{
+            label: 'Feed Level (%)',
+            data: Object.values(feedLevels),
+            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      const waterChart = new Chart(document.getElementById('waterLevelChart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(waterLevels),
+          datasets: [{
+            label: 'Water Tank Level (%)',
+            data: Object.values(waterLevels),
+            backgroundColor: 'rgba(75, 192, 192, 0.7)'
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+    }
+
+    drawCharts();
+  </script>
+</body>
+</html>
