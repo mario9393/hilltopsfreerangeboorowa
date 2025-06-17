@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const clean = document.getElementById("clean");
   const dirty = document.getElementById("dirty");
+  const superDirty = document.getElementById("superDirty");
   const ground = document.getElementById("ground");
   const broken = document.getElementById("broken");
   const giant = document.getElementById("giant");
@@ -16,14 +17,15 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("flockId").value = flock;
   }
 
-  function updateTotal() {
-    const total = [clean, dirty, ground, broken, giant].reduce((sum, field) => {
-      return sum + (parseInt(field.value) || 0);
-    }, 0);
-    totalSpan.textContent = total;
-  }
+function updateTotal() {
+  // Only exclude broken eggs from total
+  const total = [clean, dirty, superDirty, ground, giant].reduce((sum, field) => {
+    return sum + (parseInt(field.value) || 0);
+  }, 0);
+  totalSpan.textContent = total;
+}
 
-  [clean, dirty, ground, broken, giant].forEach(input => {
+  [clean, dirty, superDirty, ground, broken, giant].forEach(input => {
     input.addEventListener("input", updateTotal);
   });
 
@@ -93,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "Team ID": form.teamId.value,
       "Clean Eggs": clean.value,
       "Dirty Eggs": dirty.value,
+      "Super Dirty Eggs": superDirty.value,
       "Ground Eggs": ground.value,
       "Broken Eggs": broken.value,
       "Giant Eggs": giant.value,
