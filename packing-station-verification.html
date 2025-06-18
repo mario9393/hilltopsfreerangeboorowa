@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Packing Station Verification</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -55,8 +56,9 @@
     <input type="text" id="supervisorName" required />
 
     <label>Signature:</label>
-    <canvas id="signaturePad" width="300" height="100" style="border:1px solid #000;"></canvas>
-    <button type="button" id="clearSignature">Clear</button>
+    <canvas id="signaturePad" width="300" height="150" style="border:1px solid #ccc; width: 100%; height: 150px;"></canvas>
+    <button type="button" onclick="clearSignature()">Clear Signature</button>
+    <input type="hidden" id="signatureImage">
 
     <br /><br />
     <button type="submit" id="submitForm">Submit</button>
@@ -64,92 +66,66 @@
   </div>
 
   <script>
-    // Show/hide correction section
     const matchDropdown = document.getElementById('matchConfirmation');
     const correctionFields = document.getElementById('correctionFields');
     matchDropdown.addEventListener('change', () => {
       correctionFields.style.display = matchDropdown.value === 'No' ? 'block' : 'none';
     });
+  </script>
 
-    // Signature drawing setup
+  <script>
     const canvas = document.getElementById("signaturePad");
-    const ctx = canvas.getContext("2d");
-    let drawing = false;
+    const signaturePad = new SignaturePad(canvas);
+    function clearSignature() {
+      signaturePad.clear();
+    }
+  </script>
 
-    canvas.addEventListener("mousedown", () => drawing = true);
-    canvas.addEventListener("mouseup", () => drawing = false);
-    canvas.addEventListener("mousemove", draw);
+  <script>
+  window.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
+      const data = await res.json();
+      document.getElementById("autoTotalEggs").value = data.total;
+    } catch (err) {
+      document.getElementById("autoTotalEggs").value = "Error";
+    }
+  });
+  </script>
 
-    function draw(e) {
-      if (!drawing) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "black";
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  <script>
+  document.getElementById("submitForm").addEventListener("click", async () => {
+    if (signaturePad.isEmpty()) {
+      alert("Please draw your signature before submitting.");
+      return;
     }
 
-    document.getElementById("clearSignature").addEventListener("click", () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-    });
+    const data = {
+      date: new Date().toLocaleDateString("en-AU"),
+      autoTotalEggs: document.getElementById("autoTotalEggs").value,
+      matchConfirmation: document.getElementById("matchConfirmation").value,
+      correctedEggs: document.getElementById("correctedEggs").value,
+      mismatchReason: document.getElementById("mismatchReason").value,
+      cleanedEggs: document.getElementById("cleanedEggs").value,
+      dirtyEggs: document.getElementById("dirtyEggs").value,
+      giantEggs: document.getElementById("giantEggs").value,
+      supervisorName: document.getElementById("supervisorName").value,
+      signature: signaturePad.toDataURL()
+    };
 
-    // Load total eggs value from server
-    window.addEventListener("DOMContentLoaded", async () => {
-      try {
-        const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
-        const data = await res.json();
-        document.getElementById("autoTotalEggs").value = data.total;
-      } catch (err) {
-        document.getElementById("autoTotalEggs").value = "Error";
-      }
-    });
-
-    // Submit form handler
-    document.getElementById("submitForm").addEventListener("click", async () => {
-      const photoFiles = document.getElementById("photoUpload").files;
-      const photoUploads = [];
-      const signature = canvas.toDataURL("image/png");
-
-      // Read all photos as base64
-      const readPhotos = Array.from(photoFiles).map(file => {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = e => resolve(e.target.result);
-          reader.readAsDataURL(file);
-        });
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbx-yj68lf_DjPCr_B5u8nMCjvZ69Bwo81o0WwJoADc4RiLfshV94rmCBrWJ5nfWTLNpog/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
       });
 
-      Promise.all(readPhotos).then(results => {
-        const data = {
-          date: new Date().toLocaleDateString("en-AU"),
-          autoTotalEggs: document.getElementById("autoTotalEggs").value,
-          matchConfirmation: document.getElementById("matchConfirmation").value,
-          correctedEggs: document.getElementById("correctedEggs").value,
-          mismatchReason: document.getElementById("mismatchReason").value,
-          cleanedEggs: document.getElementById("cleanedEggs").value,
-          dirtyEggs: document.getElementById("dirtyEggs").value,
-          giantEggs: document.getElementById("giantEggs").value,
-          supervisorName: document.getElementById("supervisorName").value,
-          signature: signature,
-          photoUploads: results
-        };
-
-        fetch("https://script.google.com/macros/s/AKfycbx-yj68lf_DjPCr_B5u8nMCjvZ69Bwo81o0WwJoADc4RiLfshV94rmCBrWJ5nfWTLNpog/exec", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        }).then(() => {
-          document.getElementById("message").textContent = "✅ Submission successful.";
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }).catch(() => {
-          document.getElementById("message").textContent = "❌ Failed to submit.";
-        });
-      });
-    });
+      document.getElementById("message").textContent = "✅ Submission successful.";
+    } catch (err) {
+      document.getElementById("message").textContent = "❌ Failed to submit. Try again.";
+    }
+  });
   </script>
+
 </body>
 </html>
