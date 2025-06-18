@@ -28,7 +28,8 @@
   </style>
 </head>
 <body>
-  <h2>Hilltops Visitor Exit Log</h2>
+  <img src="hilltops-logo.png" alt="Hilltops Logo" style="max-width: 150px; display: block; margin: 0 auto 10px;" />
+  <h2 style="text-align: center;">Hilltops Free Range Exit Log</h2>
   <form id="exitForm">
     <input type="tel" name="phone" placeholder="Phone Number" required>
     <input type="text" name="date" id="date" readonly>
@@ -63,12 +64,24 @@
           },
           body: JSON.stringify(payload)
         });
-        document.getElementById("message").textContent = "✅ Exit logged successfully.";
-        form.reset();
+        // Replace form with confirmation
+        form.innerHTML = `
+          <div style="text-align: center; font-size: 18px; padding: 20px;">
+            ✅ Thank you! Your exit has been logged successfully.
+          </div>
+        `;
       } catch (err) {
-        document.getElementById("message").textContent = "❌ Failed to log exit.";
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit Exit";
+        alert("❌ Failed to log exit. Please try again.");
       }
     });
   </script>
+
+<footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
+<p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
+<p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
+</footer>
+  
 </body>
 </html>
