@@ -64,14 +64,14 @@
   </div>
 
   <script>
+    // Show/hide correction section
     const matchDropdown = document.getElementById('matchConfirmation');
     const correctionFields = document.getElementById('correctionFields');
-
     matchDropdown.addEventListener('change', () => {
       correctionFields.style.display = matchDropdown.value === 'No' ? 'block' : 'none';
     });
 
-    // Signature pad setup
+    // Signature drawing setup
     const canvas = document.getElementById("signaturePad");
     const ctx = canvas.getContext("2d");
     let drawing = false;
@@ -82,11 +82,10 @@
 
     function draw(e) {
       if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
       ctx.lineWidth = 2;
       ctx.lineCap = "round";
       ctx.strokeStyle = "black";
-
-      const rect = canvas.getBoundingClientRect();
       ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
       ctx.stroke();
       ctx.beginPath();
@@ -97,59 +96,60 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.beginPath();
     });
-  </script>
-  
-<script>
-window.addEventListener("DOMContentLoaded", async () => {
-  try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec"); // Replace with your deployed get URL
-    const data = await res.json();
-    document.getElementById("autoTotalEggs").value = data.total;
-  } catch (err) {
-    document.getElementById("autoTotalEggs").value = "Error";
-  }
-});
-</script>
 
-<script>
-document.getElementById("submitForm").addEventListener("click", async () => {
-  const canvas = document.getElementById("signaturePad");
-  const signature = canvas.toDataURL("image/png");
-
-  const data = {
-    date: new Date().toLocaleDateString("en-AU"),
-    autoTotalEggs: document.getElementById("autoTotalEggs").value,
-    matchConfirmation: document.getElementById("matchConfirmation").value,
-    correctedEggs: document.getElementById("correctedEggs").value,
-    mismatchReason: document.getElementById("mismatchReason").value,
-    cleanedEggs: document.getElementById("cleanedEggs").value,
-    dirtyEggs: document.getElementById("dirtyEggs").value,
-    giantEggs: document.getElementById("giantEggs").value,
-    supervisorName: document.getElementById("supervisorName").value,
-    signature: signature
-  };
-
-  try {
-    await fetch("https://script.google.com/macros/s/AKfycbx-yj68lf_DjPCr_B5u8nMCjvZ69Bwo81o0WwJoADc4RiLfshV94rmCBrWJ5nfWTLNpog/exec", {
-      method: "POST",
-      // mode: "no-cors", ← remove this line entirely
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
+    // Load total eggs value from server
+    window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
+        const data = await res.json();
+        document.getElementById("autoTotalEggs").value = data.total;
+      } catch (err) {
+        document.getElementById("autoTotalEggs").value = "Error";
+      }
     });
 
-    document.getElementById("message").textContent = "✅ Submission successful.";
-    document.querySelector("form").reset();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  } catch (err) {
-    document.getElementById("message").textContent = "❌ Failed to submit. Try again.";
-  }
-});
-</script>
+    // Submit form handler
+    document.getElementById("submitForm").addEventListener("click", async () => {
+      const photoFiles = document.getElementById("photoUpload").files;
+      const photoUploads = [];
+      const signature = canvas.toDataURL("image/png");
 
+      // Read all photos as base64
+      const readPhotos = Array.from(photoFiles).map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target.result);
+          reader.readAsDataURL(file);
+        });
+      });
 
+      Promise.all(readPhotos).then(results => {
+        const data = {
+          date: new Date().toLocaleDateString("en-AU"),
+          autoTotalEggs: document.getElementById("autoTotalEggs").value,
+          matchConfirmation: document.getElementById("matchConfirmation").value,
+          correctedEggs: document.getElementById("correctedEggs").value,
+          mismatchReason: document.getElementById("mismatchReason").value,
+          cleanedEggs: document.getElementById("cleanedEggs").value,
+          dirtyEggs: document.getElementById("dirtyEggs").value,
+          giantEggs: document.getElementById("giantEggs").value,
+          supervisorName: document.getElementById("supervisorName").value,
+          signature: signature,
+          photoUploads: results
+        };
 
-  
+        fetch("https://script.google.com/macros/s/AKfycbx-yj68lf_DjPCr_B5u8nMCjvZ69Bwo81o0WwJoADc4RiLfshV94rmCBrWJ5nfWTLNpog/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        }).then(() => {
+          document.getElementById("message").textContent = "✅ Submission successful.";
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }).catch(() => {
+          document.getElementById("message").textContent = "❌ Failed to submit.";
+        });
+      });
+    });
+  </script>
 </body>
 </html>
