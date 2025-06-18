@@ -2,86 +2,121 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Packing Station Verification</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 150px;
+      touch-action: none;
+    }
+    button[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+      border: none;
+    }
+    button[type="submit"]:hover {
+      background-color: #45a049;
+    }
+    button[type="button"] {
+      background: #eee;
+      margin-top: 10px;
+    }
+    #message {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Packing Station Egg Verification</h1>
 
-    <!-- Section 1: Auto Total -->
-    <div id="autoTotalSection">
-      <label>Total Eggs Submitted by Collectors:</label>
-      <input type="number" id="autoTotalEggs" readonly />
-    </div>
+<form id="packingForm">
+  <h2 style="text-align:center;">Packing Station Egg Verification</h2>
 
-    <!-- Section 2: Supervisor Review -->
-    <div>
-      <label>Does the above number match the eggs physically received?</label>
-      <select id="matchConfirmation" required>
-        <option value="">Select</option>
-        <option value="Yes">Yes</option>
-        <option value="No">No</option>
-      </select>
-    </div>
+  <label>Total Eggs Submitted by Collectors:</label>
+  <input type="number" id="autoTotalEggs" readonly />
 
-    <div id="correctionFields" style="display:none;">
-      <label>Enter actual number of eggs received:</label>
-      <input type="number" id="correctedEggs" min="0" />
+  <label>Does the above number match the eggs physically received?</label>
+  <select id="matchConfirmation" required>
+    <option value="">Select</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
 
-      <label>Reason for mismatch or comments:</label>
-      <textarea id="mismatchReason"></textarea>
-    </div>
+  <div id="correctionFields" style="display:none;">
+    <label>Enter actual number of eggs received:</label>
+    <input type="number" id="correctedEggs" min="0" />
 
-    <!-- Section 3: Categorization -->
-    <h3>Sort the eggs into categories</h3>
-    <label>Cleaned Eggs (trays):</label>
-    <input type="number" id="cleanedEggs" min="0" />
-
-    <label>Dirty/Ground/Broken Eggs (trays):</label>
-    <input type="number" id="dirtyEggs" min="0" />
-
-    <label>Giant Eggs (trays):</label>
-    <input type="number" id="giantEggs" min="0" />
-
-    <!-- Section 4: Upload Photos -->
-    <h3>Upload proof photos</h3>
-    <input type="file" accept="image/*" multiple id="photoUpload" />
-
-    <!-- Section 5: Signature -->
-    <h3>Supervisor Verification</h3>
-    <label>Supervisor Name:</label>
-    <input type="text" id="supervisorName" required />
-
-    <label>Signature:</label>
-    <canvas id="signaturePad" width="300" height="150" style="border:1px solid #ccc; width: 100%; height: 150px;"></canvas>
-    <button type="button" onclick="clearSignature()">Clear Signature</button>
-    <input type="hidden" id="signatureImage">
-
-    <br /><br />
-    <button type="submit" id="submitForm">Submit</button>
-    <div id="message"></div>
+    <label>Reason for mismatch or comments:</label>
+    <textarea id="mismatchReason"></textarea>
   </div>
 
-  <script>
-    const matchDropdown = document.getElementById('matchConfirmation');
-    const correctionFields = document.getElementById('correctionFields');
-    matchDropdown.addEventListener('change', () => {
-      correctionFields.style.display = matchDropdown.value === 'No' ? 'block' : 'none';
-    });
-  </script>
+  <label>Cleaned Eggs (trays):</label>
+  <input type="number" id="cleanedEggs" min="0" />
 
-  <script>
-    const canvas = document.getElementById("signaturePad");
-    const signaturePad = new SignaturePad(canvas);
-    function clearSignature() {
-      signaturePad.clear();
-    }
-  </script>
+  <label>Dirty/Ground/Broken Eggs (trays):</label>
+  <input type="number" id="dirtyEggs" min="0" />
 
-  <script>
+  <label>Giant Eggs (trays):</label>
+  <input type="number" id="giantEggs" min="0" />
+
+  <label>Upload proof photos:</label>
+  <input type="file" accept="image/*" multiple id="photoUpload" />
+
+  <label>Supervisor Name:</label>
+  <input type="text" id="supervisorName" required />
+
+  <label>Signature:</label>
+  <canvas id="signaturePad"></canvas>
+  <button type="button" id="clearSignature">Clear Signature</button>
+
+  <button type="submit" id="submitForm">Submit</button>
+  <div id="message"></div>
+</form>
+
+<!-- Signature Pad -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+<script>
+  const matchDropdown = document.getElementById('matchConfirmation');
+  const correctionFields = document.getElementById('correctionFields');
+  matchDropdown.addEventListener('change', () => {
+    correctionFields.style.display = matchDropdown.value === 'No' ? 'block' : 'none';
+  });
+
+  const canvas = document.getElementById("signaturePad");
+  const signaturePad = new SignaturePad(canvas);
+
+  document.getElementById("clearSignature").addEventListener("click", () => {
+    signaturePad.clear();
+  });
+
+  // Auto total eggs fetch
   window.addEventListener("DOMContentLoaded", async () => {
     try {
       const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
@@ -91,14 +126,17 @@
       document.getElementById("autoTotalEggs").value = "Error";
     }
   });
-  </script>
 
-  <script>
-  document.getElementById("submitForm").addEventListener("click", async () => {
+  document.getElementById("packingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
     if (signaturePad.isEmpty()) {
-      alert("Please draw your signature before submitting.");
+      alert("Please provide a signature before submitting.");
       return;
     }
+
+    const files = document.getElementById("photoUpload").files;
+    const fileNames = Array.from(files).map(file => file.name); // Names only, upload to Drive needs more steps
 
     const data = {
       date: new Date().toLocaleDateString("en-AU"),
@@ -110,22 +148,28 @@
       dirtyEggs: document.getElementById("dirtyEggs").value,
       giantEggs: document.getElementById("giantEggs").value,
       supervisorName: document.getElementById("supervisorName").value,
-      signature: signaturePad.toDataURL()
+      signature: signaturePad.toDataURL(),
+      photoUploads: fileNames
     };
 
     try {
       await fetch("https://script.google.com/macros/s/AKfycbx-yj68lf_DjPCr_B5u8nMCjvZ69Bwo81o0WwJoADc4RiLfshV94rmCBrWJ5nfWTLNpog/exec", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(data)
       });
 
       document.getElementById("message").textContent = "✅ Submission successful.";
+      document.getElementById("packingForm").reset();
+      signaturePad.clear();
     } catch (err) {
       document.getElementById("message").textContent = "❌ Failed to submit. Try again.";
     }
   });
-  </script>
+</script>
 
 </body>
 </html>
+
