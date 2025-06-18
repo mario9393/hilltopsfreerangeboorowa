@@ -20,15 +20,30 @@ input, select {
   padding: 8px;
   margin-top: 5px;
 }
-button {
-  margin-top: 15px;
+
+button[type="submit"] {
   width: 100%;
-  padding: 10px;
-  background-color: #2196F3;
+  padding: 12px;
+  margin-top: 20px;
+  border-radius: 8px;
+  background-color: #4CAF50;
   color: white;
-  border: none;
+  font-weight: bold;
   font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
+
+button[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+button[type="submit"]:active {
+  background-color: #3e8e41;
+  transform: scale(0.97);
+}
+
 #message {
   margin-top: 15px;
   color: green;
