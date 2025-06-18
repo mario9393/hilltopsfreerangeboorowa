@@ -132,7 +132,7 @@ document.getElementById("submitForm").addEventListener("click", async () => {
   try {
     await fetch("https://script.google.com/macros/s/AKfycbx-yj68lf_DjPCr_B5u8nMCjvZ69Bwo81o0WwJoADc4RiLfshV94rmCBrWJ5nfWTLNpog/exec", {
       method: "POST",
-      mode: "no-cors",
+      // mode: "no-cors", ← remove this line entirely
       headers: {
         "Content-Type": "application/json"
       },
