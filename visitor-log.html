@@ -138,7 +138,14 @@ form.addEventListener('submit', async function(e) {
     alert('Please provide a signature.');
     return;
   }
-
+// Validate GPS location
+  const lat = document.getElementById('latitude').value;
+  const lng = document.getElementById('longitude').value;
+  if (!lat || !lng) {
+  alert('Location is required. Please allow location access and try again.');
+  return;
+  }
+  
   // Disable submit button to prevent multiple clicks
   const submitButton = form.querySelector('button[type="submit"]');
   submitButton.disabled = true;
