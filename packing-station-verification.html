@@ -114,7 +114,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 <script>
 document.getElementById("submitForm").addEventListener("click", async () => {
   const canvas = document.getElementById("signaturePad");
-  const signatureImage = canvas.toDataURL("image/png");
+  const signature = canvas.toDataURL("image/png");
 
   const data = {
     date: new Date().toLocaleDateString("en-AU"),
@@ -126,7 +126,7 @@ document.getElementById("submitForm").addEventListener("click", async () => {
     dirtyEggs: document.getElementById("dirtyEggs").value,
     giantEggs: document.getElementById("giantEggs").value,
     supervisorName: document.getElementById("supervisorName").value,
-    signatureImage: signatureImage
+    signature: signature
   };
 
   try {
