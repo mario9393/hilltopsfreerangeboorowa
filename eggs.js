@@ -62,10 +62,13 @@ function updateTotal() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // in meters
   }
-
+  const submitButton = form.querySelector("button[type='submit']"); // ✅ Added
+  
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
+    submitButton.disabled = true; // ✅ Added
+    submitButton.textContent = "Submitting..."; // ✅ Added
+    
     const flockId = form.flockId.value;
     const target = flockCoordinates[flockId];
     let latitude = "";
@@ -120,8 +123,13 @@ function updateTotal() {
       document.getElementById("message").textContent = "✅ Submission successful!";
       form.reset();
       totalSpan.textContent = "0";
+      submitButton.disabled = false; // ✅ Added
+      submitButton.textContent = "Submit"; // ✅ Added
+      
     } catch (err) {
       document.getElementById("message").textContent = "❌ Failed to submit.";
+      submitButton.disabled = false; // ✅ Added
+      submitButton.textContent = "Submit"; // ✅ Added
     }
   });
 });
