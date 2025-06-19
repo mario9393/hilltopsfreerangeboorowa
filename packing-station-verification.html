@@ -47,6 +47,11 @@
 
 <form id="packingForm">
   <h2 style="text-align:center;">Packing Station Egg Verification</h2>
+ 
+  <label>Select Date to Verify:</label>
+  <select id="verifyDate" required>
+  <option value="">-- Loading dates --</option>
+  </select>
 
   <label>Total Eggs Submitted by Collectors:</label>
   <input type="number" id="autoTotalEggs" readonly />
@@ -89,16 +94,35 @@
     document.getElementById('correctionFields').style.display = show ? 'block' : 'none';
   });
 
-  // Auto-fetch today's total eggs from collector log
-  window.addEventListener("DOMContentLoaded", async () => {
-    try {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
-      const data = await res.json();
-      document.getElementById("autoTotalEggs").value = data.total || 0;
-    } catch {
-      document.getElementById("autoTotalEggs").value = "Error";
-    }
-  });
+// Fetch past 3 days' totals and populate dropdown
+async function loadDateOptions() {
+  try {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
+    const result = await res.json();
+    const totals = result.totals;
+
+    const verifyDateSelect = document.getElementById("verifyDate");
+    verifyDateSelect.innerHTML = `<option value="">-- Select Date --</option>`;
+
+    Object.keys(totals).sort().reverse().forEach(date => {
+      const option = document.createElement("option");
+      option.value = date;
+      option.textContent = `${date} — Total: ${totals[date]}`;
+      option.dataset.total = totals[date];
+      verifyDateSelect.appendChild(option);
+    });
+  } catch (err) {
+    document.getElementById("verifyDate").innerHTML = `<option value="">Error loading dates</option>`;
+  }
+}
+
+document.getElementById("verifyDate").addEventListener("change", () => {
+  const selected = document.getElementById("verifyDate").selectedOptions[0];
+  document.getElementById("autoTotalEggs").value = selected.dataset.total || "";
+});
+
+window.addEventListener("DOMContentLoaded", loadDateOptions);
+
 
   // Submit form
   document.getElementById("packingForm").addEventListener("submit", async (e) => {
