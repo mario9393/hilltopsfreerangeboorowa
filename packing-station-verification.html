@@ -119,9 +119,12 @@
     try {
       await fetch("https://script.google.com/macros/s/AKfycbwy9SnXJPf6yTMh-PORGtCjjHp7G1f5zlxAb5OdkppsKRkq7e0_XaKf4uhBLQBrHW_Egw/exec", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        mode: "no-cors", // prevent CORS errors
+        headers: {
+        "Content-Type": "text/plain" // Important: NOT application/json
+        },
         body: JSON.stringify(data)
-      });
+        });
 
       document.getElementById("message").textContent = "✅ Submission successful.";
       document.getElementById("packingForm").reset();
