@@ -83,9 +83,16 @@
   <label>Supervisor Name:</label>
   <input type="text" id="supervisorName" required />
 
+  <label for="signaturePad">Supervisor Signature:</label> 
+  <canvas id="signaturePad" height="150"></canvas>
+  <button type="button" id="clearSignature">Clear Signature</button>
+  <input type="hidden" id="signature" name="signature">
+  
   <button type="submit">Submit</button>
   <div id="message"></div>
 </form>
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
 <script>
   // Show correction fields if mismatch
@@ -123,10 +130,24 @@ document.getElementById("verifyDate").addEventListener("change", () => {
 
 window.addEventListener("DOMContentLoaded", loadDateOptions);
 
+const canvas = document.getElementById("signaturePad");
+const signaturePad = new SignaturePad(canvas);
+const signatureInput = document.getElementById("signature");
+
+document.getElementById("clearSignature").addEventListener("click", () => {
+  signaturePad.clear();
+});
+
 
   // Submit form
   document.getElementById("packingForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+
+  if (signaturePad.isEmpty()) {
+  alert("Please provide a signature before submitting.");
+  return;
+  }
+  signatureInput.value = signaturePad.toDataURL();
 
     const data = {
       date: new Date().toLocaleDateString("en-AU"),
@@ -138,7 +159,8 @@ window.addEventListener("DOMContentLoaded", loadDateOptions);
       cleanedEggs: document.getElementById("cleanedEggs").value,
       dirtyEggs: document.getElementById("dirtyEggs").value,
       giantEggs: document.getElementById("giantEggs").value,
-      supervisorName: document.getElementById("supervisorName").value
+      supervisorName: document.getElementById("supervisorName").value,
+      signature: document.getElementById("signature").value
     };
 
     try {
