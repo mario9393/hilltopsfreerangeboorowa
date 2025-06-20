@@ -138,11 +138,14 @@ document.getElementById("clearSignature").addEventListener("click", () => {
   signaturePad.clear();
 });
 
-
   // Submit form
   document.getElementById("packingForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
+  const submitButton = document.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  submitButton.textContent = "Submitting...";
+  
   if (signaturePad.isEmpty()) {
   alert("Please provide a signature before submitting.");
   return;
@@ -176,8 +179,12 @@ document.getElementById("clearSignature").addEventListener("click", () => {
       document.getElementById("message").textContent = "✅ Submission successful.";
       document.getElementById("packingForm").reset();
       document.getElementById("correctionFields").style.display = "none";
+      submitButton.disabled = false;
+      submitButton.textContent = "Submit";
     } catch {
       document.getElementById("message").textContent = "❌ Failed to submit. Try again.";
+      submitButton.disabled = false;
+      submitButton.textContent = "Submit";
     }
   });
 </script>
