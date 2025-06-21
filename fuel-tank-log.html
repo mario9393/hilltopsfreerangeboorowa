@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuel Tank Logging</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: auto;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">Fuel Tank Logging Form</h2>
+  <form id="fuelLogForm">
+    <label for="fuelType">Fuel Type</label>
+    <select id="fuelType" required>
+      <option value="">Select Fuel Type</option>
+      <option value="Diesel">Diesel</option>
+      <option value="Petrol">Petrol</option>
+    </select>
+
+    <label for="vehicleType">Vehicle Type</label>
+    <select id="vehicleType" required>
+      <option value="">Select Vehicle Type</option>
+      <option value="Tractor">Tractor</option>
+      <option value="Ute">Ute</option>
+      <option value="Generator">Generator</option>
+      <option value="Quad Bike">Quad Bike</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label for="amount">Amount Dispensed (Liters)</label>
+    <input type="number" id="amount" min="1" step="0.1" required>
+
+    <label for="driver">Driver Name</label>
+    <input type="text" id="driver" required>
+
+    <label for="note">Comment / Note (Optional)</label>
+    <textarea id="note"></textarea>
+
+    <input type="hidden" id="latitude">
+    <input type="hidden" id="longitude">
+
+    <button type="submit">Submit Log</button>
+  </form>
+
+  <script>
+    document.getElementById('fuelLogForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const data = {
+        fuelType: document.getElementById('fuelType').value,
+        vehicleType: document.getElementById('vehicleType').value,
+        amount: parseFloat(document.getElementById('amount').value),
+        driver: document.getElementById('driver').value,
+        note: document.getElementById('note').value,
+        latitude: document.getElementById('latitude').value,
+        longitude: document.getElementById('longitude').value,
+        timestamp: new Date().toISOString()
+      };
+
+      fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => res.text())
+      .then(response => {
+        alert('Submission successful!');
+        document.getElementById('fuelLogForm').reset();
+      })
+      .catch(err => {
+        alert('Submission failed. Please try again.');
+        console.error(err);
+      });
+    });
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        document.getElementById('latitude').value = pos.coords.latitude;
+        document.getElementById('longitude').value = pos.coords.longitude;
+      });
+    }
+  </script>
+</body>
+</html>
