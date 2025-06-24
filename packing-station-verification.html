@@ -5,52 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Packing Station Verification</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f7f7f7;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button[type="submit"] {
-      background-color: #4CAF50;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s ease;
-      border: none;
-    }
-    button[type="submit"]:hover {
-      background-color: #45a049;
-    }
-    #message {
-      text-align: center;
-      margin-top: 15px;
-      font-weight: bold;
-    }
+    body{font-family:Arial, sans-serif;padding:20px;background:#f7f7f7;}
+    form{background:#fff;padding:20px;border-radius:10px;max-width:600px;margin:auto;
+         box-shadow:0 0 10px rgba(0,0,0,.1);}
+    input,select,textarea,button{width:100%;padding:10px;margin-top:10px;
+         border-radius:6px;border:1px solid #ccc;}
+    button[type="submit"]{background:#4CAF50;color:#fff;font-weight:bold;cursor:pointer;
+         transition:.2s ease;border:none;}
+    button[type="submit"]:hover{background:#45a049;}
+    #message{text-align:center;margin-top:15px;font-weight:bold;}
   </style>
 </head>
 <body>
 
 <form id="packingForm">
   <h2 style="text-align:center;">Hilltops Packing Station Egg Verification</h2>
- 
+
   <label>Select Date to Verify:</label>
   <select id="verifyDate" required>
-  <option value="">-- Loading dates --</option>
+    <option value="">-- Loading dates --</option>
   </select>
 
   <label>Total Eggs Submitted by Collectors:</label>
@@ -66,7 +39,6 @@
   <div id="correctionFields" style="display:none;">
     <label>Enter actual number of eggs received:</label>
     <input type="number" id="correctedEggs" min="0" />
-
     <label>Reason for mismatch or comments:</label>
     <textarea id="mismatchReason"></textarea>
   </div>
@@ -83,116 +55,125 @@
   <label>Supervisor Name:</label>
   <input type="text" id="supervisorName" required />
 
-  <label for="signaturePad">Supervisor Signature:</label> 
+  <label for="signaturePad">Supervisor Signature:</label>
   <canvas id="signaturePad" height="150"></canvas>
   <button type="button" id="clearSignature">Clear Signature</button>
   <input type="hidden" id="signature" name="signature">
-  
+
   <button type="submit">Submit</button>
   <div id="message"></div>
 </form>
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-
 <script>
-  // Show correction fields if mismatch
-  document.getElementById('matchConfirmation').addEventListener('change', () => {
-    const show = document.getElementById('matchConfirmation').value === 'No';
-    document.getElementById('correctionFields').style.display = show ? 'block' : 'none';
-  });
+/* ---------- helpers ---------- */
+const verifyDate     = document.getElementById('verifyDate');
+const matchSelect    = document.getElementById('matchConfirmation');
+const cleanedField   = document.getElementById('cleanedEggs');
+const dirtyField     = document.getElementById('dirtyEggs');
+const giantField     = document.getElementById('giantEggs');
+const corrWrap       = document.getElementById('correctionFields');
 
-// Fetch past 3 days' totals and populate dropdown
-async function loadDateOptions() {
-  try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
-    const result = await res.json();
-    const totals = result.totals;
+/* show / hide correction block */
+matchSelect.addEventListener('change', () => {
+  corrWrap.style.display = matchSelect.value === 'No' ? 'block' : 'none';
+  applyAutoFill();
+});
 
-    const verifyDateSelect = document.getElementById("verifyDate");
-    verifyDateSelect.innerHTML = `<option value="">-- Select Date --</option>`;
-
-    Object.keys(totals).sort().reverse().forEach(date => {
-      const option = document.createElement("option");
-      option.value = date;
-      option.textContent = `${date} — Total: ${totals[date]}`;
-      option.dataset.total = totals[date];
-      verifyDateSelect.appendChild(option);
+/* fetch last-3-days data */
+async function loadDateOptions(){
+  try{
+    const r  = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
+    const j  = await r.json();              // { totals: { "yyyy-MM-dd":{total,clean,dirty,giant}, … } }
+    const t  = j.totals || {};
+    verifyDate.innerHTML = `<option value="">-- Select Date --</option>`;
+    Object.keys(t).sort().reverse().forEach(d=>{
+      const opt = document.createElement('option');
+      opt.value       = d;
+      opt.textContent = `${d} — Total: ${t[d].total}`;
+      opt.dataset.total  = t[d].total;
+      opt.dataset.clean  = t[d].clean;
+      opt.dataset.dirty  = t[d].dirty;
+      opt.dataset.giant  = t[d].giant;
+      verifyDate.appendChild(opt);
     });
-  } catch (err) {
-    document.getElementById("verifyDate").innerHTML = `<option value="">Error loading dates</option>`;
+  }catch(e){
+    verifyDate.innerHTML = `<option value="">Error loading dates</option>`;
+  }
+}
+window.addEventListener('DOMContentLoaded', loadDateOptions);
+
+/* when date changes update Total & maybe auto-fill counts */
+verifyDate.addEventListener('change', ()=>{
+  const sel = verifyDate.selectedOptions[0] || {};
+  document.getElementById('autoTotalEggs').value = sel.dataset.total || '';
+  applyAutoFill();
+});
+
+/* auto-fill logic */
+function applyAutoFill(){
+  const sel = verifyDate.selectedOptions[0];
+  if(!sel) return;
+
+  if(matchSelect.value === 'Yes'){
+    cleanedField.value = sel.dataset.clean || '';
+    dirtyField.value   = sel.dataset.dirty || '';
+    giantField.value   = sel.dataset.giant || '';
+
+    cleanedField.readOnly = dirtyField.readOnly = giantField.readOnly = true;
+  }else{
+    cleanedField.readOnly = dirtyField.readOnly = giantField.readOnly = false;
   }
 }
 
-document.getElementById("verifyDate").addEventListener("change", () => {
-  const selected = document.getElementById("verifyDate").selectedOptions[0];
-  document.getElementById("autoTotalEggs").value = selected.dataset.total || "";
-});
+/* ---------- signature pad ---------- */
+const canvas        = document.getElementById('signaturePad');
+const signaturePad  = new SignaturePad(canvas);
+document.getElementById('clearSignature').onclick = ()=>signaturePad.clear();
 
-window.addEventListener("DOMContentLoaded", loadDateOptions);
+/* ---------- submit ---------- */
+document.getElementById('packingForm').addEventListener('submit', async e=>{
+  e.preventDefault();
 
-const canvas = document.getElementById("signaturePad");
-const signaturePad = new SignaturePad(canvas);
-const signatureInput = document.getElementById("signature");
+  if(signaturePad.isEmpty()){ alert('Please sign before submitting.'); return; }
 
-document.getElementById("clearSignature").addEventListener("click", () => {
-  signaturePad.clear();
-});
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true; btn.textContent = 'Submitting…';
 
-  // Submit form
-  document.getElementById("packingForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const data = {
+    date             : new Date().toLocaleDateString('en-AU'),
+    selectedDateTotal: verifyDate.selectedOptions[0].text,
+    autoTotalEggs    : document.getElementById('autoTotalEggs').value,
+    matchConfirmation: matchSelect.value,
+    correctedEggs    : document.getElementById('correctedEggs').value,
+    mismatchReason   : document.getElementById('mismatchReason').value,
+    cleanedEggs      : cleanedField.value,
+    dirtyEggs        : dirtyField.value,
+    giantEggs        : giantField.value,
+    supervisorName   : document.getElementById('supervisorName').value,
+    signature        : signaturePad.toDataURL()
+  };
 
-  const submitButton = document.querySelector('button[type="submit"]');
-  submitButton.disabled = true;
-  submitButton.textContent = "Submitting...";
-  
-  if (signaturePad.isEmpty()) {
-  alert("Please provide a signature before submitting.");
-  return;
+  try{
+    await fetch("https://script.google.com/macros/s/AKfycbwy9SnXJPf6yTMh-PORGtCjjHp7G1f5zlxAb5OdkppsKRkq7e0_XaKf4uhBLQBrHW_Egw/exec",{
+      method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(data)
+    });
+    document.getElementById('message').textContent = '✅ Submission successful.';
+    e.target.reset(); signaturePad.clear(); corrWrap.style.display='none';
+  }catch{
+    document.getElementById('message').textContent = '❌ Failed to submit.';
+  }finally{
+    btn.disabled=false; btn.textContent='Submit';
   }
-  signatureInput.value = signaturePad.toDataURL();
-
-    const data = {
-      date: new Date().toLocaleDateString("en-AU"),
-      selectedDateTotal: document.getElementById("verifyDate").selectedOptions[0].text,
-      autoTotalEggs: document.getElementById("autoTotalEggs").value,
-      matchConfirmation: document.getElementById("matchConfirmation").value,
-      correctedEggs: document.getElementById("correctedEggs").value,
-      mismatchReason: document.getElementById("mismatchReason").value,
-      cleanedEggs: document.getElementById("cleanedEggs").value,
-      dirtyEggs: document.getElementById("dirtyEggs").value,
-      giantEggs: document.getElementById("giantEggs").value,
-      supervisorName: document.getElementById("supervisorName").value,
-      signature: document.getElementById("signature").value
-    };
-
-    try {
-      await fetch("https://script.google.com/macros/s/AKfycbwy9SnXJPf6yTMh-PORGtCjjHp7G1f5zlxAb5OdkppsKRkq7e0_XaKf4uhBLQBrHW_Egw/exec", {
-        method: "POST",
-        mode: "no-cors", // prevent CORS errors
-        headers: {
-        "Content-Type": "text/plain" // Important: NOT application/json
-        },
-        body: JSON.stringify(data)
-        });
-
-      document.getElementById("message").textContent = "✅ Submission successful.";
-      document.getElementById("packingForm").reset();
-      document.getElementById("correctionFields").style.display = "none";
-      submitButton.disabled = false;
-      submitButton.textContent = "Submit";
-    } catch {
-      document.getElementById("message").textContent = "❌ Failed to submit. Try again.";
-      submitButton.disabled = false;
-      submitButton.textContent = "Submit";
-    }
-  });
+});
 </script>
 
-<footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
-<p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
-<p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
+<footer style="text-align:center;font-size:14px;padding:20px;background:#f5f5f5;">
+  <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
+  <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use is prohibited.</p>
 </footer>
-  
+
 </body>
 </html>
