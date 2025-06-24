@@ -92,7 +92,7 @@ async function loadDateOptions(){
       opt.value       = d;
       opt.textContent = `${d} — Total: ${t[d].total}`;
       opt.dataset.total  = t[d].total;
-      opt.dataset.clean  = t[d].clean;
+      opt.dataset.clean  = t[d].cleaned;
       opt.dataset.dirty  = t[d].dirty;
       opt.dataset.giant  = t[d].giant;
       verifyDate.appendChild(opt);
