@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Egg Washing Log</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+      border: none;
+    }
+    button[type="submit"]:hover {
+      background-color: #45a049;
+    }
+    #message {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<form id="washingForm">
+  <h2 style="text-align:center;">Egg Washing Log</h2>
+
+  <label for="washingDate">Date of Washing:</label>
+  <input type="date" id="washingDate" required />
+
+  <label for="washingPerson">Washed By:</label>
+  <input type="text" id="washingPerson" required />
+
+  <label for="verifiedDates">Select Verified Dates Being Washed:</label>
+  <select id="verifiedDates" multiple required></select>
+
+  <label for="totalWashed">Total Eggs Washed:</label>
+  <input type="number" id="totalWashed" required min="0" />
+
+  <label for="brokenDuringWash">Broken During Washing:</label>
+  <input type="number" id="brokenDuringWash" required min="0" />
+
+  <label for="notes">Notes (optional):</label>
+  <textarea id="notes"></textarea>
+
+  <button type="submit">Submit</button>
+  <div id="message"></div>
+</form>
+
+<script>
+  async function loadVerifiedDates() {
+    try {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbwy9SnXJPf6yTMh-PORGtCjjHp7G1f5zlxAb5OdkppsKRkq7e0_XaKf4uhBLQBrHW_Egw/exec");
+      const data = await res.json();
+      const select = document.getElementById("verifiedDates");
+      select.innerHTML = "";
+
+      Object.keys(data.totals).sort().reverse().forEach(date => {
+        const option = document.createElement("option");
+        option.value = date;
+        option.textContent = `${date} — Verified Dirty Eggs: ${data.totals[date]}`;
+        select.appendChild(option);
+      });
+    } catch {
+      document.getElementById("verifiedDates").innerHTML = "<option>Error loading dates</option>";
+    }
+  }
+
+  document.getElementById("washingForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const selectedOptions = Array.from(document.getElementById("verifiedDates").selectedOptions);
+    const selectedDates = selectedOptions.map(opt => opt.text);
+
+    const payload = {
+      date: document.getElementById("washingDate").value,
+      person: document.getElementById("washingPerson").value,
+      verifiedDates: selectedDates,
+      washed: document.getElementById("totalWashed").value,
+      broken: document.getElementById("brokenDuringWash").value,
+      notes: document.getElementById("notes").value
+    };
+
+    try {
+      await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      });
+      document.getElementById("message").textContent = "✅ Submitted successfully!";
+      document.getElementById("washingForm").reset();
+    } catch {
+      document.getElementById("message").textContent = "❌ Submission failed.";
+    }
+  });
+
+  window.addEventListener("DOMContentLoaded", loadVerifiedDates);
+</script>
+
+</body>
+</html>
