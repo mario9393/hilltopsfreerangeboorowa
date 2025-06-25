@@ -131,7 +131,7 @@ form.addEventListener('submit',async e=>{
   };
 
   try{
-    await fetch('YOUR_EGG_WASHING_SCRIPT_URL', {
+    await fetch('https://script.google.com/macros/s/AKfycbw9TptRYDosF_6WkzGPqDlbOusdLBnW6G6s7aNyPvQvewoehD1OXuvM6epabOJkl9ey/exec', {
       method:'POST',mode:'no-cors',
       headers:{'Content-Type':'text/plain'},
       body:JSON.stringify(payload)
