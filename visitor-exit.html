@@ -61,45 +61,52 @@ button[type="submit"]:active {
   </form>
   <p id="message"></p>
 
-  <script>
-    const form = document.getElementById("exitForm");
-    const dateInput = document.getElementById("date");
-    const timeoutInput = document.getElementById("timeout");
+<script>
+  const form = document.getElementById("exitForm");
+  const dateInput = document.getElementById("date");
+  const timeoutInput = document.getElementById("timeout");
+  const submitButton = form.querySelector('button[type="submit"]');
 
-    const now = new Date();
-    dateInput.value = now.toISOString().split('T')[0];
-    timeoutInput.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const now = new Date();
+  dateInput.value = now.toISOString().split('T')[0];
+  timeoutInput.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const payload = {
-        phone: form.phone.value,
-        date: form.date.value,
-        timeout: form.timeout.value
-      };
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      try {
-        await fetch("https://script.google.com/macros/s/AKfycbzOcGycP05fyvgYA4xg0ujGcBsQpQcbdw_4y2uRi8zLOex2hnc3wbkW_scwNMxG0zUl/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-        // Replace form with confirmation
-        form.innerHTML = `
-          <div style="text-align: center; font-size: 18px; padding: 20px;">
-            ✅ Thank you! Your exit has been logged successfully.
-          </div>
-        `;
-      } catch (err) {
-        submitButton.disabled = false;
-        submitButton.textContent = "Submit Exit";
-        alert("❌ Failed to log exit. Please try again.");
-      }
-    });
-  </script>
+    // Change button to prevent resubmission
+    submitButton.textContent = "Submitting Exit...";
+    submitButton.disabled = true;
+
+    const payload = {
+      phone: form.phone.value,
+      date: form.date.value,
+      timeout: form.timeout.value
+    };
+
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbzOcGycP05fyvgYA4xg0ujGcBsQpQcbdw_4y2uRi8zLOex2hnc3wbkW_scwNMxG0zUl/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      form.innerHTML = `
+        <div style="text-align: center; font-size: 18px; padding: 20px;">
+          ✅ Thank you! Your exit has been logged successfully.
+        </div>
+      `;
+    } catch (err) {
+      submitButton.disabled = false;
+      submitButton.textContent = "Submit Exit";
+      alert("❌ Failed to log exit. Please try again.");
+    }
+  });
+</script>
+
 
 <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
 <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
