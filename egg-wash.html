@@ -67,11 +67,11 @@ document.getElementById('clearSignature').onclick = ()=>pad.clear();
 /* ---------- fetch verified totals (packing script) ---------- */
 async function loadDates(){
   try{
-    const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
-    const {totals={}} = await res.json();                    // totals[date]={dirty,clean,giant,total}
+    const res = await fetch("https://script.google.com/macros/s/AKfycbwy9SnXJPf6yTMh-PORGtCjjHp7G1f5zlxAb5OdkppsKRkq7e0_XaKf4uhBLQBrHW_Egw/exec");
+    const {verified={}} = await res.json(); // totals[date]={dirty,clean,giant,total}
     washDateSel.innerHTML = '<option value="">-- Select Date --</option>';
     Object.keys(totals).sort().reverse().forEach(d=>{
-      const dirty = totals[d].dirty;
+    const dirty = verified[d].dirtyEggs;
       if(dirty>0){
         const o=document.createElement('option');
         o.value=d;
