@@ -2,122 +2,147 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Egg Washing Log</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
       padding: 20px;
+      background-color: #f7f7f7;
     }
     form {
-      background: #fff;
+      background: white;
       padding: 20px;
       border-radius: 10px;
       max-width: 600px;
       margin: auto;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    label, select, input, textarea, button {
-      display: block;
+    input, select, textarea, button {
       width: 100%;
-      margin-top: 15px;
-      font-size: 16px;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    button {
+    button[type="submit"] {
       background-color: #4CAF50;
       color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
       font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+      border: none;
+    }
+    button[type="submit"]:hover {
+      background-color: #45a049;
     }
     #message {
-      margin-top: 20px;
       text-align: center;
+      margin-top: 15px;
       font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-<form id="washForm">
-  <h2 style="text-align:center;">Egg Washing Log</h2>
+<form id="eggWashForm">
+  <h2 style="text-align:center;">Hilltops Egg Washing Log</h2>
 
-  <label>Select Date(s) Eggs Were Collected & Verified:</label>
-  <select id="verifiedDates" multiple required>
-    <option value="">Loading...</option>
+  <label>Select Date to Wash:</label>
+  <select id="washDate" required>
+    <option value="">-- Loading verified dirty egg dates --</option>
   </select>
 
-  <label>Total Eggs Washed:</label>
-  <input type="number" id="eggsWashed" min="0" required />
+  <label>Verified Dirty/Super Dirty/Ground Eggs:</label>
+  <input type="number" id="verifiedDirtyEggs" readonly />
+
+  <label>Eggs Washed:</label>
+  <input type="number" id="washedEggs" min="0" required />
 
   <label>Eggs Broken During Washing:</label>
-  <input type="number" id="eggsBroken" min="0" required />
+  <input type="number" id="brokenEggs" min="0" required />
 
-  <label>Notes (optional):</label>
-  <textarea id="washNotes"></textarea>
+  <label>Washer Name:</label>
+  <input type="text" id="washerName" required />
+
+  <label for="signaturePad">Signature:</label>
+  <canvas id="signaturePad" height="150"></canvas>
+  <button type="button" id="clearSignature">Clear Signature</button>
+  <input type="hidden" id="signature" name="signature" />
 
   <button type="submit">Submit</button>
   <div id="message"></div>
 </form>
 
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
-// Fetch last 5 packing dates with dirty egg data
-async function loadVerifiedDates() {
-  try {
-    const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
-    const result = await res.json();
-    const select = document.getElementById("verifiedDates");
-    select.innerHTML = "";
-    Object.keys(result.totals).sort().reverse().slice(0, 5).forEach(date => {
-      const option = document.createElement("option");
-      option.value = date;
-      option.textContent = `${date} — Total: ${result.totals[date]}`;
-      select.appendChild(option);
-    });
-  } catch {
-    document.getElementById("verifiedDates").innerHTML = `<option>Error loading dates</option>`;
+  const signaturePad = new SignaturePad(document.getElementById('signaturePad'));
+  document.getElementById('clearSignature').onclick = () => signaturePad.clear();
+
+  const washDateSelect = document.getElementById('washDate');
+  const verifiedDirtyInput = document.getElementById('verifiedDirtyEggs');
+
+  async function loadVerifiedDirtyDates() {
+    try {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
+      const json = await res.json();
+      const totals = json.totals || {};
+
+      washDateSelect.innerHTML = `<option value="">-- Select Date --</option>`;
+      Object.keys(totals).sort().reverse().forEach(date => {
+        const dirty = totals[date].dirty;
+        if (dirty > 0) {
+          const opt = document.createElement('option');
+          opt.value = date;
+          opt.textContent = `${date} — Dirty Eggs: ${dirty}`;
+          opt.dataset.dirty = dirty;
+          washDateSelect.appendChild(opt);
+        }
+      });
+    } catch (err) {
+      washDateSelect.innerHTML = `<option value="">Error loading dates</option>`;
+    }
   }
-}
 
-window.addEventListener("DOMContentLoaded", loadVerifiedDates);
+  washDateSelect.addEventListener("change", () => {
+    const selected = washDateSelect.selectedOptions[0];
+    verifiedDirtyInput.value = selected ? selected.dataset.dirty : '';
+  });
 
-// Submit form
-const form = document.getElementById("washForm");
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const submitBtn = form.querySelector("button[type='submit']");
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Submitting...";
+  window.addEventListener("DOMContentLoaded", loadVerifiedDirtyDates);
 
-  const selectedDates = Array.from(document.getElementById("verifiedDates").selectedOptions).map(opt => opt.text);
-  const data = {
-    washDate: new Date().toLocaleDateString("en-AU"),
-    verifiedDates: selectedDates,
-    eggsWashed: document.getElementById("eggsWashed").value,
-    eggsBroken: document.getElementById("eggsBroken").value,
-    notes: document.getElementById("washNotes").value
-  };
+  document.getElementById("eggWashForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  try {
-    await fetch("https://script.google.com/macros/s/AKfycbw9TptRYDosF_6WkzGPqDlbOusdLBnW6G6s7aNyPvQvewoehD1OXuvM6epabOJkl9ey/exec", {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify(data)
-    });
-    document.getElementById("message").textContent = "✅ Washing record submitted successfully.";
-    form.reset();
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Submit";
-  } catch {
-    document.getElementById("message").textContent = "❌ Failed to submit. Try again.";
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Submit";
-  }
-});
+    if (signaturePad.isEmpty()) {
+      alert("Please sign before submitting.");
+      return;
+    }
+
+    const data = {
+      timestamp: new Date().toLocaleString('en-AU'),
+      washDate: washDateSelect.value,
+      verifiedDirtyEggs: verifiedDirtyInput.value,
+      washedEggs: document.getElementById("washedEggs").value,
+      brokenEggs: document.getElementById("brokenEggs").value,
+      washerName: document.getElementById("washerName").value,
+      signature: signaturePad.toDataURL()
+    };
+
+    try {
+      await fetch("YOUR_EGG_WASHING_SCRIPT_URL", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(data)
+      });
+      document.getElementById("message").textContent = "✅ Submission successful.";
+      e.target.reset();
+      signaturePad.clear();
+    } catch {
+      document.getElementById("message").textContent = "❌ Submission failed.";
+    }
+  });
 </script>
 
 </body>
