@@ -67,7 +67,7 @@ document.getElementById('clearSignature').onclick = ()=>pad.clear();
 /* ---------- fetch verified totals (packing script) ---------- */
 async function loadDates(){
   try {
-    const res = await fetch("YOUR_UPDATED_SCRIPT_URL");
+    const res = await fetch("https://script.google.com/macros/s/AKfycbwy9SnXJPf6yTMh-PORGtCjjHp7G1f5zlxAb5OdkppsKRkq7e0_XaKf4uhBLQBrHW_Egw/exec");
     const { verified = {} } = await res.json();
 
     washDateSel.innerHTML = '<option value="">-- Select Date --</option>';
