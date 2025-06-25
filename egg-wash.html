@@ -1,52 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Egg Washing Log</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f7f7f7;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button[type="submit"] {
-      background-color: #4CAF50;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s ease;
-      border: none;
-    }
-    button[type="submit"]:hover {
-      background-color: #45a049;
-    }
-    #message {
-      text-align: center;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Egg Washing Log</title>
+<style>
+ body{font-family:Arial,sans-serif;padding:20px;background:#f7f7f7}
+ form{background:#fff;padding:20px;border-radius:10px;max-width:600px;margin:auto;
+      box-shadow:0 0 10px rgba(0,0,0,.1)}
+ input,select,button{width:100%;padding:10px;margin-top:10px;border:1px solid #ccc;
+      border-radius:6px}
+ button[type=submit]{background:#4CAF50;color:#fff;font-weight:bold;border:none;cursor:pointer;transition:.2s}
+ button[type=submit]:hover{background:#45a049}
+ #message{text-align:center;margin-top:15px;font-weight:bold}
+ canvas{border:1px solid #ccc;width:100%;height:150px;touch-action:none}
+</style>
 </head>
 <body>
 
 <form id="eggWashForm">
-  <h2 style="text-align:center;">Hilltops Egg Washing Log</h2>
+  <h2 style="text-align:center">Hilltops Egg Washing Log</h2>
 
   <label>Select Date to Wash:</label>
   <select id="washDate" required>
@@ -57,18 +30,21 @@
   <input type="number" id="verifiedDirtyEggs" readonly />
 
   <label>Eggs Washed:</label>
-  <input type="number" id="washedEggs" min="0" required />
+  <input type="number" id="washedEggs" min="0" disabled required />
 
   <label>Eggs Broken During Washing:</label>
-  <input type="number" id="brokenEggs" min="0" required />
+  <input type="number" id="brokenEggs" min="0" disabled required />
+
+  <label>Clean Eggs After Wash:</label>
+  <input type="number" id="cleanAfterWash" readonly />
 
   <label>Washer Name:</label>
   <input type="text" id="washerName" required />
 
-  <label for="signaturePad">Signature:</label>
+  <label>Signature:</label>
   <canvas id="signaturePad" height="150"></canvas>
   <button type="button" id="clearSignature">Clear Signature</button>
-  <input type="hidden" id="signature" name="signature" />
+  <input type="hidden" id="signature">
 
   <button type="submit">Submit</button>
   <div id="message"></div>
@@ -76,74 +52,103 @@
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 <script>
-  const signaturePad = new SignaturePad(document.getElementById('signaturePad'));
-  document.getElementById('clearSignature').onclick = () => signaturePad.clear();
+/* ---------- elements ---------- */
+const washDateSel   = document.getElementById('washDate');
+const verifiedDirty = document.getElementById('verifiedDirtyEggs');
+const washedIn      = document.getElementById('washedEggs');
+const brokenIn      = document.getElementById('brokenEggs');
+const cleanOut      = document.getElementById('cleanAfterWash');
+const form          = document.getElementById('eggWashForm');
 
-  const washDateSelect = document.getElementById('washDate');
-  const verifiedDirtyInput = document.getElementById('verifiedDirtyEggs');
+/* ---------- signature ---------- */
+const pad = new SignaturePad(document.getElementById('signaturePad'));
+document.getElementById('clearSignature').onclick = ()=>pad.clear();
 
-  async function loadVerifiedDirtyDates() {
-    try {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
-      const json = await res.json();
-      const totals = json.totals || {};
-
-      washDateSelect.innerHTML = `<option value="">-- Select Date --</option>`;
-      Object.keys(totals).sort().reverse().forEach(date => {
-        const dirty = totals[date].dirty;
-        if (dirty > 0) {
-          const opt = document.createElement('option');
-          opt.value = date;
-          opt.textContent = `${date} — Dirty Eggs: ${dirty}`;
-          opt.dataset.dirty = dirty;
-          washDateSelect.appendChild(opt);
-        }
-      });
-    } catch (err) {
-      washDateSelect.innerHTML = `<option value="">Error loading dates</option>`;
-    }
+/* ---------- fetch verified totals (packing script) ---------- */
+async function loadDates(){
+  try{
+    const res = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec");
+    const {totals={}} = await res.json();                    // totals[date]={dirty,clean,giant,total}
+    washDateSel.innerHTML = '<option value="">-- Select Date --</option>';
+    Object.keys(totals).sort().reverse().forEach(d=>{
+      const dirty = totals[d].dirty;
+      if(dirty>0){
+        const o=document.createElement('option');
+        o.value=d;
+        o.textContent=`${d} — Dirty: ${dirty}`;
+        o.dataset.dirty=dirty;
+        washDateSel.appendChild(o);
+      }
+    });
+  }catch{
+    washDateSel.innerHTML='<option value="">Error loading dates</option>';
   }
+}
+window.addEventListener('DOMContentLoaded',loadDates);
 
-  washDateSelect.addEventListener("change", () => {
-    const selected = washDateSelect.selectedOptions[0];
-    verifiedDirtyInput.value = selected ? selected.dataset.dirty : '';
-  });
+/* ---------- enable/auto-fill when date chosen ---------- */
+washDateSel.addEventListener('change',()=>{
+  const sel = washDateSel.selectedOptions[0];
+  const dirty = sel?.dataset.dirty || '';
+  verifiedDirty.value = dirty;
+  washedIn.value = brokenIn.value = '';
+  cleanOut.value = '';
+  const enable = !!dirty;
+  washedIn.disabled = brokenIn.disabled = !enable;
+});
 
-  window.addEventListener("DOMContentLoaded", loadVerifiedDirtyDates);
+/* ---------- live calculation ---------- */
+function recalc(){
+  const washed = +washedIn.value||0;
+  const broken = +brokenIn.value||0;
+  if(broken > washed){
+    brokenIn.setCustomValidity('Cannot exceed eggs washed');
+  }else{
+    brokenIn.setCustomValidity('');
+  }
+  cleanOut.value = Math.max(washed - broken,0);
+}
+washedIn.addEventListener('input',recalc);
+brokenIn.addEventListener('input',recalc);
 
-  document.getElementById("eggWashForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+/* ---------- submit ---------- */
+form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(pad.isEmpty()){alert('Please sign before submitting.');return;}
 
-    if (signaturePad.isEmpty()) {
-      alert("Please sign before submitting.");
-      return;
-    }
+  const btn=form.querySelector('button[type=submit]');
+  btn.disabled=true;btn.textContent='Submitting…';
 
-    const data = {
-      timestamp: new Date().toLocaleString('en-AU'),
-      washDate: washDateSelect.value,
-      verifiedDirtyEggs: verifiedDirtyInput.value,
-      washedEggs: document.getElementById("washedEggs").value,
-      brokenEggs: document.getElementById("brokenEggs").value,
-      washerName: document.getElementById("washerName").value,
-      signature: signaturePad.toDataURL()
-    };
+  const payload={
+    timestamp       : new Date().toLocaleString('en-AU'),
+    washDate        : washDateSel.value,
+    verifiedDirty   : verifiedDirty.value,
+    washedEggs      : washedIn.value,
+    brokenEggs      : brokenIn.value,
+    cleanAfterWash  : cleanOut.value,
+    washerName      : document.getElementById('washerName').value,
+    signature       : pad.toDataURL()
+  };
 
-    try {
-      await fetch("YOUR_EGG_WASHING_SCRIPT_URL", {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(data)
-      });
-      document.getElementById("message").textContent = "✅ Submission successful.";
-      e.target.reset();
-      signaturePad.clear();
-    } catch {
-      document.getElementById("message").textContent = "❌ Submission failed.";
-    }
-  });
+  try{
+    await fetch('YOUR_EGG_WASHING_SCRIPT_URL', {
+      method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify(payload)
+    });
+    document.getElementById('message').textContent='✅ Logged successfully.';
+    form.reset(); pad.clear(); verifiedDirty.value=''; cleanOut.value='';
+    washedIn.disabled = brokenIn.disabled = true;
+  }catch{
+    document.getElementById('message').textContent='❌ Failed – try again.';
+  }finally{
+    btn.disabled=false;btn.textContent='Submit';
+  }
+});
 </script>
 
+<footer style="text-align:center;font-size:14px;padding:20px;background:#f5f5f5">
+  <p>&copy; 2025 Hilltops Free Range Pty Ltd – Internal use only</p>
+</footer>
 </body>
 </html>
