@@ -45,7 +45,10 @@
       <option value="Diesel">Diesel</option>
       <option value="Petrol">Petrol</option>
     </select>
-
+    
+  <p id="currentLevel" style="margin-top:10px;">Current Fuel Level: --</p>
+  <p id="remainingLevel">Remaining After Usage: --</p>
+    
     <label for="vehicleType">Vehicle Type</label>
     <select id="vehicleType" required>
       <option value="">Select Vehicle Type</option>
@@ -73,51 +76,94 @@
   </form>
 
   <script>
-    document.getElementById('fuelLogForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+  let currentTankLevel = 0;
 
-      const data = {
-        fuelType: document.getElementById('fuelType').value,
-        vehicleType: document.getElementById('vehicleType').value,
-        amount: parseFloat(document.getElementById('amount').value),
-        driver: document.getElementById('driver').value,
-        note: document.getElementById('note').value,
-        latitude: document.getElementById('latitude').value,
-        longitude: document.getElementById('longitude').value,
-        timestamp: new Date().toISOString()
-      };
+  document.getElementById('fuelType').addEventListener('change', function () {
+    const fuelType = this.value;
+    if (!fuelType) return;
 
-      if (!data.latitude || !data.longitude) {
+    fetch(`https://script.google.com/macros/s/AKfycbzEV5rN8TmxL9yqep9wKIuS0H7JA9VI08DoCDPE0YytyIYqyKmCu_4rpsOpxuZbDOqA/exec?fuelType=${fuelType}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.level !== undefined) {
+          currentTankLevel = parseFloat(data.level);
+          document.getElementById("currentLevel").textContent = `Current Fuel Level: ${currentTankLevel} L`;
+          updateRemainingLevel();
+        } else {
+          document.getElementById("currentLevel").textContent = "Error fetching level.";
+        }
+      });
+  });
+
+  document.getElementById('amount').addEventListener('input', updateRemainingLevel);
+
+  function updateRemainingLevel() {
+    const amount = parseFloat(document.getElementById('amount').value) || 0;
+    const remaining = currentTankLevel - amount;
+    if (!isNaN(remaining)) {
+      if (remaining < 0) {
+        document.getElementById("remainingLevel").textContent = `⚠️ Not enough fuel!`;
+        document.getElementById("remainingLevel").style.color = "red";
+      } else {
+        document.getElementById("remainingLevel").textContent = `Remaining After Usage: ${remaining.toFixed(2)} L`;
+        document.getElementById("remainingLevel").style.color = "black";
+      }
+    }
+  }
+
+  document.getElementById('fuelLogForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const amount = parseFloat(document.getElementById('amount').value) || 0;
+    if (amount > currentTankLevel) {
+      alert("Not enough fuel in the tank. Please check the amount.");
+      return;
+    }
+
+    const data = {
+      fuelType: document.getElementById('fuelType').value,
+      vehicleType: document.getElementById('vehicleType').value,
+      amount: amount,
+      driver: document.getElementById('driver').value,
+      note: document.getElementById('note').value,
+      latitude: document.getElementById('latitude').value,
+      longitude: document.getElementById('longitude').value,
+      timestamp: new Date().toISOString()
+    };
+
+    if (!data.latitude || !data.longitude) {
       alert('Waiting for location... Please try again in a few seconds.');
       return;
-      }
-
-      fetch('https://script.google.com/macros/s/AKfycbzEV5rN8TmxL9yqep9wKIuS0H7JA9VI08DoCDPE0YytyIYqyKmCu_4rpsOpxuZbDOqA/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(res => res.text())
-      .then(response => {
-        alert('Submission successful!');
-        document.getElementById('fuelLogForm').reset();
-      })
-      .catch(err => {
-        alert('Submission failed. Please try again.');
-        console.error(err);
-      });
-    });
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        document.getElementById('latitude').value = pos.coords.latitude;
-        document.getElementById('longitude').value = pos.coords.longitude;
-      });
     }
-  </script>
+
+    fetch('https://script.google.com/macros/s/AKfycbzEV5rN8TmxL9yqep9wKIuS0H7JA9VI08DoCDPE0YytyIYqyKmCu_4rpsOpxuZbDOqA/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(() => {
+      alert('Submission successful!');
+      document.getElementById('fuelLogForm').reset();
+      document.getElementById('currentLevel').textContent = 'Current Fuel Level: --';
+      document.getElementById('remainingLevel').textContent = 'Remaining After Usage: --';
+      currentTankLevel = 0;
+    })
+    .catch(err => {
+      alert('Submission failed. Please try again.');
+      console.error(err);
+    });
+  });
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      document.getElementById('latitude').value = pos.coords.latitude;
+      document.getElementById('longitude').value = pos.coords.longitude;
+    });
+  }
+</script>
 
   <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
   <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
