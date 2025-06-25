@@ -66,24 +66,27 @@ document.getElementById('clearSignature').onclick = ()=>pad.clear();
 
 /* ---------- fetch verified totals (packing script) ---------- */
 async function loadDates(){
-  try{
+  try {
     const res = await fetch("https://script.google.com/macros/s/AKfycbwy9SnXJPf6yTMh-PORGtCjjHp7G1f5zlxAb5OdkppsKRkq7e0_XaKf4uhBLQBrHW_Egw/exec");
-    const {verified={}} = await res.json(); // totals[date]={dirty,clean,giant,total}
+    const { verified = {} } = await res.json(); // verified[date] = { dirtyEggs, displayText }
+
     washDateSel.innerHTML = '<option value="">-- Select Date --</option>';
-    Object.keys(verified).sort().reverse().forEach(d=>{
-    const dirty = verified[d].dirtyEggs;
-      if(dirty>0){
-        const o=document.createElement('option');
-        o.value=d;
-        o.textContent=`${d} — Dirty: ${dirty}`;
-        o.dataset.dirty=dirty;
+
+    Object.keys(verified).sort().reverse().forEach(date => {
+      const entry = verified[date];
+      if (entry.dirtyEggs > 0) {
+        const o = document.createElement('option');
+        o.value = date;
+        o.textContent = `${entry.displayText} — Dirty: ${entry.dirtyEggs}`;
+        o.dataset.dirty = entry.dirtyEggs;
         washDateSel.appendChild(o);
       }
     });
-  }catch{
-    washDateSel.innerHTML='<option value="">Error loading dates</option>';
+  } catch (err) {
+    washDateSel.innerHTML = '<option value="">Error loading dates</option>';
   }
 }
+
 window.addEventListener('DOMContentLoaded',loadDates);
 
 /* ---------- enable/auto-fill when date chosen ---------- */
