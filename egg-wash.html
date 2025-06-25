@@ -70,7 +70,7 @@ async function loadDates(){
     const res = await fetch("https://script.google.com/macros/s/AKfycbwy9SnXJPf6yTMh-PORGtCjjHp7G1f5zlxAb5OdkppsKRkq7e0_XaKf4uhBLQBrHW_Egw/exec");
     const {verified={}} = await res.json(); // totals[date]={dirty,clean,giant,total}
     washDateSel.innerHTML = '<option value="">-- Select Date --</option>';
-    Object.keys(totals).sort().reverse().forEach(d=>{
+    Object.keys(verified).sort().reverse().forEach(d=>{
     const dirty = verified[d].dirtyEggs;
       if(dirty>0){
         const o=document.createElement('option');
