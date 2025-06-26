@@ -66,7 +66,16 @@ map.on('load', () => {
     ['concat', '\n🐣 Age: ', ['to-string', ['get', 'age_weeks']]],
     ''
   ],
-  { 'font-scale': 1.0 }
+  { 'font-scale': 1.0 },
+  '\n',
+  // Line 3: Only for Flock 24
+  [
+    'case',
+    ['==', ['get', 'name'], 'Flock 24'],
+    'Includes: 29 + 32',
+    ''
+  ],
+  { 'font-scale': 0.9 }
 ],
 
       'text-size': 14,
@@ -85,6 +94,10 @@ map.on('load', () => {
   fetch('Hilltops_Farm_Map.geojson')
     .then(res => res.json())
     .then(data => {
+    // ✅ Remove Flock 29 and 32 completely
+    data.features = data.features.filter(f =>
+    !["Flock 29", "Flock 32"].includes(f.properties.name)
+    );
       for (const feature of data.features) {
         const flockId = feature.properties.name;
     if (!["Tank A", "Tank B"].includes(flockId)) {
