@@ -166,7 +166,8 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Flock 29"
+        "name": "Flock 29",
+        "movedTo": "Flock 24"
       },
       "geometry": {
         "type": "Polygon",
@@ -269,7 +270,8 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Flock 32"
+        "name": "Flock 32",
+        "movedTo": "Flock 24"
       },
       "geometry": {
         "type": "Polygon",
@@ -495,7 +497,9 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Flock 24"
+        "name": "Flock 24",
+        "contains": ["Flock 24", "Flock 29", "Flock 32"],
+        "mergedOn": "2025-06-18"
       },
       "geometry": {
         "type": "Polygon",
