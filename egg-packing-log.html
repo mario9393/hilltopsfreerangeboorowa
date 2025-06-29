@@ -107,6 +107,39 @@
       document.getElementById("date").value = now.toISOString().split("T")[0];
       document.getElementById("time").value = now.toTimeString().slice(0,5);
     }
+        document.getElementById("packingForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const payload = {
+        date: formData.get("date"),
+        time: formData.get("time"),
+        totalEggs: formData.get("totalEggs"),
+        brokenEggs: formData.get("brokenEggs"),
+        usableEggs: document.getElementById("usableEggs").value,
+        cartons: document.getElementById("cartons").value,
+        boxes: document.getElementById("boxes").value,
+        looseEggs: document.getElementById("looseEggs").value,
+        packedBy: formData.get("packedBy"),
+        notes: formData.get("note"),
+        signature: formData.get("signature"),
+        photoUrl: "" // You can later update this if you add Drive upload
+      };
+
+      await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      alert("Packing log submitted!");
+      form.reset();
+    });
+
   </script>
 </body>
 </html>
