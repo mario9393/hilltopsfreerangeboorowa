@@ -163,9 +163,12 @@
 
     try {
       await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec", {  // ✅ Replace with your deployed Web App URL
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
+    method: "POST",
+    mode: "no-cors",  // ✅ important line
+    headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(data)
       });
 
       document.getElementById("packingForm").innerHTML = `
