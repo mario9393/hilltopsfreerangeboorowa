@@ -48,39 +48,61 @@
 <body>
   <h2 style="text-align:center">Hilltops Final Egg Packing Log</h2>
   <form id="packingForm">
+    <div>
     <label>Date</label>
     <input type="date" id="date" name="date" required>
-
+    </div>
+    
+    <div>
     <label>Time</label>
     <input type="time" id="time" name="time" required>
-
+    </div>
+    
+    <div>
     <label>Total Eggs Sent to Packing Station</label>
     <input type="number" id="totalEggs" name="totalEggs" required>
-
+    </div>
+    
+    <div>
     <label>Broken Eggs</label>
     <input type="number" id="brokenEggs" name="brokenEggs" required>
-
+    </div>
+    
+    <div>
     <label>Usable Eggs</label>
     <input type="number" id="usableEggs" class="readonly" name="usableEggs" readonly>
-
+    </div>
+    
+    <div>
     <label>Egg Cartons (12 eggs per carton)</label>
     <input type="number" id="cartons" class="readonly" name="cartons" readonly>
-
+    </div>
+    
+    <div>
     <label>Boxes (15 cartons per box)</label>
     <input type="number" id="boxes" class="readonly" name="boxes" readonly>
-
+    </div>
+    
+    <div>
     <label>Remaining Loose Eggs</label>
     <input type="number" id="looseEggs" class="readonly" name="looseEggs" readonly>
-
+    </div>
+    
+    <div>
     <label>Packed By</label>
     <input type="text" name="packedBy" required>
-
+    </div>
+    
+    <div>
     <label>Batch Note (Optional)</label>
     <textarea name="note" rows="3"></textarea>
-
+    </div>
+    
+    <div>
     <label>Proof Photo (Optional)</label>
     <input type="file" name="photo" accept="image/*">
-
+    </div>
+    
     <label>Digital Signature</label>
     <canvas id="signature-pad"></canvas>
     <button type="button" onclick="clearSignature()">Clear Signature</button>
@@ -182,6 +204,12 @@
     }
   }
   </script>
+
+  <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
+  <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
+  <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
+  </footer>
+  
 </body>
 </html>
 
