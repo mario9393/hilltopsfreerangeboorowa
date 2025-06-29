@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hilltops Egg Packing Log</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+    form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, label, textarea {
+      width: 100%;
+      margin: 10px 0;
+      padding: 8px;
+      font-size: 1rem;
+    }
+    input[type="submit"] {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background-color: #218838;
+    }
+    .readonly {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center">Hilltops Final Egg Packing Log</h2>
+  <form id="packingForm">
+    <label>Date</label>
+    <input type="date" id="date" name="date" required>
+
+    <label>Time</label>
+    <input type="time" id="time" name="time" required>
+
+    <label>Total Eggs Sent to Packing Station</label>
+    <input type="number" id="totalEggs" name="totalEggs" required>
+
+    <label>Broken Eggs</label>
+    <input type="number" id="brokenEggs" name="brokenEggs" required>
+
+    <label>Usable Eggs</label>
+    <input type="number" id="usableEggs" class="readonly" readonly>
+
+    <label>Egg Cartons (12 eggs per carton)</label>
+    <input type="number" id="cartons" class="readonly" readonly>
+
+    <label>Boxes (15 cartons per box)</label>
+    <input type="number" id="boxes" class="readonly" readonly>
+
+    <label>Remaining Loose Eggs</label>
+    <input type="number" id="looseEggs" class="readonly" readonly>
+
+    <label>Packed By</label>
+    <input type="text" name="packedBy" required>
+
+    <label>Batch Note (Optional)</label>
+    <textarea name="note" rows="3"></textarea>
+
+    <label>Proof Photo (Optional)</label>
+    <input type="file" name="photo" accept="image/*">
+
+    <label>Digital Signature</label>
+    <input type="text" name="signature" required>
+
+    <input type="submit" value="Submit Packing Log">
+  </form>
+
+  <script>
+    const totalEggs = document.getElementById("totalEggs");
+    const brokenEggs = document.getElementById("brokenEggs");
+    const usableEggs = document.getElementById("usableEggs");
+    const cartons = document.getElementById("cartons");
+    const boxes = document.getElementById("boxes");
+    const looseEggs = document.getElementById("looseEggs");
+
+    function calculatePacking() {
+      const total = parseInt(totalEggs.value) || 0;
+      const broken = parseInt(brokenEggs.value) || 0;
+      const usable = Math.max(0, total - broken);
+      usableEggs.value = usable;
+      cartons.value = Math.floor(usable / 12);
+      boxes.value = Math.floor(usable / 180);
+      looseEggs.value = usable % 12;
+    }
+
+    totalEggs.addEventListener("input", calculatePacking);
+    brokenEggs.addEventListener("input", calculatePacking);
+
+    // Set default date and time
+    window.onload = () => {
+      const now = new Date();
+      document.getElementById("date").value = now.toISOString().split("T")[0];
+      document.getElementById("time").value = now.toTimeString().slice(0,5);
+    }
+  </script>
+</body>
+</html>
