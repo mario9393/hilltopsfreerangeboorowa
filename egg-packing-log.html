@@ -87,7 +87,35 @@
     <label>Remaining Loose Eggs</label>
     <input type="number" id="looseEggs" class="readonly" name="looseEggs" readonly>
     </div>
-    
+
+    <hr>
+    <h4>Breakdown by Egg Type</h4>
+
+    <label>600g Egg Cartons</label>
+    <input type="number" id="carton600" name="carton600" required>
+    <label>Boxes (15x600g cartons)</label>
+    <input type="number" id="box600" class="readonly" name="box600" readonly>
+
+    <label>700g Egg Cartons</label>
+    <input type="number" id="carton700" name="carton700" required>
+    <label>Boxes (15x700g cartons)</label>
+    <input type="number" id="box700" class="readonly" name="box700" readonly>
+
+    <label>800g Egg Cartons</label>
+    <input type="number" id="carton800" name="carton800" required>
+    <label>Boxes (15x800g cartons)</label>
+    <input type="number" id="box800" class="readonly" name="box800" readonly>
+
+    <label>Very Small Egg Cartons</label>
+    <input type="number" id="cartonSmall" name="cartonSmall" required>
+    <label>Boxes (15xSmall cartons)</label>
+    <input type="number" id="boxSmall" class="readonly" name="boxSmall" readonly>
+
+    <label>Very Large Egg Cartons</label>
+    <input type="number" id="cartonLarge" name="cartonLarge" required>
+    <label>Boxes (15xLarge cartons)</label>
+    <input type="number" id="boxLarge" class="readonly" name="boxLarge" readonly>
+
     <div>
     <label>Packed By</label>
     <input type="text" name="packedBy" required>
@@ -131,6 +159,19 @@
 
     totalEggs.addEventListener("input", calculatePacking);
     brokenEggs.addEventListener("input", calculatePacking);
+    
+    function calculateBoxCount(cartonId, boxId) {
+    const cartons = parseInt(document.getElementById(cartonId).value) || 0;
+      document.getElementById(boxId).value = Math.floor(cartons / 15);
+    }
+
+    ['600', '700', '800', 'Small', 'Large'].forEach(size => {
+      const cartonId = 'carton' + size;
+      const boxId = 'box' + size;
+      document.getElementById(cartonId).addEventListener('input', () => {
+        calculateBoxCount(cartonId, boxId);
+      });
+    });
 
     window.onload = () => {
       const now = new Date();
