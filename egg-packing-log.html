@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hilltops Egg Packing Log</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hilltops Final Egg Packing Log</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,7 +11,7 @@
       background-color: #f7f7f7;
     }
     form {
-      background-color: #fff;
+      background: white;
       padding: 20px;
       border-radius: 10px;
       max-width: 600px;
@@ -36,7 +36,14 @@
     .readonly {
       background-color: #eee;
     }
+    canvas {
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 200px;
+      touch-action: none;
+    }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
 <body>
   <h2 style="text-align:center">Hilltops Final Egg Packing Log</h2>
@@ -54,16 +61,16 @@
     <input type="number" id="brokenEggs" name="brokenEggs" required>
 
     <label>Usable Eggs</label>
-    <input type="number" id="usableEggs" class="readonly" readonly>
+    <input type="number" id="usableEggs" class="readonly" name="usableEggs" readonly>
 
     <label>Egg Cartons (12 eggs per carton)</label>
-    <input type="number" id="cartons" class="readonly" readonly>
+    <input type="number" id="cartons" class="readonly" name="cartons" readonly>
 
     <label>Boxes (15 cartons per box)</label>
-    <input type="number" id="boxes" class="readonly" readonly>
+    <input type="number" id="boxes" class="readonly" name="boxes" readonly>
 
     <label>Remaining Loose Eggs</label>
-    <input type="number" id="looseEggs" class="readonly" readonly>
+    <input type="number" id="looseEggs" class="readonly" name="looseEggs" readonly>
 
     <label>Packed By</label>
     <input type="text" name="packedBy" required>
@@ -75,7 +82,9 @@
     <input type="file" name="photo" accept="image/*">
 
     <label>Digital Signature</label>
-    <input type="text" name="signature" required>
+    <canvas id="signature-pad"></canvas>
+    <button type="button" onclick="clearSignature()">Clear Signature</button>
+    <input type="hidden" name="signature" id="signature" required>
 
     <input type="submit" value="Submit Packing Log">
   </form>
@@ -94,52 +103,82 @@
       const usable = Math.max(0, total - broken);
       usableEggs.value = usable;
       cartons.value = Math.floor(usable / 12);
-      boxes.value = Math.floor(usable / 180);
+      boxes.value = Math.floor(cartons.value / 15);
       looseEggs.value = usable % 12;
     }
 
     totalEggs.addEventListener("input", calculatePacking);
     brokenEggs.addEventListener("input", calculatePacking);
 
-    // Set default date and time
     window.onload = () => {
       const now = new Date();
       document.getElementById("date").value = now.toISOString().split("T")[0];
       document.getElementById("time").value = now.toTimeString().slice(0,5);
+    };
+
+    // Signature Pad
+    const canvas = document.getElementById("signature-pad");
+    const signaturePad = new SignaturePad(canvas);
+    const signatureInput = document.getElementById("signature");
+
+    function clearSignature() {
+      signaturePad.clear();
     }
-        document.getElementById("packingForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
 
-      const form = e.target;
-      const formData = new FormData(form);
 
-      const payload = {
-        date: formData.get("date"),
-        time: formData.get("time"),
-        totalEggs: formData.get("totalEggs"),
-        brokenEggs: formData.get("brokenEggs"),
-        usableEggs: document.getElementById("usableEggs").value,
-        cartons: document.getElementById("cartons").value,
-        boxes: document.getElementById("boxes").value,
-        looseEggs: document.getElementById("looseEggs").value,
-        packedBy: formData.get("packedBy"),
-        notes: formData.get("note"),
-        signature: formData.get("signature"),
-        photoUrl: "" // You can later update this if you add Drive upload
+  document.getElementById("packingForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    if (signaturePad.isEmpty()) {
+      alert("Please provide a digital signature.");
+      return;
+    }
+
+    const signatureInput = document.getElementById("signature");
+    signatureInput.value = signaturePad.toDataURL();
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // Handle optional photo
+    const photoFile = form.querySelector('input[name="photo"]').files[0];
+    if (photoFile) {
+      const reader = new FileReader();
+      reader.onload = async function() {
+        data.photo = reader.result;
+        await submitToScript(data);
       };
+      reader.readAsDataURL(photoFile);
+    } else {
+      data.photo = "";
+      await submitToScript(data);
+    }
+  });
 
-      await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec", {
+  async function submitToScript(data) {
+    const submitBtn = document.querySelector('input[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.value = "Submitting...";
+
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec", {  // ✅ Replace with your deployed Web App URL
         method: "POST",
-        headers: {
-          "Content-Type": "text/plain"
-        },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
       });
 
-      alert("Packing log submitted!");
-      form.reset();
-    });
-
+      document.getElementById("packingForm").innerHTML = `
+        <div style="text-align: center; font-size: 18px; padding: 20px;">
+          ✅ Packing log submitted successfully!
+        </div>`;
+    } catch (error) {
+      alert("Submission failed. Please try again.");
+      submitBtn.disabled = false;
+      submitBtn.value = "Submit Packing Log";
+    }
+  }
   </script>
 </body>
 </html>
+
