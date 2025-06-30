@@ -201,7 +201,7 @@
     // Fetch stock summary from Google Apps Script endpoint
     async function loadStockSummary() {
       try {
-        const res = await fetch("YOUR_STOCK_DATA_SCRIPT_URL");
+        const res = await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec");
         const stock = await res.json();
         let html = "";
         for (const [type, vals] of Object.entries(stock)) {
