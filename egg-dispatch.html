@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Egg Dispatch Tracking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 700px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select, label {
+      width: 100%;
+      margin: 8px 0;
+      padding: 8px;
+      font-size: 1rem;
+    }
+    input[type="submit"] {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+    .readonly {
+      background-color: #eee;
+    }
+    .section {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">Egg Dispatch Tracking & Verification</h2>
+
+  <form id="dispatchForm">
+    <label>Date</label>
+    <input type="date" name="date" id="date" required>
+
+    <label>Time</label>
+    <input type="time" name="time" id="time" required>
+
+    <label>Customer</label>
+    <select name="customer" required>
+      <option value="">--Select Customer--</option>
+      <option value="Woolworths">Woolworths</option>
+      <option value="Coles">Coles</option>
+      <option value="The IGAs">The IGAs</option>
+      <option value="Superbarns">Superbarns</option>
+      <option value="Hyatt Hotel">Hyatt Hotel</option>
+      <option value="W Hotel">W Hotel</option>
+      <option value="Private Use">Private Use</option>
+      <option value="Other Customers">Other Customers</option>
+    </select>
+
+    <div class="section">
+      <h4>Dispatch Quantities Per Egg Size</h4>
+
+      <label>600g Cartons</label><input type="number" name="carton600">
+      <label>600g Boxes</label><input type="number" name="box600">
+      <label>Loose 600g Eggs</label><input type="number" name="loose600geggs">
+
+      <label>700g Cartons</label><input type="number" name="carton700">
+      <label>700g Boxes</label><input type="number" name="box700">
+      <label>Loose 700g Eggs</label><input type="number" name="loose700geggs">
+
+      <label>800g Cartons</label><input type="number" name="carton800">
+      <label>800g Boxes</label><input type="number" name="box800">
+      <label>Loose 800g Eggs</label><input type="number" name="loose800geggs">
+
+      <label>Very Small Egg Cartons</label><input type="number" name="cartonSmall">
+      <label>Small Boxes</label><input type="number" name="boxSmall">
+      <label>Loose Very Small Eggs</label><input type="number" name="looseverysmalleggs">
+
+      <label>Very Large Egg Cartons</label><input type="number" name="cartonLarge">
+      <label>Large Boxes</label><input type="number" name="boxLarge">
+      <label>Loose Large Eggs</label><input type="number" name="largeeggs">
+    </div>
+
+    <label>Submitted By</label>
+    <input type="text" name="submittedBy" required>
+
+    <input type="submit" value="Submit Dispatch Record">
+  </form>
+
+  <script>
+    window.onload = () => {
+      const now = new Date();
+      document.getElementById("date").value = now.toISOString().split("T")[0];
+      document.getElementById("time").value = now.toTimeString().slice(0,5);
+    };
+
+    document.getElementById("dispatchForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      const submitBtn = form.querySelector('input[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.value = "Submitting...";
+
+      try {
+        await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        form.innerHTML = `<div style="text-align:center; font-size:18px;">✅ Dispatch entry submitted successfully!</div>`;
+      } catch (err) {
+        alert("Failed to submit. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.value = "Submit Dispatch Record";
+      }
+    });
+  </script>
+</body>
+</html>
