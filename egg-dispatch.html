@@ -2,24 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Egg Dispatch Tracking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hilltops Egg Dispatch Tracking</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f7f7f7;
       padding: 20px;
+      background-color: #f7f7f7;
     }
     form {
-      background: #fff;
+      background: white;
       padding: 20px;
       border-radius: 10px;
       max-width: 700px;
       margin: auto;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    input, select, label {
+    input, label, select, textarea {
       width: 100%;
-      margin: 8px 0;
+      margin: 10px 0;
       padding: 8px;
       font-size: 1rem;
     }
@@ -35,98 +36,184 @@
     .readonly {
       background-color: #eee;
     }
-    .section {
-      margin-top: 20px;
+    .egg-section {
+      border: 2px solid;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .red { border-color: red; }
+    .green { border-color: green; }
+    .orange { border-color: orange; }
+    .pink { border-color: deeppink; }
+    .purple { border-color: purple; }
+    canvas {
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 200px;
+      touch-action: none;
+    }
+    .stock-box {
+      background: #eef9ee;
+      padding: 10px;
+      border-left: 5px solid #28a745;
+      margin-bottom: 20px;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
 <body>
-  <h2 style="text-align:center;">Egg Dispatch Tracking & Verification</h2>
+
+  <h2 style="text-align:center">Hilltops Egg Dispatch Tracking</h2>
+  
+  <div id="stockDisplay" class="stock-box">
+    <strong>Available Stock (Live from Packing Log):</strong><br>
+    Loading stock data...
+  </div>
 
   <form id="dispatchForm">
     <label>Date</label>
-    <input type="date" name="date" id="date" required>
+    <input type="date" id="date" name="date" required>
 
     <label>Time</label>
-    <input type="time" name="time" id="time" required>
+    <input type="time" id="time" name="time" required>
 
     <label>Customer</label>
     <select name="customer" required>
-      <option value="">--Select Customer--</option>
-      <option value="Woolworths">Woolworths</option>
-      <option value="Coles">Coles</option>
-      <option value="The IGAs">The IGAs</option>
-      <option value="Superbarns">Superbarns</option>
-      <option value="Hyatt Hotel">Hyatt Hotel</option>
-      <option value="W Hotel">W Hotel</option>
-      <option value="Private Use">Private Use</option>
-      <option value="Other Customers">Other Customers</option>
+      <option value="">Select Customer</option>
+      <option>Woolworths</option>
+      <option>Coles</option>
+      <option>The IGAs</option>
+      <option>Superbarns</option>
+      <option>Hyatt Hotel</option>
+      <option>W Hotel</option>
+      <option>Private Use</option>
+      <option>Other Customers</option>
     </select>
 
-    <div class="section">
-      <h4>Dispatch Quantities Per Egg Size</h4>
-
+    <!-- Egg Type Sections -->
+    <div class="egg-section red">
       <label>600g Cartons</label><input type="number" name="carton600">
       <label>600g Boxes</label><input type="number" name="box600">
-      <label>Loose 600g Eggs</label><input type="number" name="loose600geggs">
+      <label>Loose 600g Eggs</label><input type="number" name="loose600">
+    </div>
 
+    <div class="egg-section green">
       <label>700g Cartons</label><input type="number" name="carton700">
       <label>700g Boxes</label><input type="number" name="box700">
-      <label>Loose 700g Eggs</label><input type="number" name="loose700geggs">
+      <label>Loose 700g Eggs</label><input type="number" name="loose700">
+    </div>
 
+    <div class="egg-section orange">
       <label>800g Cartons</label><input type="number" name="carton800">
       <label>800g Boxes</label><input type="number" name="box800">
-      <label>Loose 800g Eggs</label><input type="number" name="loose800geggs">
+      <label>Loose 800g Eggs</label><input type="number" name="loose800">
+    </div>
 
-      <label>Very Small Egg Cartons</label><input type="number" name="cartonSmall">
+    <div class="egg-section pink">
+      <label>Small Cartons</label><input type="number" name="cartonSmall">
       <label>Small Boxes</label><input type="number" name="boxSmall">
-      <label>Loose Very Small Eggs</label><input type="number" name="looseverysmalleggs">
+      <label>Loose Small Eggs</label><input type="number" name="looseSmall">
+    </div>
 
-      <label>Very Large Egg Cartons</label><input type="number" name="cartonLarge">
+    <div class="egg-section purple">
+      <label>Large Cartons</label><input type="number" name="cartonLarge">
       <label>Large Boxes</label><input type="number" name="boxLarge">
-      <label>Loose Large Eggs</label><input type="number" name="largeeggs">
+      <label>Loose Large Eggs</label><input type="number" name="looseLarge">
     </div>
 
     <label>Submitted By</label>
     <input type="text" name="submittedBy" required>
 
-    <input type="submit" value="Submit Dispatch Record">
+    <label>Proof Photo (Optional)</label>
+    <input type="file" name="photo" accept="image/*">
+
+    <label>Signature</label>
+    <canvas id="signature-pad"></canvas>
+    <button type="button" onclick="clearSignature()">Clear Signature</button>
+    <input type="hidden" name="signature" id="signature" required>
+
+    <input type="submit" value="Submit Dispatch">
   </form>
 
   <script>
-    window.onload = () => {
-      const now = new Date();
-      document.getElementById("date").value = now.toISOString().split("T")[0];
-      document.getElementById("time").value = now.toTimeString().slice(0,5);
-    };
+    const canvas = document.getElementById("signature-pad");
+    const signaturePad = new SignaturePad(canvas);
+    const signatureInput = document.getElementById("signature");
+
+    function clearSignature() {
+      signaturePad.clear();
+    }
+
+    document.getElementById("date").value = new Date().toISOString().split("T")[0];
+    document.getElementById("time").value = new Date().toTimeString().slice(0, 5);
 
     document.getElementById("dispatchForm").addEventListener("submit", async function(e) {
       e.preventDefault();
+
+      if (signaturePad.isEmpty()) {
+        alert("Please sign before submitting.");
+        return;
+      }
+
+      signatureInput.value = signaturePad.toDataURL();
+
       const form = e.target;
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
 
-      const submitBtn = form.querySelector('input[type="submit"]');
-      submitBtn.disabled = true;
-      submitBtn.value = "Submitting...";
-
-      try {
-        await fetch("https://script.google.com/macros/s/AKfycbwpJwifKrsqQlvX_ifjR8OoCKWHpAJ-QKcer_s_mGpOndiWP6CWig2eCpyl3VlffZFHfg/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(data)
-        });
-
-        form.innerHTML = `<div style="text-align:center; font-size:18px;">✅ Dispatch entry submitted successfully!</div>`;
-      } catch (err) {
-        alert("Failed to submit. Please try again.");
-        submitBtn.disabled = false;
-        submitBtn.value = "Submit Dispatch Record";
+      const photoFile = form.querySelector('input[name="photo"]').files[0];
+      if (photoFile) {
+        const reader = new FileReader();
+        reader.onload = async function() {
+          data.photo = reader.result;
+          await submitToScript(data);
+        };
+        reader.readAsDataURL(photoFile);
+      } else {
+        data.photo = "";
+        await submitToScript(data);
       }
     });
+
+    async function submitToScript(data) {
+      const btn = document.querySelector('input[type="submit"]');
+      btn.disabled = true;
+      btn.value = "Submitting...";
+      try {
+        await fetch("YOUR_GOOGLE_SCRIPT_URL", {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        document.getElementById("dispatchForm").innerHTML = `
+          <div style="text-align: center; font-size: 18px; padding: 20px;">
+            ✅ Dispatch submitted successfully!
+          </div>`;
+      } catch (err) {
+        alert("Submission failed. Try again.");
+        btn.disabled = false;
+        btn.value = "Submit Dispatch";
+      }
+    }
+
+    // Fetch stock summary from Google Apps Script endpoint
+    async function loadStockSummary() {
+      try {
+        const res = await fetch("YOUR_STOCK_DATA_SCRIPT_URL");
+        const stock = await res.json();
+        let html = "";
+        for (const [type, vals] of Object.entries(stock)) {
+          html += `${type}: ${vals.cartons} cartons, ${vals.boxes} boxes, ${vals.loose} loose eggs<br>`;
+        }
+        document.getElementById("stockDisplay").innerHTML = html;
+      } catch (err) {
+        document.getElementById("stockDisplay").innerText = "⚠️ Failed to load stock data.";
+      }
+    }
+
+    loadStockSummary();
   </script>
 </body>
 </html>
