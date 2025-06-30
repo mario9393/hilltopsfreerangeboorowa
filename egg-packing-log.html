@@ -42,6 +42,36 @@
       height: 200px;
       touch-action: none;
     }
+    .box600 {
+  border: 3px solid red;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+.box700 {
+  border: 3px solid green;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+.box800 {
+  border: 3px solid orange;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+.boxSmall {
+  border: 3px solid crimson;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+.boxLarge {
+  border: 3px solid purple;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
@@ -90,42 +120,52 @@
 
     <hr>
     <h4>Breakdown by Egg Type</h4>
-
+    
+    <div class="box600">
     <label>600g Egg Cartons</label>
     <input type="number" id="carton600" name="carton600" required>
     <label>Boxes (15x600g cartons)</label>
     <input type="number" id="box600" class="readonly" name="box600" readonly>
     <label>Loose 600g Eggs</label>
     <input type="number" id="loose600geggs" name="loose600geggs" required>
+    </div>
     
+    <div class="box700">
     <label>700g Egg Cartons</label>
     <input type="number" id="carton700" name="carton700" required>
     <label>Boxes (15x700g cartons)</label>
     <input type="number" id="box700" class="readonly" name="box700" readonly>
     <label>Loose 700g Eggs</label>
     <input type="number" id="loose700geggs" name="loose700geggs" required>
-
+    </div>
+    
+    <div class="box800">
     <label>800g Egg Cartons</label>
     <input type="number" id="carton800" name="carton800" required>
     <label>Boxes (15x800g cartons)</label>
     <input type="number" id="box800" class="readonly" name="box800" readonly>
     <label>Loose 800g Eggs</label>
     <input type="number" id="loose800geggs" name="loose800geggs" required>
-
+    </div>
+    
+    <div class="boxSmall">
     <label>Very Small Egg Cartons</label>
     <input type="number" id="cartonSmall" name="cartonSmall" required>
     <label>Boxes (15xSmall cartons)</label>
     <input type="number" id="boxSmall" class="readonly" name="boxSmall" readonly>
     <label>Loose Very Small Eggs</label>
     <input type="number" id="looseverysmalleggs" name="looseverysmalleggs" required>
-
+    </div>
+    
+    <div class="boxLarge">
     <label>Very Large Egg Cartons</label>
     <input type="number" id="cartonLarge" name="cartonLarge" required>
     <label>Boxes (15xLarge cartons)</label>
     <input type="number" id="boxLarge" class="readonly" name="boxLarge" readonly>
     <label>Loose Large Eggs</label>
     <input type="number" id="looseverylargeeggs" name="looseverylargeeggs" required>
-
+    </div>
+    
     <div>
     <label>Packed By</label>
     <input type="text" name="packedBy" required>
