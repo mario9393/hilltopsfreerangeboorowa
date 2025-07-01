@@ -38,6 +38,12 @@
   <label>Clean Eggs After Wash:</label>
   <input type="number" id="cleanAfterWash" readonly />
 
+ <label>Water pH Level (must be above 10.5):</label>
+ <input type="number" id="phLevel" step="0.1" min="0" required />
+
+ <label>Water Temperature (°C – should be 11°C warmer than eggs, ideally 40–42°C):</label>
+ <input type="number" id="waterTemp" step="0.1" min="0" required />
+
   <label>Washer Name:</label>
   <input type="text" id="washerName" required />
 
@@ -116,6 +122,14 @@ form.addEventListener('submit',async e=>{
   e.preventDefault();
   if(pad.isEmpty()){alert('Please sign before submitting.');return;}
 
+ const phLevel = parseFloat(document.getElementById('phLevel').value);
+ const waterTemp = parseFloat(document.getElementById('waterTemp').value);
+
+ if (phLevel <= 10.5) {
+ alert('Water pH level must be above 10.5');
+ return;
+ }
+
   const btn=form.querySelector('button[type=submit]');
   btn.disabled=true;btn.textContent='Submitting…';
 
@@ -126,6 +140,8 @@ form.addEventListener('submit',async e=>{
     washedEggs      : washedIn.value,
     brokenEggs      : brokenIn.value,
     cleanAfterWash  : cleanOut.value,
+    phLevel         : phLevel,
+    waterTemp       : waterTemp,
     washerName      : document.getElementById('washerName').value,
     signature       : pad.toDataURL()
   };
