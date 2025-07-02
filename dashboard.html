@@ -2,109 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Farm Dashboard</title>
+  <title>Hilltops Egg Collection Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-    h1 { text-align: center; margin-bottom: 30px; }
-    .chart-container { width: 100%; max-width: 800px; margin: auto; margin-bottom: 50px; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    canvas { max-width: 100%; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 30px;
+    }
+    canvas {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin: 30px auto;
+      display: block;
+      max-width: 95%;
+    }
   </style>
 </head>
 <body>
-  <h1>Hilltops Farm Live Dashboard</h1>
 
-  <div class="chart-container">
-    <h2>🥚 Egg Count per Flock (Today)</h2>
-    <canvas id="eggFlockChart"></canvas>
-  </div>
+  <h2>Daily Egg Collection per Flock (Excl. Broken)</h2>
+  <canvas id="flockChart" height="300"></canvas>
 
-  <div class="chart-container">
-    <h2>🍽️ Feed Levels per Feeder (Today)</h2>
-    <canvas id="feedLevelChart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <h2>💧 Water Levels per Flock (Today)</h2>
-    <canvas id="waterLevelChart"></canvas>
-  </div>
+  <h2>Total Daily Egg Collection (All Flocks)</h2>
+  <canvas id="totalChart" height="300"></canvas>
 
   <script>
-    async function fetchSheetData(sheetUrl) {
-      const res = await fetch(sheetUrl);
-      const text = await res.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-      const rows = Array.from(doc.querySelectorAll('table tr'))
-        .map(tr => Array.from(tr.children).map(td => td.innerText));
-      return rows;
-    }
+    const url = "https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec";
 
-    function groupAndSum(data, indexKey, indexValue) {
-      const totals = {};
-      for (let i = 1; i < data.length; i++) {
-        const key = data[i][indexKey];
-        const value = parseFloat(data[i][indexValue]) || 0;
-        totals[key] = (totals[key] || 0) + value;
-      }
-      return totals;
-    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const perFlock = data.perFlock;
+        const dailyTotal = data.dailyTotal;
 
-    async function drawCharts() {
-      const eggSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQRb3Xhvuu0KTGYETnei-bDwxd1we6bL7SwLDZzZEelb8Q_DkhJT4YcXHZJsiI7HmNOamK-KRMCz1C2/pubhtml';
-      const feedSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQINARyh9GBZ04CbNhrweG37B14hIuPcP_qZTQHQ0wdmJvx0qqhBUXuSqESfg9djz4nBEkzgMUfvJcL/pubhtml';
-      const waterSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQb8TqZrPKm1NKov2s1Y3kHgOLmuqfVJ1a9fbo0b7M1wMDnQ4sx3NWB8UihRzDmLs4jO5UtiLLaMqj8/pubhtml';
+        // Prepare labels (dates)
+        const allDatesSet = new Set();
+        for (const flock in perFlock) {
+          for (const date in perFlock[flock]) {
+            allDatesSet.add(date);
+          }
+        }
+        const sortedDates = Array.from(allDatesSet).sort();
 
-      const eggData = await fetchSheetData(eggSheet);
-      const feedData = await fetchSheetData(feedSheet);
-      const waterData = await fetchSheetData(waterSheet);
+        // Flock Chart datasets
+        const flockDatasets = Object.entries(perFlock).map(([flockId, values]) => ({
+          label: flockId,
+          data: sortedDates.map(date => values[date] || 0),
+          borderWidth: 2,
+          fill: false,
+          tension: 0.2
+        }));
 
-      const eggTotals = groupAndSum(eggData, 0, 1); // Flock, Egg Count
-      const feedLevels = groupAndSum(feedData, 1, 4); // Feeder ID, Level After Fill
-      const waterLevels = groupAndSum(waterData, 1, 2); // Flock, Water Level %
+        new Chart(document.getElementById("flockChart"), {
+          type: "line",
+          data: {
+            labels: sortedDates,
+            datasets: flockDatasets
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'top'
+              },
+              title: {
+                display: false
+              }
+            }
+          }
+        });
 
-      const eggChart = new Chart(document.getElementById('eggFlockChart'), {
-        type: 'bar',
-        data: {
-          labels: Object.keys(eggTotals),
-          datasets: [{
-            label: 'Eggs Collected',
-            data: Object.values(eggTotals),
-            backgroundColor: 'rgba(255, 159, 64, 0.7)'
-          }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        // Total Chart
+        const totalLabels = Object.keys(dailyTotal).sort();
+        const totalValues = totalLabels.map(date => dailyTotal[date]);
+
+        new Chart(document.getElementById("totalChart"), {
+          type: "bar",
+          data: {
+            labels: totalLabels,
+            datasets: [{
+              label: "Total Eggs",
+              data: totalValues,
+              backgroundColor: "rgba(75, 192, 192, 0.6)"
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: { display: false }
+            }
+          }
+        });
       });
-
-      const feedChart = new Chart(document.getElementById('feedLevelChart'), {
-        type: 'bar',
-        data: {
-          labels: Object.keys(feedLevels),
-          datasets: [{
-            label: 'Feed Level (%)',
-            data: Object.values(feedLevels),
-            backgroundColor: 'rgba(54, 162, 235, 0.7)'
-          }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } } }
-      });
-
-      const waterChart = new Chart(document.getElementById('waterLevelChart'), {
-        type: 'bar',
-        data: {
-          labels: Object.keys(waterLevels),
-          datasets: [{
-            label: 'Water Tank Level (%)',
-            data: Object.values(waterLevels),
-            backgroundColor: 'rgba(75, 192, 192, 0.7)'
-          }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } } }
-      });
-    }
-
-    drawCharts();
   </script>
+
 </body>
 </html>
