@@ -112,30 +112,24 @@ function updateTotal() {
       "Longitude": longitude,
       "Proximity Status": proximityStatus
     };
-try {
-  const response = await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  const text = await response.text();
 
-  if (text.trim() === "DUPLICATE") {
-    document.getElementById("message").innerHTML = `<p style="color: red; font-weight: bold;">❌ Already submitted for this flock today. Please check your entry.</p>`;
-  } else if (text.trim() === "Success") {
-    document.getElementById("message").innerHTML = `<p style="color: green; font-weight: bold;">✅ Submission successful!</p>`;
-    form.reset();
-    totalSpan.textContent = "0";
-  } else {
-    document.getElementById("message").innerHTML = `<p style="color: orange;">⚠️ Unexpected response: ${text}</p>`;
-  }
-
-  submitButton.disabled = false;
-  submitButton.textContent = "Submit";
-} catch (err) {
-  document.getElementById("message").textContent = "❌ Failed to submit.";
-  submitButton.disabled = false;
-  submitButton.textContent = "Submit";
-}
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      document.getElementById("message").textContent = "✅ Submission successful!";
+      form.reset();
+      totalSpan.textContent = "0";
+      submitButton.disabled = false; // ✅ Added
+      submitButton.textContent = "Submit"; // ✅ Added
+      
+    } catch (err) {
+      document.getElementById("message").textContent = "❌ Failed to submit.";
+      submitButton.disabled = false; // ✅ Added
+      submitButton.textContent = "Submit"; // ✅ Added
+    }
   });
 });
