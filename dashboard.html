@@ -56,64 +56,133 @@
     <canvas id="totalChart"></canvas>
   </div>
 
-  <script>
-    const url = "https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec?dashboard=true";
+<script>
+const url = "https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec?dashboard=true";
 
-    fetch(url)
+fetch(url)
+  .then(response => response.json())
+  .then(data => {
+    const perFlock = data.perFlock;
+    const dailyTotal = data.dailyTotal;
+    const eggTypeByFlock = data.eggTypeByFlock;
+
+    // --- Chart 1: Per-Flock Egg Trends ---
+    const allDatesSet = new Set();
+    for (const flock in perFlock) {
+      for (const date in perFlock[flock]) {
+        allDatesSet.add(date);
+      }
+    }
+    const sortedDates = Array.from(allDatesSet).sort();
+
+    const flockDatasets = Object.entries(perFlock).map(([flockId, values]) => ({
+      label: flockId,
+      data: sortedDates.map(date => values[date] || 0),
+      borderWidth: 2,
+      fill: false,
+      tension: 0.2
+    }));
+
+    new Chart(document.getElementById("flockChart"), {
+      type: "line",
+      data: {
+        labels: sortedDates,
+        datasets: flockDatasets
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'top' },
+          title: { display: false }
+        }
+      }
+    });
+
+    // --- Chart 2: Aggregated Daily Total ---
+    const totalLabels = Object.keys(dailyTotal).sort();
+    const totalValues = totalLabels.map(date => dailyTotal[date]);
+
+    new Chart(document.getElementById("totalChart"), {
+      type: "bar",
+      data: {
+        labels: totalLabels,
+        datasets: [{
+          label: "Total Eggs",
+          data: totalValues,
+          backgroundColor: "rgba(75, 192, 192, 0.6)"
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: { display: false }
+        }
+      }
+    });
+
+    // --- Chart 3: Egg Type Distribution ---
+    const flocks = Object.keys(eggTypeByFlock);
+    const cleanData = flocks.map(f => eggTypeByFlock[f].clean);
+    const dirtyData = flocks.map(f => eggTypeByFlock[f].dirty);
+    const superDirtyData = flocks.map(f => eggTypeByFlock[f].superDirty);
+    const groundData = flocks.map(f => eggTypeByFlock[f].ground);
+    const brokenData = flocks.map(f => eggTypeByFlock[f].broken);
+    const giantData = flocks.map(f => eggTypeByFlock[f].giant);
+
+    new Chart(document.getElementById("eggTypeChart"), {
+      type: "bar",
+      data: {
+        labels: flocks,
+        datasets: [
+          { label: "Clean", data: cleanData },
+          { label: "Dirty", data: dirtyData },
+          { label: "Super Dirty", data: superDirtyData },
+          { label: "Ground", data: groundData },
+          { label: "Broken", data: brokenData },
+          { label: "Giant", data: giantData }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: false }
+        },
+        scales: {
+          x: { stacked: true },
+          y: { beginAtZero: true, stacked: true }
+        }
+      }
+    });
+  });
+
+// --- Flock Ranking Chart ---
+window.onload = function () {
+  const flockRankingCtx = document.getElementById("flockRankingChart").getContext("2d");
+  let flockRankingChart;
+
+  function loadFlockRanking(period = "week") {
+    const avgUrl = `https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec?dashboard=true&avg=true&period=${period}`;
+
+    fetch(avgUrl)
       .then(response => response.json())
       .then(data => {
-        const perFlock = data.perFlock;
-        const dailyTotal = data.dailyTotal;
+        const avgData = data.avgPerFlock || {};
+        const labels = Object.keys(avgData);
+        const values = Object.values(avgData);
 
-        // Prepare labels (dates)
-        const allDatesSet = new Set();
-        for (const flock in perFlock) {
-          for (const date in perFlock[flock]) {
-            allDatesSet.add(date);
-          }
+        if (flockRankingChart) {
+          flockRankingChart.destroy();
         }
-        const sortedDates = Array.from(allDatesSet).sort();
 
-        // Flock Chart datasets
-        const flockDatasets = Object.entries(perFlock).map(([flockId, values]) => ({
-          label: flockId,
-          data: sortedDates.map(date => values[date] || 0),
-          borderWidth: 2,
-          fill: false,
-          tension: 0.2
-        }));
-
-        new Chart(document.getElementById("flockChart"), {
-          type: "line",
+        flockRankingChart = new Chart(flockRankingCtx, {
+          type: 'bar',
           data: {
-            labels: sortedDates,
-            datasets: flockDatasets
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                position: 'top'
-              },
-              title: {
-                display: false
-              }
-            }
-          }
-        });
-
-        // Total Chart
-        const totalLabels = Object.keys(dailyTotal).sort();
-        const totalValues = totalLabels.map(date => dailyTotal[date]);
-
-        new Chart(document.getElementById("totalChart"), {
-          type: "bar",
-          data: {
-            labels: totalLabels,
+            labels,
             datasets: [{
-              label: "Total Eggs",
-              data: totalValues,
-              backgroundColor: "rgba(75, 192, 192, 0.6)"
+              label: "Avg. Daily Eggs",
+              data: values,
+              backgroundColor: 'rgba(255, 159, 64, 0.7)'
             }]
           },
           options: {
@@ -121,63 +190,23 @@
             plugins: {
               legend: { display: false },
               title: { display: false }
+            },
+            scales: {
+              y: { beginAtZero: true }
             }
           }
         });
       });
-  window.onload = function () {
-    const flockRankingCtx = document.getElementById("flockRankingChart").getContext("2d");
-    let flockRankingChart;
+  }
 
-    function loadFlockRanking(period = "week") {
-      const avgUrl = `https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec?dashboard=true&avg=true&period=${period}`;
+  loadFlockRanking("week");
+  document.getElementById("periodSelect").addEventListener("change", function () {
+    loadFlockRanking(this.value);
+  });
+};
+</script>
 
-      fetch(avgUrl)
-        .then(response => response.json())
-        .then(data => {
-          const avgData = data.avgPerFlock || {};
-          const labels = Object.keys(avgData);
-          const values = Object.values(avgData);
-
-          if (flockRankingChart) {
-            flockRankingChart.destroy();
-          }
-
-          flockRankingChart = new Chart(flockRankingCtx, {
-            type: 'bar',
-            data: {
-              labels,
-              datasets: [{
-                label: "Avg. Daily Eggs",
-                data: values,
-                backgroundColor: 'rgba(255, 159, 64, 0.7)'
-              }]
-            },
-            options: {
-              responsive: true,
-              plugins: {
-                legend: { display: false },
-                title: { display: false }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true
-                }
-              }
-            }
-          });
-        });
-    }
-
-    // Load default (Last 7 Days)
-    loadFlockRanking("week");
-
-    // On dropdown change
-    document.getElementById("periodSelect").addEventListener("change", function () {
-      loadFlockRanking(this.value);
-    });
-  };
-  </script>
+  
   <div class="chart-container">
     <h2>Flock Performance Ranking (Avg. Daily Eggs)</h2>
     <div style="text-align:center; margin-bottom: 20px;">
@@ -189,6 +218,11 @@
       </select>
   </div>
   <canvas id="flockRankingChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+  <h2>Egg Type Distribution per Flock (All Days Combined)</h2>
+  <canvas id="eggTypeChart"></canvas>
   </div>
 
   <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
