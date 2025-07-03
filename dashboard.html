@@ -125,7 +125,72 @@
           }
         });
       });
+  window.onload = function () {
+    const flockRankingCtx = document.getElementById("flockRankingChart").getContext("2d");
+    let flockRankingChart;
+
+    function loadFlockRanking(period = "week") {
+      const avgUrl = `https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec?dashboard=true&avg=true&period=${period}`;
+
+      fetch(avgUrl)
+        .then(response => response.json())
+        .then(data => {
+          const avgData = data.avgPerFlock || {};
+          const labels = Object.keys(avgData);
+          const values = Object.values(avgData);
+
+          if (flockRankingChart) {
+            flockRankingChart.destroy();
+          }
+
+          flockRankingChart = new Chart(flockRankingCtx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                label: "Avg. Daily Eggs",
+                data: values,
+                backgroundColor: 'rgba(255, 159, 64, 0.7)'
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                title: { display: false }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        });
+    }
+
+    // Load default (Last 7 Days)
+    loadFlockRanking("week");
+
+    // On dropdown change
+    document.getElementById("periodSelect").addEventListener("change", function () {
+      loadFlockRanking(this.value);
+    });
+  };
   </script>
+  <div class="chart-container">
+    <h2>Flock Performance Ranking (Avg. Daily Eggs)</h2>
+    <div style="text-align:center; margin-bottom: 20px;">
+      <label for="periodSelect" style="font-weight: bold;">Select Period: </label>
+      <select id="periodSelect">
+        <option value="today">Today</option>
+        <option value="week" selected>Last 7 Days</option>
+        <option value="month">This Month</option>
+      </select>
+  </div>
+  <canvas id="flockRankingChart"></canvas>
+  </div>
+
   <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
   <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
   <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
