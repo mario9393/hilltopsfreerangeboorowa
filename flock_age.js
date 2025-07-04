@@ -12,7 +12,9 @@ const FLOCK_ARRIVAL_DATES = {
   "Flock 41": "2025-01-01",
   "Flock 42": "2025-01-15",
   "Flock 43": "2025-02-01",
-  "Flock 44": "2025-04-01"
+  "Flock 44": "2025-04-01",
+  "Flock 45": "2025-06-16",
+  "Flock 46": "2025-07-01"
 };
 
 function getChickenAgeWeeks(flockId) {
