@@ -77,6 +77,16 @@
     </div>
     <canvas id="eggTypeChart"></canvas>
   </div>
+  
+  <div class="chart-container">
+    <h2>Download Daily Egg Log (PDF)</h2>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <input type="date" id="pdfDate" style="padding: 8px; font-size: 1em;" />
+      <button onclick="downloadEggLogPDF()" style="padding: 10px 20px; font-size: 1em; margin-left: 10px; background-color: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Download PDF
+      </button>
+    </div>
+  </div>
 
   <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
     <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
@@ -245,6 +255,19 @@
         loadFlockRanking(this.value);
       });
     };
+  
+    function downloadEggLogPDF() {
+  const date = document.getElementById("pdfDate").value;
+  if (!date) {
+    alert("Please select a date.");
+    return;
+  }
+
+  const baseUrl = "https://script.google.com/macros/s/AKfycbyX3KV4p2tGZY0u-IJOefKqQ2vJ1e_cwyyiXyVwYixbo7Nii_aON6nQ9D-UP5cgKMwb/exec"; // 🔁 replace with your full deployed Web App URL
+  const fullUrl = `${baseUrl}?pdf=true&date=${date}`;
+  window.open(fullUrl, "_blank");
+}
+
   </script>
 </body>
 </html>
