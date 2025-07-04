@@ -48,7 +48,9 @@ function updateTotal() {
     "Flock 41": { lat: -34.353400, lng: 148.706169 },
     "Flock 42": { lat: -34.353883, lng: 148.705925 },
     "Flock 43": { lat: -34.353933, lng: 148.706528 },
-    "Flock 44": { lat: -34.348578, lng: 148.705606 }
+    "Flock 44": { lat: -34.348578, lng: 148.705606 },
+    "Flock 45": { lat: -34.345740, lng: 148.702910 },
+    "Flock 46": { lat: -34.345625, lng: 148.702940 }
   };
 
   function getDistance(lat1, lon1, lat2, lon2) {
