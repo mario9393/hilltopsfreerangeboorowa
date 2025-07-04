@@ -29,9 +29,12 @@ function updateTotal() {
     input.addEventListener("input", updateTotal);
   });
 
-  const now = new Date();
-  dateInput.valueAsDate = now;
-  timeInput.value = now.toTimeString().slice(0, 5);
+const now = new Date();
+const yyyy = now.getFullYear();
+const mm = String(now.getMonth() + 1).padStart(2, '0');
+const dd = String(now.getDate()).padStart(2, '0');
+dateInput.value = `${yyyy}-${mm}-${dd}`;
+timeInput.value = now.toTimeString().slice(0, 5);
 
   // Define known flock coordinates (replace with your real locations)
   const flockCoordinates = {
