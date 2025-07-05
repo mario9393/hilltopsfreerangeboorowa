@@ -37,6 +37,11 @@
   </div>
 
   <div class="chart-container">
+  <h3>Dead Chickens per Day per Flock</h3>
+  <canvas id="flockPerDayChart"></canvas>
+  </div>
+
+  <div class="chart-container">
     <h3>Dead Chickens per Day</h3>
     <canvas id="dateChart"></canvas>
   </div>
@@ -49,6 +54,7 @@
       .then(data => {
         drawChart('flockChart', 'Total Dead Chickens per Flock', data.deadByFlock, 'bar');
         drawChart('dateChart', 'Dead Chickens per Day', data.deadByDate, 'line');
+        drawMultiLineChart('flockPerDayChart', data.deadByFlockPerDay);
       });
 
     function drawChart(canvasId, label, dataset, type) {
@@ -81,6 +87,54 @@
         }
       });
     }
+function drawMultiLineChart(canvasId, dataset) {
+  if (!dataset) return;
+
+  const dates = Object.keys(dataset).sort(); // X-axis
+  const flocks = new Set();
+
+  // Collect all flocks
+  dates.forEach(date => {
+    Object.keys(dataset[date]).forEach(flock => flocks.add(flock));
+  });
+
+  const datasets = Array.from(flocks).map(flock => {
+    return {
+      label: flock,
+      data: dates.map(date => dataset[date][flock] || 0),
+      borderWidth: 2,
+      fill: false,
+      tension: 0.3
+    };
+  });
+
+  new Chart(document.getElementById(canvasId), {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: datasets
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: 'Dead Chickens per Day per Flock'
+        }
+      },
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Number of Chickens' }
+        },
+        x: {
+          title: { display: true, text: 'Date' }
+        }
+      }
+    }
+  });
+}
+
   </script>
 </body>
 </html>
