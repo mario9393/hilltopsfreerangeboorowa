@@ -82,6 +82,16 @@
     </div>
     
     <div>
+    <label>Packed Percentage (%)</label>
+    <input type="number" id="packedPercent" name="packedPercent" class="readonly" readonly>
+    </div>
+    
+    <div>
+    <label>Broken Percentage (%)</label>
+    <input type="number" id="brokenPercent" name="brokenPercent" class="readonly" readonly>
+    </div>
+
+    <div>
       <label>Packed By</label>
       <input type="text" name="packedBy" required>
     </div>
@@ -123,9 +133,18 @@
         cLarge * 12 + lLarge;
 
       document.getElementById("totalPackedEggs").value = totalPacked;
-
       const totalSent = parseInt(document.getElementById("totalEggs").value) || 0;
-      document.getElementById("brokenEggs").value = Math.max(0, totalSent - totalPacked);
+      const broken = Math.max(0, totalSent - totalPacked);
+      document.getElementById("brokenEggs").value = broken;
+
+  // Percentages
+  let packedPercent = 0, brokenPercent = 0;
+  if (totalSent > 0) {
+    packedPercent = (totalPacked / totalSent) * 100;
+    brokenPercent = (broken / totalSent) * 100;
+  }
+  document.getElementById("packedPercent").value = packedPercent.toFixed(1);
+  document.getElementById("brokenPercent").value = brokenPercent.toFixed(1);
     }
 
     // Attach to all inputs for breakdown
