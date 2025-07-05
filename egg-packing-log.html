@@ -5,73 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hilltops Final Egg Packing Log</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f7f7f7;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, label, textarea {
-      width: 100%;
-      margin: 10px 0;
-      padding: 8px;
-      font-size: 1rem;
-    }
-    input[type="submit"] {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    input[type="submit"]:hover {
-      background-color: #218838;
-    }
-    .readonly {
-      background-color: #eee;
-    }
-    canvas {
-      border: 1px solid #ccc;
-      width: 100%;
-      height: 200px;
-      touch-action: none;
-    }
-    .box600 {
-  border: 3px solid red;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
-.box700 {
-  border: 3px solid green;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
-.box800 {
-  border: 3px solid orange;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
-.boxSmall {
-  border: 3px solid crimson;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
-.boxLarge {
-  border: 3px solid purple;
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f7f7f7; }
+    form { background: white; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, label, textarea { width: 100%; margin: 10px 0; padding: 8px; font-size: 1rem; }
+    input[type="submit"] { background-color: #28a745; color: white; border: none; cursor: pointer; }
+    input[type="submit"]:hover { background-color: #218838; }
+    .readonly { background-color: #eee; }
+    canvas { border: 1px solid #ccc; width: 100%; height: 200px; touch-action: none; }
+    .box600 { border: 3px solid red; padding: 10px; margin-bottom: 15px; border-radius: 8px; }
+    .box700 { border: 3px solid green; padding: 10px; margin-bottom: 15px; border-radius: 8px; }
+    .box800 { border: 3px solid orange; padding: 10px; margin-bottom: 15px; border-radius: 8px; }
+    .boxSmall { border: 3px solid crimson; padding: 10px; margin-bottom: 15px; border-radius: 8px; }
+    .boxLarge { border: 3px solid purple; padding: 10px; margin-bottom: 15px; border-radius: 8px; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
@@ -79,108 +24,75 @@
   <h2 style="text-align:center">Hilltops Final Egg Packing Log</h2>
   <form id="packingForm">
     <div>
-    <label>Date</label>
-    <input type="date" id="date" name="date" required>
+      <label>Date</label>
+      <input type="date" id="date" name="date" required>
     </div>
-    
     <div>
-    <label>Time</label>
-    <input type="time" id="time" name="time" required>
+      <label>Time</label>
+      <input type="time" id="time" name="time" required>
     </div>
-    
     <div>
-    <label>Total Eggs Sent to Packing Station</label>
-    <input type="number" id="totalEggs" name="totalEggs" required>
+      <label>Total Eggs Sent to Packing Station</label>
+      <input type="number" id="totalEggs" name="totalEggs" required>
     </div>
+    <!-- REMOVE: Broken Eggs, Usable Eggs, Cartons, Boxes, Loose Eggs -->
     
-    <div>
-    <label>Broken Eggs</label>
-    <input type="number" id="brokenEggs" name="brokenEggs" required>
+    <hr>
+    <h4>Breakdown by Egg Type</h4>
+    <div class="box600">
+      <label>600g Egg Cartons</label>
+      <input type="number" id="carton600" name="carton600" required>
+      <label>Loose 600g Eggs</label>
+      <input type="number" id="loose600geggs" name="loose600geggs" required>
     </div>
-    
-    <div>
-    <label>Usable Eggs</label>
-    <input type="number" id="usableEggs" class="readonly" name="usableEggs" readonly>
+    <div class="box700">
+      <label>700g Egg Cartons</label>
+      <input type="number" id="carton700" name="carton700" required>
+      <label>Loose 700g Eggs</label>
+      <input type="number" id="loose700geggs" name="loose700geggs" required>
     </div>
-    
-    <div>
-    <label>Egg Cartons (12 eggs per carton)</label>
-    <input type="number" id="cartons" class="readonly" name="cartons" readonly>
+    <div class="box800">
+      <label>800g Egg Cartons</label>
+      <input type="number" id="carton800" name="carton800" required>
+      <label>Loose 800g Eggs</label>
+      <input type="number" id="loose800geggs" name="loose800geggs" required>
     </div>
-    
-    <div>
-    <label>Boxes (15 cartons per box)</label>
-    <input type="number" id="boxes" class="readonly" name="boxes" readonly>
+    <div class="boxSmall">
+      <label>Very Small Egg Cartons</label>
+      <input type="number" id="cartonSmall" name="cartonSmall" required>
+      <label>Loose Very Small Eggs</label>
+      <input type="number" id="looseverysmalleggs" name="looseverysmalleggs" required>
     </div>
-    
-    <div>
-    <label>Remaining Loose Eggs</label>
-    <input type="number" id="looseEggs" class="readonly" name="looseEggs" readonly>
+    <div class="boxLarge">
+      <label>Very Large Egg Cartons</label>
+      <input type="number" id="cartonLarge" name="cartonLarge" required>
+      <label>Loose Large Eggs</label>
+      <input type="number" id="looseverylargeeggs" name="looseverylargeeggs" required>
     </div>
 
     <hr>
-    <h4>Breakdown by Egg Type</h4>
-    
-    <div class="box600">
-    <label>600g Egg Cartons</label>
-    <input type="number" id="carton600" name="carton600" required>
-    <label>Boxes (15x600g cartons)</label>
-    <input type="number" id="box600" class="readonly" name="box600" readonly>
-    <label>Loose 600g Eggs</label>
-    <input type="number" id="loose600geggs" name="loose600geggs" required>
+    <!-- Live calculated fields: -->
+    <div>
+      <label>Total Packed Eggs</label>
+      <input type="number" id="totalPackedEggs" name="totalPackedEggs" class="readonly" readonly>
     </div>
-    
-    <div class="box700">
-    <label>700g Egg Cartons</label>
-    <input type="number" id="carton700" name="carton700" required>
-    <label>Boxes (15x700g cartons)</label>
-    <input type="number" id="box700" class="readonly" name="box700" readonly>
-    <label>Loose 700g Eggs</label>
-    <input type="number" id="loose700geggs" name="loose700geggs" required>
-    </div>
-    
-    <div class="box800">
-    <label>800g Egg Cartons</label>
-    <input type="number" id="carton800" name="carton800" required>
-    <label>Boxes (15x800g cartons)</label>
-    <input type="number" id="box800" class="readonly" name="box800" readonly>
-    <label>Loose 800g Eggs</label>
-    <input type="number" id="loose800geggs" name="loose800geggs" required>
-    </div>
-    
-    <div class="boxSmall">
-    <label>Very Small Egg Cartons</label>
-    <input type="number" id="cartonSmall" name="cartonSmall" required>
-    <label>Boxes (15xSmall cartons)</label>
-    <input type="number" id="boxSmall" class="readonly" name="boxSmall" readonly>
-    <label>Loose Very Small Eggs</label>
-    <input type="number" id="looseverysmalleggs" name="looseverysmalleggs" required>
-    </div>
-    
-    <div class="boxLarge">
-    <label>Very Large Egg Cartons</label>
-    <input type="number" id="cartonLarge" name="cartonLarge" required>
-    <label>Boxes (15xLarge cartons)</label>
-    <input type="number" id="boxLarge" class="readonly" name="boxLarge" readonly>
-    <label>Loose Large Eggs</label>
-    <input type="number" id="looseverylargeeggs" name="looseverylargeeggs" required>
+    <div>
+      <label>Broken Eggs</label>
+      <input type="number" id="brokenEggs" name="brokenEggs" class="readonly" readonly>
     </div>
     
     <div>
-    <label>Packed By</label>
-    <input type="text" name="packedBy" required>
+      <label>Packed By</label>
+      <input type="text" name="packedBy" required>
     </div>
-    
     <div>
-    <label>Batch Note (Optional)</label>
-    <textarea name="note" rows="3"></textarea>
+      <label>Batch Note (Optional)</label>
+      <textarea name="note" rows="3"></textarea>
     </div>
-    
     <div>
-    <label>Proof Photo (Optional)</label>
-    <input type="file" name="photo" accept="image/*">
+      <label>Proof Photo (Optional)</label>
+      <input type="file" name="photo" accept="image/*">
     </div>
-    
     <label>Digital Signature</label>
     <canvas id="signature-pad"></canvas>
     <button type="button" onclick="clearSignature()">Clear Signature</button>
@@ -190,117 +102,115 @@
   </form>
 
   <script>
-    const totalEggs = document.getElementById("totalEggs");
-    const brokenEggs = document.getElementById("brokenEggs");
-    const usableEggs = document.getElementById("usableEggs");
-    const cartons = document.getElementById("cartons");
-    const boxes = document.getElementById("boxes");
-    const looseEggs = document.getElementById("looseEggs");
+    // Calc logic: all cartons ×12 + all loose for all types
+    function calcTotals() {
+      const c600 = parseInt(document.getElementById("carton600").value) || 0;
+      const l600 = parseInt(document.getElementById("loose600geggs").value) || 0;
+      const c700 = parseInt(document.getElementById("carton700").value) || 0;
+      const l700 = parseInt(document.getElementById("loose700geggs").value) || 0;
+      const c800 = parseInt(document.getElementById("carton800").value) || 0;
+      const l800 = parseInt(document.getElementById("loose800geggs").value) || 0;
+      const cSmall = parseInt(document.getElementById("cartonSmall").value) || 0;
+      const lSmall = parseInt(document.getElementById("looseverysmalleggs").value) || 0;
+      const cLarge = parseInt(document.getElementById("cartonLarge").value) || 0;
+      const lLarge = parseInt(document.getElementById("looseverylargeeggs").value) || 0;
 
-    function calculatePacking() {
-      const total = parseInt(totalEggs.value) || 0;
-      const broken = parseInt(brokenEggs.value) || 0;
-      const usable = Math.max(0, total - broken);
-      usableEggs.value = usable;
-      cartons.value = Math.floor(usable / 12);
-      boxes.value = Math.floor(cartons.value / 15);
-      looseEggs.value = usable % 12;
+      const totalPacked =
+        c600 * 12 + l600 +
+        c700 * 12 + l700 +
+        c800 * 12 + l800 +
+        cSmall * 12 + lSmall +
+        cLarge * 12 + lLarge;
+
+      document.getElementById("totalPackedEggs").value = totalPacked;
+
+      const totalSent = parseInt(document.getElementById("totalEggs").value) || 0;
+      document.getElementById("brokenEggs").value = Math.max(0, totalSent - totalPacked);
     }
 
-    totalEggs.addEventListener("input", calculatePacking);
-    brokenEggs.addEventListener("input", calculatePacking);
-    
-    function calculateBoxCount(cartonId, boxId) {
-    const cartons = parseInt(document.getElementById(cartonId).value) || 0;
-      document.getElementById(boxId).value = Math.floor(cartons / 15);
-    }
-
-    ['600', '700', '800', 'Small', 'Large'].forEach(size => {
-      const cartonId = 'carton' + size;
-      const boxId = 'box' + size;
-      document.getElementById(cartonId).addEventListener('input', () => {
-        calculateBoxCount(cartonId, boxId);
-      });
+    // Attach to all inputs for breakdown
+    [
+      "carton600", "loose600geggs",
+      "carton700", "loose700geggs",
+      "carton800", "loose800geggs",
+      "cartonSmall", "looseverysmalleggs",
+      "cartonLarge", "looseverylargeeggs",
+      "totalEggs"
+    ].forEach(id => {
+      document.getElementById(id).addEventListener("input", calcTotals);
     });
 
     window.onload = () => {
       const now = new Date();
       document.getElementById("date").value = now.toISOString().split("T")[0];
       document.getElementById("time").value = now.toTimeString().slice(0,5);
+      calcTotals();
     };
 
     // Signature Pad
     const canvas = document.getElementById("signature-pad");
     const signaturePad = new SignaturePad(canvas);
-    const signatureInput = document.getElementById("signature");
 
     function clearSignature() {
       signaturePad.clear();
     }
 
+    document.getElementById("packingForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
 
-  document.getElementById("packingForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
+      if (signaturePad.isEmpty()) {
+        alert("Please provide a digital signature.");
+        return;
+      }
 
-    if (signaturePad.isEmpty()) {
-      alert("Please provide a digital signature.");
-      return;
-    }
+      document.getElementById("signature").value = signaturePad.toDataURL();
 
-    const signatureInput = document.getElementById("signature");
-    signatureInput.value = signaturePad.toDataURL();
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
 
-    const form = e.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    // Handle optional photo
-    const photoFile = form.querySelector('input[name="photo"]').files[0];
-    if (photoFile) {
-      const reader = new FileReader();
-      reader.onload = async function() {
-        data.photo = reader.result;
+      // Handle optional photo
+      const photoFile = form.querySelector('input[name="photo"]').files[0];
+      if (photoFile) {
+        const reader = new FileReader();
+        reader.onload = async function() {
+          data.photo = reader.result;
+          await submitToScript(data);
+        };
+        reader.readAsDataURL(photoFile);
+      } else {
+        data.photo = "";
         await submitToScript(data);
-      };
-      reader.readAsDataURL(photoFile);
-    } else {
-      data.photo = "";
-      await submitToScript(data);
+      }
+    });
+
+    async function submitToScript(data) {
+      const submitBtn = document.querySelector('input[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.value = "Submitting...";
+
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec", {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        document.getElementById("packingForm").innerHTML = `
+          <div style="text-align: center; font-size: 18px; padding: 20px;">
+            ✅ Packing log submitted successfully!
+          </div>`;
+      } catch (error) {
+        alert("Submission failed. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.value = "Submit Packing Log";
+      }
     }
-  });
-
-  async function submitToScript(data) {
-    const submitBtn = document.querySelector('input[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.value = "Submitting...";
-
-    try {
-      await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec", {  // ✅ Replace with your deployed Web App URL
-    method: "POST",
-    mode: "no-cors",  // ✅ important line
-    headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(data)
-      });
-
-      document.getElementById("packingForm").innerHTML = `
-        <div style="text-align: center; font-size: 18px; padding: 20px;">
-          ✅ Packing log submitted successfully!
-        </div>`;
-    } catch (error) {
-      alert("Submission failed. Please try again.");
-      submitBtn.disabled = false;
-      submitBtn.value = "Submit Packing Log";
-    }
-  }
   </script>
-
   <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
-  <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
-  <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
+    <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
+    <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
   </footer>
-  
 </body>
 </html>
-
