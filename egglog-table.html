@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Egg Log Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+      font-size: 14px;
+    }
+    th {
+      background-color: #e9ecef;
+    }
+    h2 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Hilltops Egg Log Dashboard</h2>
+    <table id="eggLogTable"></table>
+  </div>
+
+  <script>
+    const scriptUrl = "https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_URL/exec";
+
+    fetch(scriptUrl)
+      .then(res => res.json())
+      .then(data => {
+        const table = document.getElementById("eggLogTable");
+        if (!Array.isArray(data) || data.length === 0) {
+          table.innerHTML = "<tr><td>No egg log data available.</td></tr>";
+          return;
+        }
+
+        const headers = Object.keys(data[0]);
+        const thead = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+        const rows = data.map(row => {
+          return "<tr>" + headers.map(h => `<td>${row[h] || ""}</td>`).join("") + "</tr>";
+        }).join("");
+
+        table.innerHTML = thead + rows;
+      })
+      .catch(error => {
+        console.error("Error loading egg log data:", error);
+      });
+  </script>
+</body>
+</html>
