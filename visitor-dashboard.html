@@ -49,19 +49,14 @@
         let rows = data.map(row => {
           return "<tr>" + headers.map(h => {
             if (h.toLowerCase().includes("signature")) {
-              return `<td><img class="signature" src="${extractImageUrl(row[h])}" alt="Signature"></td>`;
-            }
+  return `<td><img class="signature" src="${row[h]}" alt="Signature"></td>`;
+}
             return `<td>${row[h] || ""}</td>`;
           }).join("") + "</tr>";
         }).join("");
 
         table.innerHTML = thead + rows;
       });
-
-    function extractImageUrl(formula) {
-      const match = /IMAGE\("([^"]+)"\)/.exec(formula);
-      return match ? match[1] : "";
-    }
   </script>
 </body>
 </html>
