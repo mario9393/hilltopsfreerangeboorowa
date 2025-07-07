@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hilltops Daily Egg Packing Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .chart-container {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+    canvas {
+      width: 100% !important;
+      height: 500px !important;
+    }
+  </style>
+</head>
+<body>
+  <h2>Hilltops Daily Egg Packing Dashboard</h2>
+  <div class="chart-container">
+    <canvas id="packingChart"></canvas>
+  </div>
+
+  <script>
+    async function fetchPackingData() {
+      const response = await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec");
+      return await response.json();
+    }
+
+    function renderChart(data) {
+      const labels = data.map(entry => entry.date);
+
+      const sizes = ["600", "700", "800", "Small", "Large"];
+      const cartonDatasets = sizes.map(size => ({
+        label: `${size}g Cartons`,
+        data: data.map(entry => entry[`carton${size}`] || 0),
+        stack: "Cartons"
+      }));
+
+      const looseDatasets = sizes.map(size => ({
+        label: `${size}g Loose`,
+        data: data.map(entry => entry[`loose${size}`] || 0),
+        stack: "Loose"
+      }));
+
+      new Chart(document.getElementById("packingChart"), {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [...cartonDatasets, ...looseDatasets]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { stacked: true },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Eggs'
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Daily Packed Eggs by Size (Cartons vs Loose)'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          }
+        }
+      });
+    }
+
+    fetchPackingData().then(renderChart);
+  </script>
+</body>
+</html>
