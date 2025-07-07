@@ -39,22 +39,26 @@
       const response = await fetch("https://script.google.com/macros/s/AKfycbyBypYpuX23l2RWDoP6PQgORI6OZzgpSmgj5PqfaNgGkWv5i76iOT-zWAq81mQL8S87xQ/exec");
       return await response.json();
     }
-
+  function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  return date.toISOString().split("T")[0]; // Only keeps 'YYYY-MM-DD'
+  }
     function renderChart(data) {
-      const labels = data.map(entry => entry.date);
+      const labels = data.map(entry => formatDate(entry.date));
 
       const sizes = ["600", "700", "800", "Small", "Large"];
-      const cartonDatasets = sizes.map(size => ({
-        label: `${size}g Cartons`,
-        data: data.map(entry => entry[`carton${size}`] || 0),
-        stack: "Cartons"
-      }));
+const cartonDatasets = sizes.map(size => ({
+  label: `${["600", "700", "800"].includes(size) ? size + "g" : size} Cartons`,
+  data: data.map(entry => entry[`carton${size}`] || 0),
+  stack: "Cartons"
+}));
 
-      const looseDatasets = sizes.map(size => ({
-        label: `${size}g Loose`,
-        data: data.map(entry => entry[`loose${size}`] || 0),
-        stack: "Loose"
-      }));
+const looseDatasets = sizes.map(size => ({
+  label: `${["600", "700", "800"].includes(size) ? size + "g" : size} Loose`,
+  data: data.map(entry => entry[`loose${size}`] || 0),
+  stack: "Loose"
+}));
+
 
       new Chart(document.getElementById("packingChart"), {
         type: "bar",
