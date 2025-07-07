@@ -40,34 +40,44 @@
     <hr>
     <h4>Breakdown by Egg Type</h4>
     <div class="box600">
-      <label>600g Egg Cartons</label>
-      <input type="number" id="carton600" name="carton600" required>
-      <label>Loose 600g Eggs</label>
+      <label>Total 600g Loose Eggs</label>
       <input type="number" id="loose600geggs" name="loose600geggs" required>
+      <label>600g Egg Cartons (auto)</label>
+      <input type="number" id="carton600" name="carton600" class="readonly" readonly>
+      <label>Remaining Loose 600g Eggs</label>
+      <input type="number" id="loose600Remaining" class="readonly" readonly>
     </div>
     <div class="box700">
-      <label>700g Egg Cartons</label>
-      <input type="number" id="carton700" name="carton700" required>
-      <label>Loose 700g Eggs</label>
+      <label>Total 700g Loose Eggs</label>
       <input type="number" id="loose700geggs" name="loose700geggs" required>
+      <label>700g Egg Cartons (auto)</label>
+      <input type="number" id="carton700" name="carton700" class="readonly" readonly>
+      <label>Remaining Loose 700g Eggs</label>
+      <input type="number" id="loose700Remaining" class="readonly" readonly>
     </div>
     <div class="box800">
-      <label>800g Egg Cartons</label>
-      <input type="number" id="carton800" name="carton800" required>
-      <label>Loose 800g Eggs</label>
+      <label>Total 800g Loose Eggs</label>
       <input type="number" id="loose800geggs" name="loose800geggs" required>
+      <label>800g Egg Cartons (auto)</label>
+      <input type="number" id="carton800" name="carton800" class="readonly" readonly>
+      <label>Remaining Loose 800g Eggs</label>
+      <input type="number" id="loose800Remaining" class="readonly" readonly>
     </div>
     <div class="boxSmall">
-      <label>Very Small Egg Cartons</label>
-      <input type="number" id="cartonSmall" name="cartonSmall" required>
-      <label>Loose Very Small Eggs</label>
+      <label>Total Very Small Loose Eggs</label>
       <input type="number" id="looseverysmalleggs" name="looseverysmalleggs" required>
+      <label>Very Small Egg Cartons (auto)</label>
+      <input type="number" id="cartonSmall" name="cartonSmall" class="readonly" readonly>
+      <label>Remaining Loose Very Small Eggs</label>
+      <input type="number" id="looseSmallRemaining" class="readonly" readonly>
     </div>
     <div class="boxLarge">
-      <label>Very Large Egg Cartons</label>
-      <input type="number" id="cartonLarge" name="cartonLarge" required>
-      <label>Loose Large Eggs</label>
+      <label>Total Very Large Loose Eggs</label>
       <input type="number" id="looseverylargeeggs" name="looseverylargeeggs" required>
+      <label>Very Large Egg Cartons (auto)</label>
+      <input type="number" id="cartonLarge" name="cartonLarge" class="readonly" readonly>
+      <label>Remaining Loose Very Large Eggs</label>
+      <input type="number" id="looseLargeRemaining" class="readonly" readonly>
     </div>
 
     <hr>
@@ -112,32 +122,30 @@
   </form>
 
   <script>
-    // Calc logic: all cartons ×12 + all loose for all types
-    function calcTotals() {
-      const c600 = parseInt(document.getElementById("carton600").value) || 0;
-      const l600 = parseInt(document.getElementById("loose600geggs").value) || 0;
-      const c700 = parseInt(document.getElementById("carton700").value) || 0;
-      const l700 = parseInt(document.getElementById("loose700geggs").value) || 0;
-      const c800 = parseInt(document.getElementById("carton800").value) || 0;
-      const l800 = parseInt(document.getElementById("loose800geggs").value) || 0;
-      const cSmall = parseInt(document.getElementById("cartonSmall").value) || 0;
-      const lSmall = parseInt(document.getElementById("looseverysmalleggs").value) || 0;
-      const cLarge = parseInt(document.getElementById("cartonLarge").value) || 0;
-      const lLarge = parseInt(document.getElementById("looseverylargeeggs").value) || 0;
+    
+  function calcTotals() {
+  function calcCartons(looseInputId, cartonOutputId, looseRemainOutputId) {
+    const loose = parseInt(document.getElementById(looseInputId).value) || 0;
+    const cartons = Math.floor(loose / 12);
+    const remain = loose % 12;
+    document.getElementById(cartonOutputId).value = cartons;
+    document.getElementById(looseRemainOutputId).value = remain;
+    return cartons * 12 + remain;
+  }
 
-      const totalPacked =
-        c600 * 12 + l600 +
-        c700 * 12 + l700 +
-        c800 * 12 + l800 +
-        cSmall * 12 + lSmall +
-        cLarge * 12 + lLarge;
+  const totalPacked =
+    calcCartons("loose600geggs", "carton600", "loose600Remaining") +
+    calcCartons("loose700geggs", "carton700", "loose700Remaining") +
+    calcCartons("loose800geggs", "carton800", "loose800Remaining") +
+    calcCartons("looseverysmalleggs", "cartonSmall", "looseSmallRemaining") +
+    calcCartons("looseverylargeeggs", "cartonLarge", "looseLargeRemaining");
 
-      document.getElementById("totalPackedEggs").value = totalPacked;
-      const totalSent = parseInt(document.getElementById("totalEggs").value) || 0;
-      const broken = Math.max(0, totalSent - totalPacked);
-      document.getElementById("brokenEggs").value = broken;
+  document.getElementById("totalPackedEggs").value = totalPacked;
 
-  // Percentages
+  const totalSent = parseInt(document.getElementById("totalEggs").value) || 0;
+  const broken = Math.max(0, totalSent - totalPacked);
+  document.getElementById("brokenEggs").value = broken;
+
   let packedPercent = 0, brokenPercent = 0;
   if (totalSent > 0) {
     packedPercent = (totalPacked / totalSent) * 100;
@@ -145,19 +153,17 @@
   }
   document.getElementById("packedPercent").value = packedPercent.toFixed(1);
   document.getElementById("brokenPercent").value = brokenPercent.toFixed(1);
-    }
+}
+
 
     // Attach to all inputs for breakdown
-    [
-      "carton600", "loose600geggs",
-      "carton700", "loose700geggs",
-      "carton800", "loose800geggs",
-      "cartonSmall", "looseverysmalleggs",
-      "cartonLarge", "looseverylargeeggs",
-      "totalEggs"
-    ].forEach(id => {
-      document.getElementById(id).addEventListener("input", calcTotals);
-    });
+[
+  "loose600geggs", "loose700geggs",
+  "loose800geggs", "looseverysmalleggs",
+  "looseverylargeeggs", "totalEggs"
+].forEach(id => {
+  document.getElementById(id).addEventListener("input", calcTotals);
+});
 
     window.onload = () => {
       const now = new Date();
