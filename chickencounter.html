@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hilltops Chicken Counter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f9f6;
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #2e7d32;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input[type="file"] {
+      margin-top: 15px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1b5e20;
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+    }
+    .link-btn {
+      margin-top: 30px;
+      display: inline-block;
+      text-decoration: none;
+      background-color: #039be5;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐔 Hilltops Intelligent Poultry Counter</h1>
+    <p>Select a photo taken from drone or phone to count chickens.</p>
+
+    <input type="file" accept="image/*" disabled />
+    <div class="note">📸 Upload currently works through Google Colab.<br>
+      Click below to open the detection tool.</div>
+
+    <a href="https://colab.research.google.com/" class="link-btn" target="_blank">
+      🚀 Open Chicken Counter in Colab
+    </a>
+  </div>
+</body>
+</html>
