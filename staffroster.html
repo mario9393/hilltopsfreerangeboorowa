@@ -106,13 +106,41 @@
 </form>
 
 <script>
+<script>
   const form = document.getElementById('rosterForm');
   const replacementSection = document.getElementById('replacementSection');
+  const startTimeInput = document.getElementById('startTime');
+  const endTimeInput = document.getElementById('endTime');
+  const plannedHoursInput = document.getElementById('plannedHours');
 
   function toggleReplacement() {
     const attended = document.getElementById('attended').value;
     replacementSection.style.display = attended === 'No' ? 'block' : 'none';
   }
+
+  function calculatePlannedHours() {
+    const start = startTimeInput.value;
+    const end = endTimeInput.value;
+
+    if (start && end) {
+      const [startHour, startMin] = start.split(":").map(Number);
+      const [endHour, endMin] = end.split(":").map(Number);
+
+      let startTotal = startHour * 60 + startMin;
+      let endTotal = endHour * 60 + endMin;
+
+      // Handle overnight shifts (e.g., 11PM to 4AM)
+      if (endTotal < startTotal) endTotal += 24 * 60;
+
+      const durationMins = endTotal - startTotal;
+      const hours = (durationMins / 60).toFixed(2);
+
+      plannedHoursInput.value = hours;
+    }
+  }
+
+  startTimeInput.addEventListener("change", calculatePlannedHours);
+  endTimeInput.addEventListener("change", calculatePlannedHours);
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -134,6 +162,8 @@
       alert("Submission failed: " + err.message);
     }
   });
+</script>
+
 </script>
 
 </body>
