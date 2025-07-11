@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weekly Roster Assignment - Hilltops Farm</title>
+  <meta charset="UTF-8" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #eef4f7;
+    }
+
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 700px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Weekly Roster Assignment</h2>
+
+  <form id="rosterForm">
+    <label for="weekStart">Week Start Date</label>
+    <input type="date" id="weekStart" name="Week Start" required>
+
+    <label for="date">Task Date</label>
+    <input type="date" id="date" name="Date" required>
+
+    <label for="task">Task</label>
+    <input type="text" id="task" name="Task" placeholder="e.g., Egg Collection, Opening of Taps" required>
+
+    <label for="staff">Staff Assigned</label>
+    <select id="staff" name="Staff Assigned" multiple size="5" required>
+      <option value="Donna">Donna</option>
+      <option value="Peter">Peter</option>
+      <option value="Sheyla">Sheyla</option>
+      <option value="John">John</option>
+      <option value="Liam">Liam</option>
+    </select>
+
+    <label for="startTime">Start Time</label>
+    <input type="time" id="startTime" name="Start Time" required>
+
+    <label for="endTime">End Time</label>
+    <input type="time" id="endTime" name="End Time" required>
+
+    <label for="notes">Notes (optional)</label>
+    <textarea id="notes" name="Notes" rows="3" placeholder="e.g., Daily task, recurring, etc."></textarea>
+
+    <button type="submit">Submit Task</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("rosterForm");
+
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const selectedOptions = [...formData.getAll("Staff Assigned")];
+      const data = {
+        "Week Start": formData.get("Week Start"),
+        "Date": formData.get("Date"),
+        "Task": formData.get("Task"),
+        "Staff Assigned": selectedOptions.join(", "),
+        "Start Time": formData.get("Start Time"),
+        "End Time": formData.get("End Time"),
+        "Notes": formData.get("Notes")
+      };
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwuOctZL4FpcfZ2smpSnC-1vr2ZdBWi9Zsf44YYpZXVl2pMV7oDvxS0NBMmQcUyPh_OiA/exec", {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" }
+        });
+
+        const result = await response.text();
+        alert(result === "Success" ? "Roster task submitted successfully!" : result);
+        form.reset();
+      } catch (error) {
+        alert("Error submitting form: " + error.message);
+      }
+    });
+  </script>
+
+</body>
+</html>
