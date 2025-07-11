@@ -117,27 +117,28 @@
     replacementSection.style.display = attended === 'No' ? 'block' : 'none';
   }
 
-  function calculatePlannedHours() {
-    const start = startTimeInput.value;
-    const end = endTimeInput.value;
+function calculatePlannedHours() {
+  const start = startTimeInput.value;
+  const end = endTimeInput.value;
 
-    if (start && end) {
-      const [startHour, startMin] = start.split(":").map(Number);
-      const [endHour, endMin] = end.split(":").map(Number);
+  console.log("Start:", start, "End:", end);  // Debug log
 
-      let startTotal = startHour * 60 + startMin;
-      let endTotal = endHour * 60 + endMin;
+  if (start && end) {
+    const [startHour, startMin] = start.split(":").map(Number);
+    const [endHour, endMin] = end.split(":").map(Number);
 
-      // Handle overnight shifts (e.g., 11PM to 4AM)
-      if (endTotal < startTotal) endTotal += 24 * 60;
+    let startTotal = startHour * 60 + startMin;
+    let endTotal = endHour * 60 + endMin;
 
-      const durationMins = endTotal - startTotal;
-      const hours = (durationMins / 60).toFixed(2);
+    if (endTotal < startTotal) endTotal += 24 * 60;
 
-      plannedHoursInput.value = hours;
-    }
+    const durationMins = endTotal - startTotal;
+    const hours = (durationMins / 60).toFixed(2);
+
+    plannedHoursInput.value = hours;
   }
-
+}
+  
   startTimeInput.addEventListener("change", calculatePlannedHours);
   endTimeInput.addEventListener("change", calculatePlannedHours);
 
