@@ -110,12 +110,21 @@
       <input type="text" name="description" placeholder="Letter Description" required>
       <input type="date" name="dueDate" required>
 
-      <select name="status" required>
+        <select name="status" id="status" required onchange="handleStatusChange()">
         <option value="">Payment Status</option>
         <option value="Pending">Pending</option>
         <option value="Paid">Paid</option>
         <option value="Overdue">Overdue</option>
       </select>
+
+    <div id="receiptFields" style="display: none;">
+    <input type="text" name="receiptRef" id="receiptRef" placeholder="Receipt Reference Number">
+    <input type="file" name="receiptPhoto" id="receiptPhoto" accept="image/*">
+    </div>
+
+    <div id="reminderFields" style="display: none;">
+    <input type="date" name="reminderDate" id="reminderDate" placeholder="Reminder / Follow-up Date">
+    </div>
 
       <input type="text" name="submittedBy" placeholder="Submitted By" required>
       <input type="file" name="letterPhoto" accept="image/*" required>
@@ -181,6 +190,31 @@
       reader.readAsDataURL(photoFile);
     }
   });
+  function handleStatusChange() {
+  const status = document.getElementById("status").value;
+  const receiptFields = document.getElementById("receiptFields");
+  const reminderFields = document.getElementById("reminderFields");
+
+  if (status === "Paid") {
+    receiptFields.style.display = "block";
+    reminderFields.style.display = "none";
+    document.getElementById("receiptRef").required = true;
+    document.getElementById("receiptPhoto").required = true;
+    document.getElementById("reminderDate").required = false;
+  } else if (status === "Pending" || status === "Overdue") {
+    receiptFields.style.display = "none";
+    reminderFields.style.display = "block";
+    document.getElementById("receiptRef").required = false;
+    document.getElementById("receiptPhoto").required = false;
+    document.getElementById("reminderDate").required = true;
+  } else {
+    receiptFields.style.display = "none";
+    reminderFields.style.display = "none";
+    document.getElementById("receiptRef").required = false;
+    document.getElementById("receiptPhoto").required = false;
+    document.getElementById("reminderDate").required = false;
+  }
+}
 </script>
 
 </body>
