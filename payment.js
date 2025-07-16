@@ -19,7 +19,7 @@ document.getElementById("paymentForm").addEventListener("submit", async function
       letterPhoto: base64Photo
     };
 
-    await fetch("YOUR_WEB_APP_URL", {
+    await fetch("https://script.google.com/macros/s/AKfycbwNqp5XU-7L_YYzHVOFuPg6_G4owbtCbTX6xk7xPE7chrbieAzRe3FI9AOJfG6j3uK4/exec", {
       method: "POST",
       body: JSON.stringify(payload),
       headers: {
