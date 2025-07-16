@@ -1,76 +1,177 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Letter & Payment Tracker</title>
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 20px;
+      background: url('https://www.hilltopsfreerangeboorowa.org/background.jpg') no-repeat center center fixed;
+      background-size: cover;
     }
-    form {
-      background: white;
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.92);
       padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      max-width: 500px;
       margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    input, select, textarea {
+
+    .wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 30px 15px;
+    }
+
+    input, select {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
+      margin: 10px 0;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
-    button {
-      margin-top: 15px;
-      padding: 12px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
+
+    button[type="submit"] {
       width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      border: none;
       cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    button[type="submit"]:active {
+      background-color: #3e8e41;
+      transform: scale(0.97);
+    }
+
+    .logo {
+      display: block;
+      max-width: 150px;
+      width: 100%;
+      height: auto;
+      margin: 0 auto 10px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 14px;
+      padding: 20px;
+      background-color: rgba(255,255,255,0.9);
+      margin-top: 20px;
+    }
+
+    @media screen and (max-width: 600px) {
+      .form-container {
+        border-radius: 10px;
+        padding: 15px;
+      }
+      h2 {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
 <body>
-  <h2 style="text-align:center;">Letter & Payment Tracker</h2>
-  <form id="paymentForm">
-    <label>Company</label>
-    <select name="company" required>
-      <option value="">Select</option>
-      <option value="Hilltops Free Range Pty Ltd">Hilltops Free Range Pty Ltd</option>
-      <option value="Technomics International Pty Ltd">Technomics International Pty Ltd</option>
-      <option value="Telsoft Pty Ltd">Telsoft Pty Ltd</option>
-      <option value="Personal">Personal</option>
-    </select>
 
-    <label>Letter Description</label>
-    <textarea name="description" required></textarea>
+<div class="wrapper">
+  <div class="form-container">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <div style="font-size: 40px;">🐓</div>
+      <div style="font-family: 'Georgia', serif; font-size: 32px; color: #EBC191; font-weight: bold; letter-spacing: 2px;">HILLTOPS</div>
+      <div style="width: 60px; height: 2px; background-color: #EBC191; margin: 5px auto;"></div>
+      <div style="font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 4px; color: #EBC191;">FREE RANGE EGGS</div>
+    </div>
 
-    <label>Due Date</label>
-    <input type="date" name="dueDate" required>
+    <h2 style="text-align: center;">Letter & Payment Tracker</h2>
+    <form id="paymentForm" enctype="multipart/form-data">
+      <select name="company" required>
+        <option value="">Select Company</option>
+        <option value="Hilltops Free Range Pty Ltd">Hilltops Free Range Pty Ltd</option>
+        <option value="Technomics International Pty Ltd">Technomics International Pty Ltd</option>
+        <option value="Telsoft Pty Ltd">Telsoft Pty Ltd</option>
+      </select>
 
-    <label>Payment Status</label>
-    <select name="status" required>
-      <option value="">Select</option>
-      <option value="Pending">Pending</option>
-      <option value="Paid">Paid</option>
-    </select>
+      <input type="text" name="description" placeholder="Letter Description" required>
+      <input type="date" name="dueDate" required>
 
-    <label>Upload Letter (Photo)</label>
-    <input type="file" name="letterPhoto" accept="image/*" capture="environment" required>
+      <select name="status" required>
+        <option value="">Payment Status</option>
+        <option value="Pending">Pending</option>
+        <option value="Paid">Paid</option>
+        <option value="Overdue">Overdue</option>
+      </select>
 
-    <label>Submitted By</label>
-    <input type="text" name="submittedBy" required>
+      <input type="text" name="submittedBy" placeholder="Submitted By" required>
+      <input type="file" name="letterPhoto" accept="image/*" required>
 
-    <button type="submit">Submit</button>
-  </form>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</div>
 
-  <script src="payment.js"></script>
+<footer>
+  <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
+  <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
+</footer>
+
+<script>
+  document.getElementById("paymentForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const photoFile = formData.get("letterPhoto");
+
+    const reader = new FileReader();
+    reader.onloadend = async function () {
+      const base64Photo = reader.result;
+
+      const payload = {
+        company: formData.get("company"),
+        description: formData.get("description"),
+        dueDate: formData.get("dueDate"),
+        status: formData.get("status"),
+        submittedBy: formData.get("submittedBy"),
+        letterPhoto: base64Photo
+      };
+
+      await fetch("https://script.google.com/macros/s/AKfycbwNqp5XU-7L_YYzHVOFuPg6_G4owbtCbTX6xk7xPE7chrbieAzRe3FI9AOJfG6j3uK4/exec", {
+        method: "POST",
+        mode: 'no-cors',
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      form.innerHTML = `
+        <div style="text-align: center; font-size: 18px; padding: 20px;">
+          ✅ Thank you! Your letter has been logged successfully.
+        </div>
+      `;
+    };
+
+    if (photoFile) {
+      reader.readAsDataURL(photoFile);
+    }
+  });
+</script>
+
 </body>
 </html>
