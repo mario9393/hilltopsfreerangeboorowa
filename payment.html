@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Letter & Payment Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      width: 100%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">Letter & Payment Tracker</h2>
+  <form id="paymentForm">
+    <label>Company</label>
+    <select name="company" required>
+      <option value="">Select</option>
+      <option value="Hilltops Free Range Pty Ltd">Hilltops Free Range Pty Ltd</option>
+      <option value="Technomics International Pty Ltd">Technomics International Pty Ltd</option>
+      <option value="Telsoft Pty Ltd">Telsoft Pty Ltd</option>
+      <option value="Personal">Personal</option>
+    </select>
+
+    <label>Letter Description</label>
+    <textarea name="description" required></textarea>
+
+    <label>Due Date</label>
+    <input type="date" name="dueDate" required>
+
+    <label>Payment Status</label>
+    <select name="status" required>
+      <option value="">Select</option>
+      <option value="Pending">Pending</option>
+      <option value="Paid">Paid</option>
+    </select>
+
+    <label>Upload Letter (Photo)</label>
+    <input type="file" name="letterPhoto" accept="image/*" capture="environment" required>
+
+    <label>Submitted By</label>
+    <input type="text" name="submittedBy" required>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script src="payment.js"></script>
+</body>
+</html>
