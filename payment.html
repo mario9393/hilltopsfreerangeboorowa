@@ -138,6 +138,10 @@
     const formData = new FormData(form);
     const photoFile = formData.get("letterPhoto");
 
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
     const reader = new FileReader();
     reader.onloadend = async function () {
       const base64Photo = reader.result;
@@ -151,20 +155,26 @@
         letterPhoto: base64Photo
       };
 
-      await fetch("https://script.google.com/macros/s/AKfycbwNqp5XU-7L_YYzHVOFuPg6_G4owbtCbTX6xk7xPE7chrbieAzRe3FI9AOJfG6j3uK4/exec", {
-        method: "POST",
-        mode: 'no-cors',
-        body: JSON.stringify(payload),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbwNqp5XU-7L_YYzHVOFuPg6_G4owbtCbTX6xk7xPE7chrbieAzRe3FI9AOJfG6j3uK4/exec", {
+          method: "POST",
+          mode: 'no-cors',
+          body: JSON.stringify(payload),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
 
-      form.innerHTML = `
-        <div style="text-align: center; font-size: 18px; padding: 20px;">
-          ✅ Thank you! Your letter has been logged successfully.
-        </div>
-      `;
+        form.innerHTML = `
+          <div style="text-align: center; font-size: 18px; padding: 20px;">
+            ✅ Thank you! Your letter has been logged successfully.
+          </div>
+        `;
+      } catch (error) {
+        alert('Something went wrong. Please try again.');
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit";
+      }
     };
 
     if (photoFile) {
