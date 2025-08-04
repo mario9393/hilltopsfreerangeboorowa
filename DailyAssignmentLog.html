@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hilltops Daily Worker Assignment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+    form { background: #fff; padding: 20px; border-radius: 10px; max-width: 900px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #333; }
+    label { font-weight: bold; margin-top: 10px; display: block; }
+    input, select, textarea {
+      width: 100%; padding: 10px; margin: 5px 0 15px 0;
+      border: 1px solid #ccc; border-radius: 6px;
+    }
+    button {
+      background: #4CAF50; color: white; border: none;
+      padding: 12px 20px; font-size: 16px; border-radius: 6px; cursor: pointer;
+    }
+    button:hover { background: #45a049; }
+    .section { border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-bottom: 20px; background: #fafafa; }
+  </style>
+</head>
+<body>
+
+<form id="assignmentForm">
+  <h2>Hilltops Daily Worker Assignment Log</h2>
+
+  <label>Date:</label>
+  <input type="date" id="date" required />
+
+  <div class="section">
+    <h3>Field Work Assignment (Per Flock)</h3>
+    <label>Flock ID:</label>
+    <select id="flockId" required>
+      <option value="">-- Select Flock --</option>
+      <option value="Flock 1">Flock 1</option>
+      <option value="Flock 2">Flock 2</option>
+      <option value="Flock 3">Flock 3</option>
+      <!-- Add up to Flock 15 if needed -->
+    </select>
+
+    <label>Field Worker Name:</label>
+    <input type="text" id="fieldWorker" required />
+
+    <label>Hours Worked:</label>
+    <input type="number" id="fieldHours" min="0" step="0.5" required />
+  </div>
+
+  <div class="section">
+    <h3>Factory Work Assignment</h3>
+    <label>Factory Worker Name:</label>
+    <input type="text" id="factoryWorker" />
+
+    <label>Assigned Task:</label>
+    <select id="factoryTask">
+      <option value="">-- Select Task --</option>
+      <option value="Egg Washing">Egg Washing</option>
+      <option value="Tray Cleaning">Tray Cleaning</option>
+      <option value="Packing Eggs">Packing Eggs</option>
+      <option value="Machine Operation">Machine Operation</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label>Hours Worked:</label>
+    <input type="number" id="factoryHours" min="0" step="0.5" />
+  </div>
+
+  <label>Supervisor Name:</label>
+  <input type="text" id="supervisor" required />
+
+  <button type="submit">Submit</button>
+  <div id="message"></div>
+</form>
+
+<script>
+document.getElementById('assignmentForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const data = {
+    date: document.getElementById('date').value,
+    flockId: document.getElementById('flockId').value,
+    fieldWorker: document.getElementById('fieldWorker').value,
+    fieldHours: document.getElementById('fieldHours').value,
+    factoryWorker: document.getElementById('factoryWorker').value,
+    factoryTask: document.getElementById('factoryTask').value,
+    factoryHours: document.getElementById('factoryHours').value,
+    supervisor: document.getElementById('supervisor').value
+  };
+
+  try {
+    await fetch('https://SCRIPT_URL_HERE', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    document.getElementById('message').textContent = '✅ Assignment logged!';
+    document.getElementById('assignmentForm').reset();
+  } catch (err) {
+    document.getElementById('message').textContent = '❌ Error logging data.';
+  }
+});
+</script>
+
+</body>
+</html>
