@@ -15,7 +15,7 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
     }
     input, select {
@@ -52,6 +52,9 @@
       margin: 10px 0;
       font-weight: bold;
     }
+    .fixAttemptDiv, .fixResultDiv {
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -75,6 +78,7 @@
     <p>Daily Requirement: 268.8 L</p>
     <p>Estimated Days Remaining: <span id="daysRemaining">-</span> days</p>
 
+    <!-- Valve opened -->
     <label>Was the main valve to tank opened?</label>
     <select id="valveOpened" name="valveOpened" required>
       <option value="">Select</option>
@@ -86,6 +90,7 @@
       <input type="text" id="valveOpenedReason" name="valveOpenedReason" />
     </div>
 
+    <!-- Water flowing -->
     <label>Is water flowing into the tank?</label>
     <select id="waterFlowing" name="waterFlowing" required>
       <option value="">Select</option>
@@ -102,8 +107,28 @@
         <option value="Other">Other</option>
       </select>
       <input type="text" id="waterFlowingOtherReason" name="waterFlowingOtherReason" placeholder="If Other, specify" style="display:none;" />
+
+      <!-- Fix attempt block -->
+      <div class="fixAttemptDiv" id="waterFlowFixDiv" style="display:none;">
+        <label>Did you try to fix it?</label>
+        <select id="waterFlowFixAttempt" name="waterFlowFixAttempt">
+          <option value="">Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+        <div class="fixResultDiv" id="waterFlowFixResultDiv" style="display:none;">
+          <label>If yes, what was the result?</label>
+          <select id="waterFlowFixResult" name="waterFlowFixResult">
+            <option value="">Select Result</option>
+            <option value="Fixed and working now">Fixed and working now</option>
+            <option value="Not fixed">Not fixed</option>
+            <option value="Fixed temporarily">Fixed temporarily</option>
+          </select>
+        </div>
+      </div>
     </div>
 
+    <!-- Drinker lines -->
     <label>Are drinker lines working?</label>
     <select id="drinkerWorking" name="drinkerWorking" required>
       <option value="">Select</option>
@@ -120,8 +145,28 @@
         <option value="Other">Other</option>
       </select>
       <input type="text" id="drinkerOtherReason" name="drinkerOtherReason" placeholder="If Other, specify" style="display:none;" />
+
+      <!-- Fix attempt -->
+      <div class="fixAttemptDiv" id="drinkerFixDiv" style="display:none;">
+        <label>Did you try to fix it?</label>
+        <select id="drinkerFixAttempt" name="drinkerFixAttempt">
+          <option value="">Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+        <div class="fixResultDiv" id="drinkerFixResultDiv" style="display:none;">
+          <label>If yes, what was the result?</label>
+          <select id="drinkerFixResult" name="drinkerFixResult">
+            <option value="">Select Result</option>
+            <option value="Fixed and working now">Fixed and working now</option>
+            <option value="Not fixed">Not fixed</option>
+            <option value="Fixed temporarily">Fixed temporarily</option>
+          </select>
+        </div>
+      </div>
     </div>
 
+    <!-- Troughs -->
     <label>Were the water troughs filled?</label>
     <select id="troughFilled" name="troughFilled" required>
       <option value="">Select</option>
@@ -131,7 +176,26 @@
     <div id="troughNoReasonDiv" style="display:none;">
       <label>If No, why?</label>
       <input type="text" id="troughNoReason" name="troughNoReason" />
+      <!-- Fix attempt -->
+      <div class="fixAttemptDiv" id="troughFixDiv" style="display:none;">
+        <label>Did you try to fix it?</label>
+        <select id="troughFixAttempt" name="troughFixAttempt">
+          <option value="">Select</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+        <div class="fixResultDiv" id="troughFixResultDiv" style="display:none;">
+          <label>If yes, what was the result?</label>
+          <select id="troughFixResult" name="troughFixResult">
+            <option value="">Select Result</option>
+            <option value="Fixed and working now">Fixed and working now</option>
+            <option value="Not fixed">Not fixed</option>
+            <option value="Fixed temporarily">Fixed temporarily</option>
+          </select>
+        </div>
+      </div>
     </div>
+
     <div id="troughValveDiv" style="display:none;">
       <label>Was the valve to the trough closed after fill?</label>
       <select id="valveClosed" name="valveClosed">
@@ -142,150 +206,209 @@
       <div id="valveLeftOpenReasonDiv" style="display:none;">
         <label>If No, why left open?</label>
         <input type="text" id="valveLeftOpenReason" name="valveLeftOpenReason" />
+
+        <!-- Fix attempt -->
+        <div class="fixAttemptDiv" id="valveFixDiv" style="display:none;">
+          <label>Did you try to fix it?</label>
+          <select id="valveFixAttempt" name="valveFixAttempt">
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+          <div class="fixResultDiv" id="valveFixResultDiv" style="display:none;">
+            <label>If yes, what was the result?</label>
+            <select id="valveFixResult" name="valveFixResult">
+              <option value="">Select Result</option>
+              <option value="Fixed and working now">Fixed and working now</option>
+              <option value="Not fixed">Not fixed</option>
+              <option value="Fixed temporarily">Fixed temporarily</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
-
     <button type="submit">Submit</button>
     <p id="message"></p>
   </form>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const flock = urlParams.get("flock");
-    if (flock) document.getElementById("flockId").value = flock;
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const flock = urlParams.get("flock");
+  if (flock) document.getElementById("flockId").value = flock;
 
-    const now = new Date();
-    document.getElementById("date").valueAsDate = now;
-    document.getElementById("time").value = now.toTimeString().slice(0, 5);
+  const now = new Date();
+  document.getElementById("date").valueAsDate = now;
+  document.getElementById("time").value = now.toTimeString().slice(0, 5);
 
-    const flockCoordinates = {
-      "Flock 24": { lat: -34.352939, lng: 148.700403 },
-      "Flock 29": { lat: -34.349811, lng: 148.701231 },
-      "Flock 32": { lat: -34.345914, lng: 148.699978 },
-      "Flock 34": { lat: -34.352742, lng: 148.695286 },
-      "Flock 35": { lat: -34.351803, lng: 148.696808 },
-      "Flock 36": { lat: -34.352922, lng: 148.703650 },
-      "Flock 37": { lat: -34.351092, lng: 148.707942 },
-      "Flock 38": { lat: -34.348275, lng: 148.701122 },
-      "Flock 39": { lat: -34.350797, lng: 148.704897 },
-      "Flock 40": { lat: -34.348503, lng: 148.702567 },
-      "Flock 41": { lat: -34.353400, lng: 148.706169 },
-      "Flock 42": { lat: -34.353883, lng: 148.705925 },
-      "Flock 43": { lat: -34.353933, lng: 148.706528 },
-      "Flock 44": { lat: -34.348578, lng: 148.705606 },
-      "Flock 45": { lat: -34.345744, lng: 148.702875 },
-      "Flock 46": { lat: -34.345700, lng: 148.702890 }
+  const flockCoordinates = {
+    "Flock 24": { lat: -34.352939, lng: 148.700403 },
+    "Flock 29": { lat: -34.349811, lng: 148.701231 },
+    "Flock 32": { lat: -34.345914, lng: 148.699978 },
+    "Flock 34": { lat: -34.352742, lng: 148.695286 },
+    "Flock 35": { lat: -34.351803, lng: 148.696808 },
+    "Flock 36": { lat: -34.352922, lng: 148.703650 },
+    "Flock 37": { lat: -34.351092, lng: 148.707942 },
+    "Flock 38": { lat: -34.348275, lng: 148.701122 },
+    "Flock 39": { lat: -34.350797, lng: 148.704897 },
+    "Flock 40": { lat: -34.348503, lng: 148.702567 },
+    "Flock 41": { lat: -34.353400, lng: 148.706169 },
+    "Flock 42": { lat: -34.353883, lng: 148.705925 },
+    "Flock 43": { lat: -34.353933, lng: 148.706528 },
+    "Flock 44": { lat: -34.348578, lng: 148.705606 }
+  };
+
+  let submitLat = "", submitLng = "", proximityStatus = "Unknown";
+
+  // Get location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      submitLat = pos.coords.latitude;
+      submitLng = pos.coords.longitude;
+      document.getElementById("message").textContent = "📍 Location captured.";
+    }, () => {
+      proximityStatus = "Location Denied";
+      document.getElementById("message").textContent = "❌ Location access denied.";
+    });
+  }
+
+  // Liters & Days calculation
+  document.getElementById("level").addEventListener("input", () => {
+    const percent = parseFloat(document.getElementById("level").value) || 0;
+    const liters = (percent / 100) * 1000;
+    const days = liters / 268.8;
+    document.getElementById("litersRemaining").textContent = liters.toFixed(1);
+    document.getElementById("daysRemaining").textContent = days.toFixed(1);
+  });
+
+  // Conditional Display Handlers
+  function show(id, condition) {
+    document.getElementById(id).style.display = condition ? "block" : "none";
+  }
+
+  // Water Flow Logic
+  waterFlowing.addEventListener("change", () => {
+    const no = waterFlowing.value === "No";
+    show("waterFlowingReasonDiv", no);
+    show("waterFlowFixDiv", no);
+  });
+  waterFlowingReason.addEventListener("change", () => {
+    show("waterFlowingOtherReason", waterFlowingReason.value === "Other");
+  });
+  waterFlowFixAttempt.addEventListener("change", () => {
+    show("waterFlowFixResultDiv", waterFlowFixAttempt.value === "Yes");
+  });
+
+  // Drinker Logic
+  drinkerWorking.addEventListener("change", () => {
+    const no = drinkerWorking.value === "No";
+    show("drinkerIssueDiv", no);
+    show("drinkerFixDiv", no);
+  });
+  drinkerIssue.addEventListener("change", () => {
+    show("drinkerOtherReason", drinkerIssue.value === "Other");
+  });
+  drinkerFixAttempt.addEventListener("change", () => {
+    show("drinkerFixResultDiv", drinkerFixAttempt.value === "Yes");
+  });
+
+  // Trough Logic
+  troughFilled.addEventListener("change", () => {
+    const no = troughFilled.value === "No";
+    const yes = troughFilled.value === "Yes";
+    show("troughNoReasonDiv", no);
+    show("troughFixDiv", no);
+    show("troughValveDiv", yes);
+  });
+  troughFixAttempt.addEventListener("change", () => {
+    show("troughFixResultDiv", troughFixAttempt.value === "Yes");
+  });
+
+  // Valve Left Open Logic
+  valveClosed.addEventListener("change", () => {
+    const no = valveClosed.value === "No";
+    show("valveLeftOpenReasonDiv", no);
+    show("valveFixDiv", no);
+  });
+  valveFixAttempt.addEventListener("change", () => {
+    show("valveFixResultDiv", valveFixAttempt.value === "Yes");
+  });
+
+  // Valve Opened Manual Reason
+  valveOpened.addEventListener("change", () => {
+    show("valveOpenedReasonDiv", valveOpened.value === "No");
+  });
+
+  // Submit Handler
+  document.getElementById("waterForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const flockId = waterForm.flockId.value;
+    const target = flockCoordinates[flockId];
+    if (submitLat && submitLng && target) {
+      const dist = getDistance(submitLat, submitLng, target.lat, target.lng);
+      proximityStatus = dist <= 100 ? "Near" : "Away";
+    }
+
+    const data = {
+      date: waterForm.date.value,
+      time: waterForm.time.value,
+      flockId: flockId,
+      submitter: waterForm.submitter.value,
+      level: waterForm.level.value,
+      valveOpened: valveOpened.value,
+      valveOpenedReason: valveOpenedReason.value,
+      waterFlowing: waterFlowing.value,
+      waterFlowingReason: waterFlowingReason.value,
+      waterFlowingOtherReason: waterFlowingOtherReason.value,
+      waterFlowFixAttempt: waterFlowFixAttempt.value,
+      waterFlowFixResult: waterFlowFixResult.value,
+      drinkerWorking: drinkerWorking.value,
+      drinkerIssue: drinkerIssue.value,
+      drinkerOtherReason: drinkerOtherReason.value,
+      drinkerFixAttempt: drinkerFixAttempt.value,
+      drinkerFixResult: drinkerFixResult.value,
+      troughFilled: troughFilled.value,
+      troughNoReason: troughNoReason.value,
+      troughFixAttempt: troughFixAttempt.value,
+      troughFixResult: troughFixResult.value,
+      valveClosed: valveClosed.value,
+      valveLeftOpenReason: valveLeftOpenReason.value,
+      valveFixAttempt: valveFixAttempt.value,
+      valveFixResult: valveFixResult.value,
+      "Submitter Latitude": submitLat,
+      "Submitter Longitude": submitLng,
+      "Proximity Status": proximityStatus
     };
 
-    const litersRemainingSpan = document.getElementById("litersRemaining");
-    const daysRemainingSpan = document.getElementById("daysRemaining");
-    document.getElementById("level").addEventListener("input", function () {
-      const percent = parseFloat(this.value) || 0;
-      const liters = (percent / 100) * 1000;
-      const days = liters / 268.8;
-      litersRemainingSpan.textContent = liters.toFixed(1);
-      daysRemainingSpan.textContent = days.toFixed(1);
-    });
-
-    let submitLat = "", submitLng = "", proximityStatus = "Unknown";
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        submitLat = pos.coords.latitude;
-        submitLng = pos.coords.longitude;
-        document.getElementById("message").textContent = "📍 Location captured.";
-      }, () => {
-        proximityStatus = "Location Denied";
-        document.getElementById("message").textContent = "❌ Location access denied.";
+    try {
+      await fetch("https://script.google.com/macros/s/AKfycbzp7-OWSlUkjOlcD_Nqri4TLL7RTGjik-ixUEt-LP7M7aJaKDf9nSlYxShnjBFbYwZEcg/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
       });
+      document.getElementById("message").textContent = "✅ Water tank log submitted!";
+      waterForm.reset();
+      document.getElementById("litersRemaining").textContent = "-";
+      document.getElementById("daysRemaining").textContent = "-";
+    } catch (err) {
+      document.getElementById("message").textContent = "❌ Submission failed.";
     }
+  });
 
-    function getDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371e3;
-      const toRad = x => x * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+</script>
 
-    // Conditional logic
-    document.getElementById("valveOpened").addEventListener("change", e => {
-      document.getElementById("valveOpenedReasonDiv").style.display = e.target.value === "No" ? "block" : "none";
-    });
-    document.getElementById("waterFlowing").addEventListener("change", e => {
-      document.getElementById("waterFlowingReasonDiv").style.display = e.target.value === "No" ? "block" : "none";
-    });
-    document.getElementById("waterFlowingReason").addEventListener("change", e => {
-      document.getElementById("waterFlowingOtherReason").style.display = e.target.value === "Other" ? "block" : "none";
-    });
-    document.getElementById("drinkerWorking").addEventListener("change", e => {
-      document.getElementById("drinkerIssueDiv").style.display = e.target.value === "No" ? "block" : "none";
-    });
-    document.getElementById("drinkerIssue").addEventListener("change", e => {
-      document.getElementById("drinkerOtherReason").style.display = e.target.value === "Other" ? "block" : "none";
-    });
-    document.getElementById("troughFilled").addEventListener("change", e => {
-      document.getElementById("troughNoReasonDiv").style.display = e.target.value === "No" ? "block" : "none";
-      document.getElementById("troughValveDiv").style.display = e.target.value === "Yes" ? "block" : "none";
-    });
-    document.getElementById("valveClosed").addEventListener("change", e => {
-      document.getElementById("valveLeftOpenReasonDiv").style.display = e.target.value === "No" ? "block" : "none";
-    });
-
-    const form = document.getElementById("waterForm");
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const flockId = form.flockId.value;
-      const target = flockCoordinates[flockId];
-      if (submitLat && submitLng && target) {
-        const dist = getDistance(submitLat, submitLng, target.lat, target.lng);
-        proximityStatus = dist <= 100 ? "Near" : "Away";
-      }
-
-      const data = {
-        date: form.date.value,
-        time: form.time.value,
-        flockId: form.flockId.value,
-        level: form.level.value,
-        submitter: form.submitter.value,
-        valveOpened: form.valveOpened.value,
-        valveOpenedReason: form.valveOpenedReason?.value || "",
-        waterFlowing: form.waterFlowing.value,
-        waterFlowingReason: form.waterFlowingReason?.value || "",
-        waterFlowingOtherReason: form.waterFlowingOtherReason?.value || "",
-        drinkerWorking: form.drinkerWorking.value,
-        drinkerIssue: form.drinkerIssue?.value || "",
-        drinkerOtherReason: form.drinkerOtherReason?.value || "",
-        troughFilled: form.troughFilled.value,
-        troughNoReason: form.troughNoReason?.value || "",
-        valveClosed: form.valveClosed?.value || "",
-        valveLeftOpenReason: form.valveLeftOpenReason?.value || "",
-        "Submitter Latitude": submitLat,
-        "Submitter Longitude": submitLng,
-        "Proximity Status": proximityStatus
-      };
-
-      try {
-        await fetch("https://script.google.com/macros/s/AKfycbzp7-OWSlUkjOlcD_Nqri4TLL7RTGjik-ixUEt-LP7M7aJaKDf9nSlYxShnjBFbYwZEcg/exec", {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-        document.getElementById("message").textContent = "✅ Water tank log submitted!";
-        form.reset();
-        litersRemainingSpan.textContent = "-";
-        daysRemainingSpan.textContent = "-";
-      } catch (err) {
-        document.getElementById("message").textContent = "❌ Submission failed.";
-      }
-    });
-  </script>
-
-  <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
-    <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
-    <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
-  </footer>
+<footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
+  <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
+  <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
+</footer>
 </body>
 </html>
