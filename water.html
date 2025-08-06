@@ -15,52 +15,42 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 500px;
+      max-width: 600px;
       margin: auto;
     }
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-button[type="submit"] {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 8px;
-  background-color: #4CAF50;
-  color: white;
-  font-weight: bold;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-button[type="submit"]:hover {
-  background-color: #45a049;
-}
-
-button[type="submit"]:active {
-  background-color: #3e8e41;
-  transform: scale(0.97);
-}
-     label {
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    button[type="submit"]:hover {
+      background-color: #45a049;
+    }
+    button[type="submit"]:active {
+      background-color: #3e8e41;
+      transform: scale(0.97);
+    }
+    label {
       font-weight: bold;
     }
     p {
       margin: 10px 0;
       font-weight: bold;
-    }
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
     }
   </style>
 </head>
@@ -78,141 +68,224 @@ button[type="submit"]:active {
 
     <label for="submitter">Submitted by</label>
     <input type="text" id="submitter" name="submitter" required>
-    
+
     <label for="level">Water Level (%)</label>
     <input type="number" id="level" name="level" min="0" max="100" required>
-
     <p>Liters Remaining: <span id="litersRemaining">-</span> L</p>
     <p>Daily Requirement: 268.8 L</p>
     <p>Estimated Days Remaining: <span id="daysRemaining">-</span> days</p>
 
-    <label for="observation">Any Observations? (Leaks, broken pipes/taps)</label>
-    <input type="text" id="observation" name="observation" placeholder="e.g. pipe leaking, tap broken" />
-    <label for="severity">Issue Severity</label>
-    <select id="severity" name="severity">
-    <option value="">None</option>
-    <option value="Minor">Minor</option>
-    <option value="Major">Major</option>
-    <option value="High Alert">High Alert</option>
+    <label>Was the main valve to tank opened?</label>
+    <select id="valveOpened" name="valveOpened" required>
+      <option value="">Select</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
     </select>
-    
+    <div id="valveOpenedReasonDiv" style="display:none;">
+      <label>If No, why?</label>
+      <input type="text" id="valveOpenedReason" name="valveOpenedReason" />
+    </div>
+
+    <label>Is water flowing into the tank?</label>
+    <select id="waterFlowing" name="waterFlowing" required>
+      <option value="">Select</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+    <div id="waterFlowingReasonDiv" style="display:none;">
+      <label>If No, reason?</label>
+      <select id="waterFlowingReason" name="waterFlowingReason">
+        <option value="">Select reason</option>
+        <option value="Pipe Blocked">Pipe Blocked</option>
+        <option value="Main Valve Closed">Main Valve Closed</option>
+        <option value="Pump Issue">Pump Issue</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="text" id="waterFlowingOtherReason" name="waterFlowingOtherReason" placeholder="If Other, specify" style="display:none;" />
+    </div>
+
+    <label>Are drinker lines working?</label>
+    <select id="drinkerWorking" name="drinkerWorking" required>
+      <option value="">Select</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+    <div id="drinkerIssueDiv" style="display:none;">
+      <label>If No, what's the issue?</label>
+      <select id="drinkerIssue" name="drinkerIssue">
+        <option value="">Select reason</option>
+        <option value="Line Blockage">Line Blockage</option>
+        <option value="Broken Nipple">Broken Nipple</option>
+        <option value="No Water Pressure">No Water Pressure</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="text" id="drinkerOtherReason" name="drinkerOtherReason" placeholder="If Other, specify" style="display:none;" />
+    </div>
+
+    <label>Were the water troughs filled?</label>
+    <select id="troughFilled" name="troughFilled" required>
+      <option value="">Select</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+    <div id="troughNoReasonDiv" style="display:none;">
+      <label>If No, why?</label>
+      <input type="text" id="troughNoReason" name="troughNoReason" />
+    </div>
+    <div id="troughValveDiv" style="display:none;">
+      <label>Was the valve to the trough closed after fill?</label>
+      <select id="valveClosed" name="valveClosed">
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+      <div id="valveLeftOpenReasonDiv" style="display:none;">
+        <label>If No, why left open?</label>
+        <input type="text" id="valveLeftOpenReason" name="valveLeftOpenReason" />
+      </div>
+    </div>
+
     <button type="submit">Submit</button>
     <p id="message"></p>
   </form>
 
   <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const flock = urlParams.get("flock");
-  if (flock) {
-    document.getElementById("flockId").value = flock;
-  }
+    const urlParams = new URLSearchParams(window.location.search);
+    const flock = urlParams.get("flock");
+    if (flock) document.getElementById("flockId").value = flock;
 
-  const flockCoordinates = {
-    "Flock 24": { lat: -34.352939, lng: 148.700403 },
-    "Flock 29": { lat: -34.349811, lng: 148.701231 },
-    "Flock 32": { lat: -34.345914, lng: 148.699978 },
-    "Flock 34": { lat: -34.352742, lng: 148.695286 },
-    "Flock 35": { lat: -34.351803, lng: 148.696808 },
-    "Flock 36": { lat: -34.352922, lng: 148.703650 },
-    "Flock 37": { lat: -34.351092, lng: 148.707942 },
-    "Flock 38": { lat: -34.348275, lng: 148.701122 },
-    "Flock 39": { lat: -34.350797, lng: 148.704897 },
-    "Flock 40": { lat: -34.348503, lng: 148.702567 },
-    "Flock 41": { lat: -34.353400, lng: 148.706169 },
-    "Flock 42": { lat: -34.353883, lng: 148.705925 },
-    "Flock 43": { lat: -34.353933, lng: 148.706528 },
-    "Flock 44": { lat: -34.348578, lng: 148.705606 }
-  };
+    const now = new Date();
+    document.getElementById("date").valueAsDate = now;
+    document.getElementById("time").value = now.toTimeString().slice(0, 5);
 
-  let submitLat = "", submitLng = "", proximityStatus = "Unknown";
-
-  const now = new Date();
-  document.getElementById("date").valueAsDate = now;
-  document.getElementById("time").value = now.toTimeString().slice(0, 5);
-
-  // Calculate liters & days remaining
-  const levelInput = document.getElementById("level");
-  const litersRemainingSpan = document.getElementById("litersRemaining");
-  const daysRemainingSpan = document.getElementById("daysRemaining");
-
-  levelInput.addEventListener("input", () => {
-    const percent = parseFloat(levelInput.value) || 0;
-    const liters = (percent / 100) * 1000;
-    const days = liters / 268.8;
-    litersRemainingSpan.textContent = liters.toFixed(1);
-    daysRemainingSpan.textContent = days.toFixed(1);
-  });
-
-  // Get user's location
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      submitLat = pos.coords.latitude;
-      submitLng = pos.coords.longitude;
-      document.getElementById("message").textContent = "📍 Location captured.";
-    }, () => {
-      proximityStatus = "Location Denied";
-      document.getElementById("message").textContent = "❌ Location access denied.";
-    });
-  }
-
-  function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3;
-    const toRad = x => x * Math.PI / 180;
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat/2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon/2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-
-  const form = document.getElementById("waterForm");
-  form.addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const flockId = form.flockId.value;
-    const target = flockCoordinates[flockId];
-
-    if (submitLat && submitLng && target) {
-      const dist = getDistance(submitLat, submitLng, target.lat, target.lng);
-      proximityStatus = dist <= 100 ? "Near" : "Away";
-    }
-
-    const data = {
-      date: form.date.value,
-      time: form.time.value,
-      flockId: flockId,
-      level: form.level.value,
-      submitter: form.submitter.value,
-      observation: form.observation.value,
-      severity: form.severity.value,
-      "Submitter Latitude": submitLat,
-      "Submitter Longitude": submitLng,
-      "Proximity Status": proximityStatus
+    const flockCoordinates = {
+      "Flock 24": { lat: -34.352939, lng: 148.700403 },
+      "Flock 29": { lat: -34.349811, lng: 148.701231 },
+      "Flock 32": { lat: -34.345914, lng: 148.699978 },
+      "Flock 34": { lat: -34.352742, lng: 148.695286 },
+      "Flock 35": { lat: -34.351803, lng: 148.696808 },
+      "Flock 36": { lat: -34.352922, lng: 148.703650 },
+      "Flock 37": { lat: -34.351092, lng: 148.707942 },
+      "Flock 38": { lat: -34.348275, lng: 148.701122 },
+      "Flock 39": { lat: -34.350797, lng: 148.704897 },
+      "Flock 40": { lat: -34.348503, lng: 148.702567 },
+      "Flock 41": { lat: -34.353400, lng: 148.706169 },
+      "Flock 42": { lat: -34.353883, lng: 148.705925 },
+      "Flock 43": { lat: -34.353933, lng: 148.706528 },
+      "Flock 44": { lat: -34.348578, lng: 148.705606 },
+      "Flock 45": { lat: -34.345744, lng: 148.702875 },
+      "Flock 46": { lat: -34.345700, lng: 148.702890 }
     };
 
-    try {
-      await fetch("https://script.google.com/macros/s/AKfycbzp7-OWSlUkjOlcD_Nqri4TLL7RTGjik-ixUEt-LP7M7aJaKDf9nSlYxShnjBFbYwZEcg/exec", {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+    const litersRemainingSpan = document.getElementById("litersRemaining");
+    const daysRemainingSpan = document.getElementById("daysRemaining");
+    document.getElementById("level").addEventListener("input", function () {
+      const percent = parseFloat(this.value) || 0;
+      const liters = (percent / 100) * 1000;
+      const days = liters / 268.8;
+      litersRemainingSpan.textContent = liters.toFixed(1);
+      daysRemainingSpan.textContent = days.toFixed(1);
+    });
+
+    let submitLat = "", submitLng = "", proximityStatus = "Unknown";
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        submitLat = pos.coords.latitude;
+        submitLng = pos.coords.longitude;
+        document.getElementById("message").textContent = "📍 Location captured.";
+      }, () => {
+        proximityStatus = "Location Denied";
+        document.getElementById("message").textContent = "❌ Location access denied.";
       });
-      document.getElementById("message").textContent = "✅ Water tank log submitted!";
-      form.reset();
-      litersRemainingSpan.textContent = "-";
-      daysRemainingSpan.textContent = "-";
-    } catch (err) {
-      document.getElementById("message").textContent = "❌ Submission failed.";
     }
-  });
-</script>
-  
-<footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
-<p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
-<p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
-</footer>
-  
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const toRad = x => x * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    // Conditional logic
+    document.getElementById("valveOpened").addEventListener("change", e => {
+      document.getElementById("valveOpenedReasonDiv").style.display = e.target.value === "No" ? "block" : "none";
+    });
+    document.getElementById("waterFlowing").addEventListener("change", e => {
+      document.getElementById("waterFlowingReasonDiv").style.display = e.target.value === "No" ? "block" : "none";
+    });
+    document.getElementById("waterFlowingReason").addEventListener("change", e => {
+      document.getElementById("waterFlowingOtherReason").style.display = e.target.value === "Other" ? "block" : "none";
+    });
+    document.getElementById("drinkerWorking").addEventListener("change", e => {
+      document.getElementById("drinkerIssueDiv").style.display = e.target.value === "No" ? "block" : "none";
+    });
+    document.getElementById("drinkerIssue").addEventListener("change", e => {
+      document.getElementById("drinkerOtherReason").style.display = e.target.value === "Other" ? "block" : "none";
+    });
+    document.getElementById("troughFilled").addEventListener("change", e => {
+      document.getElementById("troughNoReasonDiv").style.display = e.target.value === "No" ? "block" : "none";
+      document.getElementById("troughValveDiv").style.display = e.target.value === "Yes" ? "block" : "none";
+    });
+    document.getElementById("valveClosed").addEventListener("change", e => {
+      document.getElementById("valveLeftOpenReasonDiv").style.display = e.target.value === "No" ? "block" : "none";
+    });
+
+    const form = document.getElementById("waterForm");
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const flockId = form.flockId.value;
+      const target = flockCoordinates[flockId];
+      if (submitLat && submitLng && target) {
+        const dist = getDistance(submitLat, submitLng, target.lat, target.lng);
+        proximityStatus = dist <= 100 ? "Near" : "Away";
+      }
+
+      const data = {
+        date: form.date.value,
+        time: form.time.value,
+        flockId: form.flockId.value,
+        level: form.level.value,
+        submitter: form.submitter.value,
+        valveOpened: form.valveOpened.value,
+        valveOpenedReason: form.valveOpenedReason?.value || "",
+        waterFlowing: form.waterFlowing.value,
+        waterFlowingReason: form.waterFlowingReason?.value || "",
+        waterFlowingOtherReason: form.waterFlowingOtherReason?.value || "",
+        drinkerWorking: form.drinkerWorking.value,
+        drinkerIssue: form.drinkerIssue?.value || "",
+        drinkerOtherReason: form.drinkerOtherReason?.value || "",
+        troughFilled: form.troughFilled.value,
+        troughNoReason: form.troughNoReason?.value || "",
+        valveClosed: form.valveClosed?.value || "",
+        valveLeftOpenReason: form.valveLeftOpenReason?.value || "",
+        "Submitter Latitude": submitLat,
+        "Submitter Longitude": submitLng,
+        "Proximity Status": proximityStatus
+      };
+
+      try {
+        await fetch("https://script.google.com/macros/s/AKfycbzp7-OWSlUkjOlcD_Nqri4TLL7RTGjik-ixUEt-LP7M7aJaKDf9nSlYxShnjBFbYwZEcg/exec", {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        document.getElementById("message").textContent = "✅ Water tank log submitted!";
+        form.reset();
+        litersRemainingSpan.textContent = "-";
+        daysRemainingSpan.textContent = "-";
+      } catch (err) {
+        document.getElementById("message").textContent = "❌ Submission failed.";
+      }
+    });
+  </script>
+
+  <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
+    <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
+    <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
+  </footer>
 </body>
 </html>
