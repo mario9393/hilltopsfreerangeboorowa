@@ -58,15 +58,8 @@
       cursor: pointer;
       transition: background-color 0.2s ease, transform 0.1s ease;
     }
-
-    button[type="submit"]:hover {
-      background-color: #45a049;
-    }
-
-    button[type="submit"]:active {
-      background-color: #3e8e41;
-      transform: scale(0.97);
-    }
+    button[type="submit"]:hover { background-color: #45a049; }
+    button[type="submit"]:active { background-color: #3e8e41; transform: scale(0.97); }
 
     canvas {
       border: 1px solid #ccc;
@@ -75,8 +68,16 @@
       touch-action: none;
     }
 
-    #farmNamesGroup {
-      display: none;
+    #farmNamesGroup { display: none; }
+
+    .biosecurity-notice{
+      background: #fff;
+      border-left: 6px solid #2e7d32;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin: 10px 0 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.06);
+      line-height: 1.35;
     }
 
     footer {
@@ -88,25 +89,16 @@
     }
 
     @media screen and (max-width: 600px) {
-      .form-container {
-        border-radius: 10px;
-        padding: 15px;
-      }
-      h2 {
-        font-size: 20px;
-      }
-      canvas {
-        height: 150px;
-      }
+      .form-container { border-radius: 10px; padding: 15px; }
+      h2 { font-size: 20px; }
+      canvas { height: 150px; }
     }
   </style>
-
 </head>
 <body>
-  
 <div class="wrapper">
   <div class="form-container">
-      <div style="text-align: center; margin-bottom: 20px;">
+    <div style="text-align: center; margin-bottom: 20px;">
       <div style="font-size: 40px;">🐓</div>
       <div style="
         font-family: 'Georgia', serif;
@@ -115,171 +107,198 @@
         font-weight: bold;
         letter-spacing: 2px;
       ">HILLTOPS</div>
-  <div style="
-    width: 60px;
-    height: 2px;
-    background-color: #EBC191;
-    margin: 5px auto;
-  "></div>
-  <div style="
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    letter-spacing: 4px;
-    color: #EBC191;
-  ">FREE RANGE EGGS</div>
-</div>
-
-    <h2 style="text-align: center;">Hilltops Free Range Visitor Log</h2>
-    <form id="visitorForm">
-
-    <input type="text" name="name" placeholder="Full Name" required>
-    <input type="tel" name="phone" placeholder="Phone Number" required>
-    <input type="text" name="datetime" id="datetime" readonly>
-
-    <select name="contact" id="contactSelect" required>
-      <option value="">Contact with other farms in previous 48 hours?</option>
-      <option value="Yes">Yes</option>
-      <option value="No">No</option>
-    </select>
-
-    <div id="farmNamesGroup">
-      <input type="text" name="farmNames" id="farmNames" placeholder="Name of other farm(s)">
+      <div style="width: 60px; height: 2px; background-color: #EBC191; margin: 5px auto;"></div>
+      <div style="font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 4px; color: #EBC191;">FREE RANGE EGGS</div>
     </div>
 
-    <select name="purpose" required>
-      <option value="">Purpose of Visit</option>
-      <option value="Work">Work</option>
-      <option value="Casual">Casual</option>
-      <option value="Delivery">Delivery</option>
-      <option value="Other">Other</option>
-    </select>
+    <h2 style="text-align: center;">Hilltops Free Range Visitor Log</h2>
 
-    <input type="hidden" name="latitude" id="latitude">
-    <input type="hidden" name="longitude" id="longitude">
-    
-    <input type="text" name="disinfect" placeholder="Disinfect Vehicle and Shoes?" required>
+    <!-- NEW: Biosecurity contact banner -->
+    <div class="biosecurity-notice" role="alert">
+      <strong>Biosecurity notice:</strong>
+      A control order made under the <em>Biosecurity Act 2015</em> applies to this farm.
+      <br>
+      <strong>Before entering the production area, contact the Farm Manager:
+        <span class="manager-name"></span> —
+        <a class="manager-phone" href="#" rel="nofollow noopener"></a>.
+      </strong>
+      Unauthorised entry may be an offence.
+    </div>
 
-    <p style="margin-top: 20px; font-weight: bold;">
-      I have received and agree to follow the biosecurity measures explained to me, as required under the Salmonella Enteritidis Control Order 2019. (Sign if agreed)
-    </p>
+    <form id="visitorForm">
+      <input type="text" name="name" placeholder="Full Name" required>
+      <input type="tel" name="phone" placeholder="Phone Number" required>
+      <input type="text" name="datetime" id="datetime" readonly>
 
-    <label>Signature:</label>
-    <canvas id="signature-pad"></canvas>
-    <button type="button" onclick="clearSignature()">Clear Signature</button>
-    <input type="hidden" name="signature" id="signature">
-    
-    <p>
-    Please read the NSW Salmonella Enteritidis Control Order here:
-    <a href="https://www.dpi.nsw.gov.au/__data/assets/pdf_file/0011/1565381/SE-Control-Order-Guide-2024.pdf" target="_blank">Read the full Control Order</a>
-    </p>
+      <select name="contact" id="contactSelect" required>
+        <option value="">Contact with other farms in previous 48 hours?</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
 
-    <label>
-    <input type="checkbox" id="agreeOrder" required>
-    I have read and understood the NSW SE Control Order and agree to comply.
-    </label>
-    
-    <button type="submit">Submit</button>
+      <div id="farmNamesGroup">
+        <input type="text" name="farmNames" id="farmNames" placeholder="Name of other farm(s)">
+      </div>
+
+      <select name="purpose" required>
+        <option value="">Purpose of Visit</option>
+        <option value="Work">Work</option>
+        <option value="Casual">Casual</option>
+        <option value="Delivery">Delivery</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <input type="hidden" name="latitude" id="latitude">
+      <input type="hidden" name="longitude" id="longitude">
+
+      <input type="text" name="disinfect" placeholder="Disinfect Vehicle and Shoes?" required>
+
+      <p style="margin-top: 20px; font-weight: bold;">
+        I have received and agree to follow the biosecurity measures explained to me, as required under the
+        <strong>NSW Biosecurity (Salmonella Enteritidis) Control Order 2024 (as amended)</strong>. (Sign if agreed)
+      </p>
+
+      <label>Signature:</label>
+      <canvas id="signature-pad"></canvas>
+      <button type="button" onclick="clearSignature()">Clear Signature</button>
+      <input type="hidden" name="signature" id="signature">
+
+      <p>
+        Please read the NSW Salmonella Enteritidis Control Order here:
+        <a href="https://www.dpi.nsw.gov.au/__data/assets/pdf_file/0011/1565381/SE-Control-Order-Guide-2024.pdf" target="_blank" rel="noopener">Read the full Control Order</a>
+      </p>
+
+      <!-- NEW: Permission/Contact confirmation -->
+      <label style="display:block; margin:10px 0;">
+        <input type="checkbox" id="permissionConfirm" required>
+        I have contacted the Farm Manager, <span class="manager-name"></span>
+        (<a class="manager-phone" href="#"></a>) and received permission/instructions to enter the production area.
+      </label>
+
+      <label style="display:block; margin:10px 0;">
+        <input type="checkbox" id="agreeOrder" required>
+        I have read and understood the NSW SE Control Order and agree to comply.
+      </label>
+
+      <button type="submit">Submit</button>
     </form>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+  // ===== Set your Farm Manager details here =====
+  const MANAGER_NAME = "Dr Anthony Jude de Silva";          // <-- change me
+  const MANAGER_PHONE_RAW = "+61417031299";          // <-- change me (no spaces)
+  const MANAGER_PHONE_PRETTY = "+61 417 031 299";    // <-- change me (display)
 
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-  <script>
-    const form = document.getElementById('visitorForm');
-    const canvas = document.getElementById('signature-pad');
-    const signaturePad = new SignaturePad(canvas);
-    const signatureInput = document.getElementById('signature');
-    const contactSelect = document.getElementById('contactSelect');
-    const farmNamesGroup = document.getElementById('farmNamesGroup');
-    const farmNamesInput = document.getElementById('farmNames');
-    document.getElementById('datetime').value = new Date().toLocaleString();
+  // Push details into all placeholders
+  document.querySelectorAll(".manager-name").forEach(el => el.textContent = MANAGER_NAME);
+  document.querySelectorAll(".manager-phone").forEach(el => {
+    el.textContent = MANAGER_PHONE_PRETTY;
+    el.setAttribute("href", "tel:" + MANAGER_PHONE_RAW);
+  });
 
-    function clearSignature() {
-      signaturePad.clear();
-    }
+  const form = document.getElementById('visitorForm');
+  const canvas = document.getElementById('signature-pad');
+  const signaturePad = new SignaturePad(canvas);
+  const signatureInput = document.getElementById('signature');
+  const contactSelect = document.getElementById('contactSelect');
+  const farmNamesGroup = document.getElementById('farmNamesGroup');
+  const farmNamesInput = document.getElementById('farmNames');
+  document.getElementById('datetime').value = new Date().toLocaleString();
 
-    contactSelect.addEventListener('change', () => {
-      if (contactSelect.value === 'Yes') {
-        farmNamesGroup.style.display = 'block';
-        farmNamesInput.required = true;
-      } else {
-        farmNamesGroup.style.display = 'none';
-        farmNamesInput.required = false;
-        farmNamesInput.value = '';
-      }
-    });
+  function clearSignature() { signaturePad.clear(); }
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position => {
-        document.getElementById('latitude').value = position.coords.latitude;
-        document.getElementById('longitude').value = position.coords.longitude;
-      }, error => {
-        alert("Location permission is required to submit the visitor log near the entrance.");
-      });
+  contactSelect.addEventListener('change', () => {
+    if (contactSelect.value === 'Yes') {
+      farmNamesGroup.style.display = 'block';
+      farmNamesInput.required = true;
     } else {
-      alert("Geolocation is not supported by this browser.");
+      farmNamesGroup.style.display = 'none';
+      farmNamesInput.required = false;
+      farmNamesInput.value = '';
+    }
+  });
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+      document.getElementById('latitude').value = position.coords.latitude;
+      document.getElementById('longitude').value = position.coords.longitude;
+    }, error => {
+      alert("Location permission is required to submit the visitor log near the entrance.");
+    });
+  } else {
+    alert("Geolocation is not supported by this browser.");
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    if (!document.getElementById('agreeOrder').checked) {
+      alert('Please read and agree to the SE Control Order before submitting.');
+      return;
     }
 
-form.addEventListener('submit', async function(e) {
-  e.preventDefault();
+    if (!document.getElementById('permissionConfirm').checked) {
+      alert('Please confirm you have contacted the Farm Manager and received instructions.');
+      return;
+    }
 
-  if (!document.getElementById('agreeOrder').checked) {
-    alert('Please read and agree to the SE Control Order before submitting.');
-    return;
-  }
+    if (signaturePad.isEmpty()) {
+      alert('Please provide a signature.');
+      return;
+    }
 
-  if (signaturePad.isEmpty()) {
-    alert('Please provide a signature.');
-    return;
-  }
-// Validate GPS location
-  const lat = document.getElementById('latitude').value;
-  const lng = document.getElementById('longitude').value;
-  if (!lat || !lng) {
-  alert('Location is required. Please allow location access and try again.');
-  return;
-  }
-  
-  // Disable submit button to prevent multiple clicks
-  const submitButton = form.querySelector('button[type="submit"]');
-  submitButton.disabled = true;
-  submitButton.textContent = "Submitting...";
+    // Validate GPS location
+    const lat = document.getElementById('latitude').value;
+    const lng = document.getElementById('longitude').value;
+    if (!lat || !lng) {
+      alert('Location is required. Please allow location access and try again.');
+      return;
+    }
 
-  signatureInput.value = signaturePad.toDataURL();
-  const formData = new FormData(form);
-  const plainFormData = Object.fromEntries(formData.entries());
-  const jsonFormData = JSON.stringify(plainFormData);
+    // Disable submit button to prevent multiple clicks
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
 
-  try {
-    await fetch('https://script.google.com/macros/s/AKfycbxhHc2D4rd7F5tDBaF6Nk0CTm634sjbC9cCEgKhYu48VTEkixHGXHqF6lRT9iEp5vyz2Q/exec', {
-      method: 'POST',
-      mode: 'no-cors',
-      body: jsonFormData,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    signatureInput.value = signaturePad.toDataURL();
+    const formData = new FormData(form);
+    const plainFormData = Object.fromEntries(formData.entries());
+    const jsonFormData = JSON.stringify(plainFormData);
 
-    // Replace form with confirmation message
-    form.innerHTML = `
-      <div style="text-align: center; font-size: 18px; padding: 20px;">
-        ✅ Thank you! Your visit has been logged successfully.
-      </div>
-    `;
-  } catch (error) {
-    alert('Something went wrong. Please try again.');
-    submitButton.disabled = false;
-    submitButton.textContent = "Submit";
-  }
-});
+    try {
+      await fetch('https://script.google.com/macros/s/AKfycbxhHc2D4rd7F5tDBaF6Nk0CTm634sjbC9cCEgKhYu48VTEkixHGXHqF6lRT9iEp5vyz2Q/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        body: jsonFormData,
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-  </script>
-  
-  <footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
+      // Replace form with confirmation message
+      form.innerHTML = `
+        <div style="text-align: center; font-size: 18px; padding: 20px;">
+          ✅ Thank you! Your visit has been logged successfully.
+        </div>
+        <div class="biosecurity-notice">
+          If you haven't already, please call the Farm Manager,
+          <strong>${MANAGER_NAME}</strong> on
+          <a href="tel:${MANAGER_PHONE_RAW}">${MANAGER_PHONE_PRETTY}</a>
+          before entering the production area.
+        </div>
+      `;
+    } catch (error) {
+      alert('Something went wrong. Please try again.');
+      submitButton.disabled = false;
+      submitButton.textContent = "Submit";
+    }
+  });
+</script>
+
+<footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
   <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
   <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
-  </footer>
-  
+</footer>
 </body>
 </html>
