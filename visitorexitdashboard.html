@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Visitor Exit Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px; }
+    .brand { text-align:center; margin-bottom: 20px; }
+    .brand .line { width:60px; height:2px; background:#EBC191; margin:5px auto; }
+    .brand .title { font-family:'Georgia',serif; font-size:32px; color:#EBC191; font-weight:bold; letter-spacing:2px; }
+    .brand .tag { font-size:12px; letter-spacing:4px; color:#EBC191; }
+    h2 { text-align: center; margin: 10px 0 16px; }
+    .toolbar {
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin: 0 auto 12px; max-width: 1100px; justify-content: center;
+    }
+    .toolbar input, .toolbar select, .toolbar button {
+      padding:8px 10px; border:1px solid #ccc; border-radius:6px; background:#fff;
+    }
+    .toolbar button { background:#4CAF50; color:#fff; font-weight:bold; border:none; cursor:pointer; }
+    .toolbar button:hover { background:#45a049; }
+
+    table {
+      width: 100%; border-collapse: collapse; background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background-color: #f1f1f1; }
+    .muted { color:#666; font-size:12px; text-align:center; margin:8px 0 16px; }
+    .count { font-weight:600; }
+    .signature { height: 60px; }
+    @media (max-width: 700px){
+      .toolbar { justify-content: stretch; }
+      .toolbar > * { flex: 1 1 140px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="brand">
+    <div style="font-size:40px;">🐓</div>
+    <div class="title">HILLTOPS</div>
+    <div class="line"></div>
+    <div class="tag">FREE RANGE EGGS</div>
+  </div>
+
+  <h2>Hilltops Free Range Visitor Exit Dashboard</h2>
+
+  <div class="toolbar">
+    <input type="date" id="dateFilter" title="Filter by date (matches the Date column)">
+    <input type="text" id="searchPhone" placeholder="Search phone…" title="Filter by phone">
+    <button id="clearFilters">Clear filters</button>
+    <button id="exportCsv">Export CSV</button>
+    <span class="muted" id="meta"></span>
+  </div>
+
+  <table id="exitTable"></table>
+
+<script>
+  // ====== CONFIG: set your exit JSON endpoint here ======
+  const EXIT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOcGycP05fyvgYA4xg0ujGcBsQpQcbdw_4y2uRi8zLOex2hnc3wbkW_scwNMxG0zUl/exec";
+  // If your Apps Script supports a query like ?mode=exit, you can do:
+  // const EXIT_SCRIPT_URL = "https://.../exec?mode=exit";
+
+  const table = document.getElementById("exitTable");
+  const dateFilter = document.getElementById("dateFilter");
+  const searchPhone = document.getElementById("searchPhone");
+  const clearBtn = document.getElementById("clearFilters");
+  const exportBtn = document.getElementById("exportCsv");
+  const meta = document.getElementById("meta");
+
+  let rawData = [];   // full dataset from server
+  let headers = [];   // column order
+
+  // Fetch and render
+  async function loadData(){
+    try{
+      const t0 = Date.now();
+      const res = await fetch(EXIT_SCRIPT_URL);
+      // Expecting an array of objects: [{ "Phone Number": "...", "Date": "YYYY-MM-DD", "Time": "HH:MM AM/PM", ...}, ...]
+      const data = await res.json();
+      rawData = Array.isArray(data) ? data : [];
+      headers = rawData.length ? Object.keys(rawData[0]) : [];
+      render();
+      const ms = Date.now() - t0;
+      meta.textContent = `Loaded ${rawData.length} exit record(s) • Updated ${new Date().toLocaleString()} • ${ms} ms`;
+    }catch(e){
+      table.innerHTML = "<tr><td>Failed to load data. Check EXIT_SCRIPT_URL.</td></tr>";
+    }
+  }
+
+  // Apply filters and paint table
+  function render(){
+    const dateCol = headers.find(h => h.toLowerCase() === "date") || headers.find(h => h.toLowerCase().includes("date"));
+    const phoneCol = headers.find(h => h.toLowerCase().includes("phone"));
+
+    let rows = [...rawData];
+
+    // Filter by date if we have a Date column and selection
+    const selectedDate = dateFilter.value; // yyyy-mm-dd
+    if (selectedDate && dateCol){
+      rows = rows.filter(r => (r[dateCol] || "").startsWith(selectedDate));
+    }
+
+    // Filter by phone substring
+    const q = searchPhone.value.trim().toLowerCase();
+    if (q && phoneCol){
+      rows = rows.filter(r => String(r[phoneCol] || "").toLowerCase().includes(q));
+    }
+
+    // Build table
+    if (!rows.length){
+      table.innerHTML = "<tr><td>No data found for current filters.</td></tr>";
+      return;
+    }
+
+    const thead = "<tr>" + headers.map(h => `<th>${escapeHtml(h)}</th>`).join("") + "</tr>";
+    const body = rows.map(r => {
+      return "<tr>" + headers.map(h => {
+        const val = r[h] ?? "";
+        // show signatures as images if any (carry-over pattern)
+        if (h.toLowerCase().includes("signature") && /^data:image\//.test(val)){
+          return `<td><img class="signature" src="${val}" alt="Signature"></td>`;
+        }
+        return `<td>${escapeHtml(String(val))}</td>`;
+      }).join("") + "</tr>";
+    }).join("");
+
+    table.innerHTML = thead + body;
+  }
+
+  // CSV export for current filtered view
+  function exportCurrentCsv(){
+    const rows = [...table.querySelectorAll("tr")].map(tr =>
+      [...tr.children].map(td => {
+        // basic CSV escaping
+        const text = td.innerText.replace(/\r?\n|\r/g," ").replace(/"/g,'""');
+        return `"${text}"`;
+      }).join(",")
+    ).join("\n");
+
+    const blob = new Blob([rows], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const d = dateFilter.value || "all-dates";
+    a.download = `visitor-exits_${d}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Helpers
+  function escapeHtml(s){
+    return s
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // Wire up filters
+  dateFilter.addEventListener("change", render);
+  searchPhone.addEventListener("input", render);
+  clearBtn.addEventListener("click", () => {
+    dateFilter.value = "";
+    searchPhone.value = "";
+    render();
+  });
+  exportBtn.addEventListener("click", exportCurrentCsv);
+
+  // Initial load + optional auto-refresh every 60s
+  loadData();
+  // setInterval(loadData, 60000);
+</script>
+</body>
+</html>
