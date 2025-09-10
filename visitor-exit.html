@@ -5,118 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hilltops Visitor Exit</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f7f7f7;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f7f7f7; }
     form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 500px;
-      margin: auto;
+      background: #fff; padding: 20px; border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto;
     }
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-button[type="submit"] {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 8px;
-  background-color: #4CAF50;
-  color: white;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-button[type="submit"]:hover {
-  background-color: #45a049;
-}
-
-button[type="submit"]:active {
-  background-color: #3e8e41;
-  transform: scale(0.97);
-}
-
-</style>
+    input, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    label.checkbox { display:block; margin:10px 0; }
+    button[type="submit"] {
+      width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
+      background-color: #4CAF50; color: #fff; font-weight: bold; border: none;
+      cursor: pointer; transition: background-color .2s ease, transform .1s ease;
+    }
+    button[type="submit"]:hover { background-color: #45a049; }
+    button[type="submit"]:active { background-color: #3e8e41; transform: scale(0.97); }
+  </style>
 </head>
 <body>
-      <div style="text-align: center; margin-bottom: 20px;">
-      <div style="font-size: 40px;">🐓</div>
-      <div style="
-        font-family: 'Georgia', serif;
-        font-size: 32px;
-        color: #EBC191;
-        font-weight: bold;
-        letter-spacing: 2px;
-      ">HILLTOPS</div>
-    <div style="
-    width: 60px;
-    height: 2px;
-    background-color: #EBC191;
-    margin: 5px auto;
-  "></div>
-  <div style="
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    letter-spacing: 4px;
-    color: #EBC191;
-  ">FREE RANGE EGGS</div>
-</div>
-  <h2 style="text-align: center;">Hilltops Free Range Exit Log</h2>
-  <form id="exitForm">
-    <input type="tel" name="phone" placeholder="Phone Number" required>
+
+  <div style="text-align: center; margin-bottom: 20px;">
+    <div style="font-size: 40px;">🐓</div>
+    <div style="font-family:'Georgia',serif; font-size:32px; color:#EBC191; font-weight:bold; letter-spacing:2px;">HILLTOPS</div>
+    <div style="width:60px; height:2px; background-color:#EBC191; margin:5px auto;"></div>
+    <div style="font-size:12px; letter-spacing:4px; color:#EBC191;">FREE RANGE EGGS</div>
+  </div>
+
+  <h2 style="text-align:center;">Hilltops Free Range Exit Log</h2>
+
+  <form id="exitForm" novalidate>
+    <input type="tel" name="phone" placeholder="Phone Number" autocomplete="tel"
+           inputmode="tel" pattern="[0-9+()\- ]{6,}" required>
+
     <input type="text" name="date" id="date" readonly>
     <input type="text" name="timeout" id="timeout" readonly>
+
+    <!-- Compliance confirmations on exit -->
+    <label class="checkbox">
+      <input type="checkbox" id="footwearExitConfirm" required>
+      I repeated the required footwear protocol on exit (footbath <em>or</em> shed boots left at door
+      <em>or</em> single-use boot covers removed and binned).
+    </label>
+
+    <select name="vehicleEnter" id="vehicleEnter" required>
+      <option value="">Did your vehicle enter the production area today?</option>
+      <option value="No">No</option>
+      <option value="Yes">Yes</option>
+    </select>
+
+    <div id="vehicleConfirmGroup" style="display:none;">
+      <label class="checkbox">
+        <input type="checkbox" id="vehicleWashConfirm">
+        I washed the wheels, footsteps and wheel arches before leaving the premises.
+      </label>
+      <input type="text" name="vehicleRego" id="vehicleRego" placeholder="Vehicle registration (optional)">
+    </div>
+
+    <!-- Optional: capture GPS at exit (like entry) -->
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
+
     <button type="submit">Submit Exit</button>
   </form>
-  <p id="message"></p>
+
+  <p id="message" style="text-align:center;"></p>
+
+  <footer style="text-align:center; font-size:14px; padding:20px; background-color:#f5f5f5;">
+    <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
+    <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
+  </footer>
 
 <script>
   const form = document.getElementById("exitForm");
   const dateInput = document.getElementById("date");
   const timeoutInput = document.getElementById("timeout");
   const submitButton = form.querySelector('button[type="submit"]');
+  const vehicleSelect = document.getElementById("vehicleEnter");
+  const vehicleGroup  = document.getElementById("vehicleConfirmGroup");
+  const vehicleWashCb = document.getElementById("vehicleWashConfirm");
 
+  // Set date/time (AU format with AM/PM)
   const now = new Date();
   dateInput.value = now.toISOString().split('T')[0];
-  timeoutInput.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  timeoutInput.value = now.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+  // Show/hide vehicle confirmation
+  vehicleSelect.addEventListener("change", () => {
+    const yes = vehicleSelect.value === "Yes";
+    vehicleGroup.style.display = yes ? "block" : "none";
+    vehicleWashCb.required = yes; // required only if vehicle entered
+  });
+
+  // Optional GPS capture (won't block submission if denied)
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      document.getElementById('latitude').value  = pos.coords.latitude;
+      document.getElementById('longitude').value = pos.coords.longitude;
+    });
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Change button to prevent resubmission
+    // Basic checks (extra safety)
+    if (!document.getElementById('footwearExitConfirm').checked) {
+      alert("Please confirm you repeated the footwear protocol on exit.");
+      return;
+    }
+    if (vehicleSelect.value === "Yes" && !vehicleWashCb.checked) {
+      alert("Please confirm the vehicle was washed before leaving.");
+      return;
+    }
+
+    // Prevent resubmission
     submitButton.textContent = "Submitting Exit...";
     submitButton.disabled = true;
 
+    // Build payload for Apps Script
     const payload = {
-      phone: form.phone.value,
+      phone: form.phone.value.trim(),
       date: form.date.value,
-      timeout: form.timeout.value
+      timeout: form.timeout.value,
+
+      // extra fields (your current doPost ignores these harmlessly; see note below to log them)
+      footwearExit: document.getElementById('footwearExitConfirm').checked ? "Yes" : "No",
+      vehicleEnter: vehicleSelect.value || "",
+      vehicleWashExit: (vehicleSelect.value === "Yes" && vehicleWashCb.checked) ? "Yes" : "No",
+      latitude: document.getElementById('latitude').value || "",
+      longitude: document.getElementById('longitude').value || "",
     };
 
     try {
       await fetch("https://script.google.com/macros/s/AKfycbzOcGycP05fyvgYA4xg0ujGcBsQpQcbdw_4y2uRi8zLOex2hnc3wbkW_scwNMxG0zUl/exec", {
         method: "POST",
         mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
       form.innerHTML = `
-        <div style="text-align: center; font-size: 18px; padding: 20px;">
+        <div style="text-align:center; font-size:18px; padding:20px;">
           ✅ Thank you! Your exit has been logged successfully.
         </div>
       `;
@@ -127,12 +154,5 @@ button[type="submit"]:active {
     }
   });
 </script>
-
-
-<footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
-<p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
-<p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
-</footer>
-  
 </body>
 </html>
