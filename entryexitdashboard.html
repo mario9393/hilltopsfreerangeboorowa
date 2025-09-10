@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hilltops Visitor – Combined Entry/Exit Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{font-family:Arial, sans-serif; background:#f8f9fa; margin:0; padding:20px;}
+  .brand{text-align:center; margin-bottom:20px;}
+  .brand .title{font-family:'Georgia',serif; font-size:32px; color:#EBC191; font-weight:bold; letter-spacing:2px;}
+  .brand .line{width:60px; height:2px; background:#EBC191; margin:5px auto;}
+  .brand .tag{font-size:12px; letter-spacing:4px; color:#EBC191;}
+  h2{margin:6px 0 12px; text-align:center;}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center; margin:0 auto 14px; max-width:1200px;}
+  .toolbar input, .toolbar button{padding:8px 10px; border:1px solid #ccc; border-radius:6px; background:#fff;}
+  .toolbar button{background:#4CAF50; color:#fff; font-weight:bold; border:none; cursor:pointer;}
+  .toolbar button:hover{background:#45a049;}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin: 10px 0 18px;}
+  .card{background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:12px 14px;}
+  .metric{font-size:24px; font-weight:700;}
+  .muted{color:#666; font-size:12px;}
+  section{margin-top:18px;}
+  .table-wrap{overflow:auto; background:#fff; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,.1);}
+  table{width:100%; border-collapse:collapse;}
+  th,td{padding:10px; border:1px solid #ddd; text-align:left; white-space:nowrap;}
+  th{background:#f1f1f1;}
+  .pill{display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:#eee;}
+  .pill.open{background:#ffe7cc;}
+  .pill.ok{background:#d7f6e1;}
+  .pill.warn{background:#ffe4e6;}
+  .section-title{display:flex; align-items:center; gap:10px; justify-content:space-between;}
+  .actions{display:flex; gap:8px; align-items:center;}
+  .signature{height:50px;}
+  @media (max-width:720px){ th,td{font-size:12px;} }
+</style>
+</head>
+<body>
+
+<div class="brand">
+  <div style="font-size:40px;">🐓</div>
+  <div class="title">HILLTOPS</div>
+  <div class="line"></div>
+  <div class="tag">FREE RANGE EGGS</div>
+</div>
+
+<h2>Visitor Entry ↔ Exit – Combined Dashboard</h2>
+
+<div class="toolbar">
+  <input type="date" id="dateFilter">
+  <input type="text" id="phoneFilter" placeholder="Search phone…">
+  <button id="refreshBtn">Refresh</button>
+  <button id="exportMatched">Export Matched CSV</button>
+  <button id="exportOpen">Export Open CSV</button>
+  <span class="muted" id="meta"></span>
+</div>
+
+<div class="cards">
+  <div class="card"><div class="metric" id="mEntries">–</div><div class="muted">Entries</div></div>
+  <div class="card"><div class="metric" id="mExits">–</div><div class="muted">Exits</div></div>
+  <div class="card"><div class="metric" id="mOpen">–</div><div class="muted">Open visits (no exit)</div></div>
+  <div class="card"><div class="metric" id="mAvgStay">–</div><div class="muted">Avg stay (matched)</div></div>
+</div>
+
+<section>
+  <div class="section-title">
+    <h3>Matched Visits</h3>
+    <div class="actions">
+      <span class="pill ok" id="matchedCount">0</span>
+    </div>
+  </div>
+  <div class="table-wrap"><table id="matchedTable"></table></div>
+</section>
+
+<section>
+  <div class="section-title">
+    <h3>Open Visits (Entry with no Exit)</h3>
+    <div class="actions"><span class="pill open" id="openCount">0</span></div>
+  </div>
+  <div class="table-wrap"><table id="openTable"></table></div>
+</section>
+
+<section>
+  <div class="section-title">
+    <h3>Unmatched Exits (Exit with no Entry)</h3>
+    <div class="actions"><span class="pill warn" id="orphanCount">0</span></div>
+  </div>
+  <div class="table-wrap"><table id="orphanTable"></table></div>
+</section>
+
+<script>
+/*** CONFIG – set your endpoints ***/
+const ENTRY_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhHc2D4rd7F5tDBaF6Nk0CTm634sjbC9cCEgKhYu48VTEkixHGXHqF6lRT9iEp5vyz2Q/exec"; // entry JSON
+const EXIT_SCRIPT_URL  = "https://script.google.com/macros/s/AKfycbzOcGycP05fyvgYA4xg0ujGcBsQpQcbdw_4y2uRi8zLOex2hnc3wbkW_scwNMxG0zUl/exec";    // exit JSON
+
+/*** DOM refs ***/
+const meta = document.getElementById("meta");
+const dateFilter = document.getElementById("dateFilter");
+const phoneFilter = document.getElementById("phoneFilter");
+const matchedTable = document.getElementById("matchedTable");
+const openTable = document.getElementById("openTable");
+const orphanTable = document.getElementById("orphanTable");
+const mEntries = document.getElementById("mEntries");
+const mExits = document.getElementById("mExits");
+const mOpen = document.getElementById("mOpen");
+const mAvgStay = document.getElementById("mAvgStay");
+const matchedCount = document.getElementById("matchedCount");
+const openCount = document.getElementById("openCount");
+const orphanCount = document.getElementById("orphanCount");
+document.getElementById("refreshBtn").addEventListener("click", loadAll);
+document.getElementById("exportMatched").addEventListener("click", () => exportCsvFromTable(matchedTable, "matched"));
+document.getElementById("exportOpen").addEventListener("click", () => exportCsvFromTable(openTable, "open"));
+
+phoneFilter.addEventListener("input", renderAll);
+dateFilter.addEventListener("change", renderAll);
+
+// Default date = today
+dateFilter.value = new Date().toISOString().slice(0,10);
+
+/*** Data holders ***/
+let entryRows = [];  // raw entry objects
+let exitRows = [];   // raw exit  objects
+
+/*** Load and correlate ***/
+async function loadAll(){
+  try{
+    const t0 = Date.now();
+    const [entryRes, exitRes] = await Promise.all([fetch(ENTRY_SCRIPT_URL), fetch(EXIT_SCRIPT_URL)]);
+    entryRows = await entryRes.json();
+    exitRows = await exitRes.json();
+
+    renderAll();
+
+    const ms = Date.now() - t0;
+    meta.textContent = `Updated ${new Date().toLocaleString()} • ${ms} ms`;
+  }catch(e){
+    meta.textContent = "Failed to fetch data – check endpoints.";
+  }
+}
+
+function renderAll(){
+  const d = dateFilter.value;              // yyyy-mm-dd or ""
+  const q = phoneFilter.value.trim();      // phone substring
+
+  const entries = entryRows
+    .map(normalizeEntry)
+    .filter(r => r); // drop un-parseable
+
+  const exits = exitRows
+    .map(normalizeExit)
+    .filter(r => r);
+
+  // Filter
+  const fEntries = entries.filter(r => (!d || r.date === d) && (!q || r.phoneDisp.includes(q)));
+  const fExits   = exits.filter(r => (!d || r.date === d) && (!q || r.phoneDisp.includes(q)));
+
+  // Correlate: map of exits by (phone,date) -> queue (in case multiple)
+  const exitMap = new Map();
+  for (const x of fExits){
+    const k = x.key;
+    if (!exitMap.has(k)) exitMap.set(k, []);
+    exitMap.get(k).push(x);
+  }
+
+  const matched = [];
+  const open = [];
+  for (const e of fEntries){
+    const arr = exitMap.get(e.key) || [];
+    if (arr.length){
+      // match with the earliest exit not yet taken (FIFO)
+      const x = arr.shift();
+      matched.push(makeMatchRow(e, x));
+    }else{
+      open.push(e);
+    }
+  }
+
+  // Orphan exits = remaining in exitMap
+  const orphans = [];
+  for (const [k, arr] of exitMap.entries()){
+    for (const x of arr) orphans.push(x);
+  }
+
+  // Metrics
+  mEntries.textContent = fEntries.length;
+  mExits.textContent   = fExits.length;
+  mOpen.textContent    = open.length;
+  matchedCount.textContent = matched.length;
+  openCount.textContent    = open.length;
+  orphanCount.textContent  = orphans.length;
+  mAvgStay.textContent     = matched.length ? formatDuration(Math.round(avg(matched.map(r => r.durationMin)))) : "–";
+
+  // Paint tables
+  paintMatched(matched);
+  paintOpen(open);
+  paintOrphans(orphans);
+}
+
+/*** Normalisers ***/
+function normalizePhone(p){
+  return (p || "").toString().replace(/[^\d+]/g,""); // keep digits and +
+}
+function prettyPhone(p){
+  const n = normalizePhone(p);
+  // simple AU pretty: +61 4xx xxx xxx or 0x xx etc (best-effort)
+  return n.startsWith("+61") && n.length>=12
+    ? n.replace(/^\+61(\d)(\d{3})(\d{3})(\d{3}).*$/, "+61 $1$2 $3 $4")
+    : n;
+}
+function getKey(phone, date){
+  return normalizePhone(phone) + "|" + date;
+}
+function toYYYYMMDD(dateStr){
+  // Accepts "YYYY-MM-DD" or local "M/D/YYYY, HH:MM:SS AM/PM" etc; returns "YYYY-MM-DD" or ""
+  if (!dateStr) return "";
+  // Already ISO?
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  // If there's a comma, split off date portion first
+  let dPart = dateStr.split(",")[0].trim();
+  // Handle dd/mm/yyyy or m/d/yyyy
+  const m = dPart.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (m){
+    const dd = m[2].length===1 ? "0"+m[2] : m[2];
+    const mm = m[1].length===1 ? "0"+m[1] : m[1];
+    const yyyy = m[3].length===2 ? ("20"+m[3]) : m[3];
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  // Try Date parse fallback
+  const d = new Date(dateStr);
+  if (!isNaN(d)) return d.toISOString().slice(0,10);
+  return "";
+}
+function extractTime(str){
+  // Returns a time string like "10:03 PM" if present, else ""
+  if (!str) return "";
+  // If in "M/D/YYYY, HH:MM:SS AM/PM"
+  const t = str.split(",")[1]?.trim() || "";
+  if (t) {
+    // Drop seconds if present
+    const m = t.match(/^(\d{1,2}:\d{2})(?::\d{2})?\s*([AP]M)?/i);
+    if (m) return (m[1] + (m[2] ? (" " + m[2].toUpperCase()) : ""));
+  }
+  // Already a short time like "10:51 PM"
+  const m2 = str.match(/^(\d{1,2}:\d{2})\s*([AP]M)$/i);
+  if (m2) return m2[1] + " " + m2[2].toUpperCase();
+  return "";
+}
+function toDateObj(dateISO, timeStr){
+  // Compose as local time; tolerate "HH:MM" and "HH:MM AM/PM"
+  if (!dateISO || !timeStr) return null;
+  let h=0,m=0,ampm="";
+  const mm = timeStr.match(/^(\d{1,2}):(\d{2})(?:\s*([AP]M))?$/i);
+  if (!mm) return null;
+  h = parseInt(mm[1],10); m = parseInt(mm[2],10); ampm = (mm[3]||"").toUpperCase();
+  if (ampm === "PM" && h < 12) h += 12;
+  if (ampm === "AM" && h === 12) h = 0;
+  const d = new Date(dateISO + "T" + String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0") + ":00");
+  return isNaN(d) ? null : d;
+}
+
+function normalizeEntry(o){
+  if (!o || typeof o !== "object") return null;
+  // find keys
+  const phoneKey = findKey(o, ["phone"]);
+  const dtKey    = findKey(o, ["datetime","date time","entry"]);
+  const dateKey  = findKey(o, ["date"]);
+  const timeKey  = findKey(o, ["time in","entry time","time"]);
+  const nameKey  = findKey(o, ["name","full name"]);
+  const purposeKey = findKey(o, ["purpose"]);
+  const footwearKey = findKey(o, ["footwear"]);
+  const vehicleEnterKey = findKey(o, ["vehicleenter","vehicle enter"]);
+  const handHygieneKey = findKey(o, ["hand","sanitise","sanitize"]);
+
+  const phone = o[phoneKey] || "";
+  const rawDt = o[dtKey] || "";
+  const dateISO = toYYYYMMDD(o[dateKey] || rawDt);
+  const timeIn  = extractTime(rawDt) || (o[timeKey] || "");
+  if (!phone || !dateISO) return null;
+
+  const e = {
+    phone: phone,
+    phoneDisp: prettyPhone(phone),
+    name: o[nameKey] || "",
+    date: dateISO,
+    timeIn: timeIn,
+    purpose: o[purposeKey] || "",
+    footwear: o[footwearKey] || "",
+    vehicleEnter: o[vehicleEnterKey] || "",
+    handHygiene: o[handHygieneKey] || "",
+    raw: o
+  };
+  e.key = getKey(e.phone, e.date);
+  return e;
+}
+
+function normalizeExit(o){
+  if (!o || typeof o !== "object") return null;
+  const phoneKey = findKey(o, ["phone"]);
+  const dateKey  = findKey(o, ["date"]);
+  const timeKey  = findKey(o, ["timeout","time out","time"]);
+  const footwearExitKey = findKey(o, ["footwear exit","footwearexit"]);
+  const vehicleEnterKey = findKey(o, ["vehicle entered","vehicleenter"]);
+  const vehicleWashKey  = findKey(o, ["vehicle washed","vehiclewash","vehicle washed before leaving"]);
+
+  const phone = o[phoneKey] || "";
+  const dateISO = toYYYYMMDD(o[dateKey] || "");
+  const timeOut = o[timeKey] || extractTime(o[timeKey]) || "";
+  if (!phone || !dateISO) return null;
+
+  const x = {
+    phone: phone,
+    phoneDisp: prettyPhone(phone),
+    date: dateISO,
+    timeOut: timeOut,
+    footwearExit: o[footwearExitKey] || "",
+    vehicleEnter: o[vehicleEnterKey] || "",
+    vehicleWashExit: o[vehicleWashKey] || "",
+    raw: o
+  };
+  x.key = getKey(x.phone, x.date);
+  return x;
+}
+
+function findKey(obj, patterns){
+  const keys = Object.keys(obj);
+  const lower = keys.map(k => k.toLowerCase());
+  for (const pat of patterns){
+    const idx = lower.findIndex(k => k.includes(pat));
+    if (idx >= 0) return keys[idx];
+  }
+  return null;
+}
+
+/*** Correlation helpers ***/
+function makeMatchRow(e, x){
+  const start = toDateObj(e.date, e.timeIn);
+  const end   = toDateObj(x.date, x.timeOut);
+  let durationMin = null;
+  if (start && end) durationMin = Math.max(0, Math.round((end - start)/60000));
+  return {
+    phone: e.phoneDisp,
+    name: e.name || "",
+    date: e.date,
+    timeIn: e.timeIn || "",
+    timeOut: x.timeOut || "",
+    durationMin,
+    purpose: e.purpose || "",
+    entryVehicle: e.vehicleEnter || "",
+    exitVehicle: x.vehicleEnter || "",
+    vehicleWashExit: x.vehicleWashExit || "",
+    footwearExit: x.footwearExit || ""
+  };
+}
+
+function formatDuration(min){
+  if (min == null) return "–";
+  const h = Math.floor(min/60);
+  const m = min % 60;
+  return (h? h+"h ":"") + m + "m";
+}
+function avg(arr){
+  if (!arr.length) return 0;
+  return arr.reduce((a,b)=>a+b,0)/arr.length;
+}
+
+/*** Painting ***/
+function paintMatched(rows){
+  if (!rows.length){ matchedTable.innerHTML = "<tr><td>No matched visits.</td></tr>"; return; }
+  const head = `
+    <tr>
+      <th>Date</th><th>Phone</th><th>Name</th>
+      <th>In</th><th>Out</th><th>Duration</th>
+      <th>Purpose</th>
+      <th>Vehicle (entry)</th>
+      <th>Vehicle (exit)</th>
+      <th>Vehicle wash (exit)</th>
+      <th>Footwear exit repeated</th>
+    </tr>`;
+  const body = rows.map(r => `
+    <tr>
+      <td>${esc(r.date)}</td>
+      <td>${esc(r.phone)}</td>
+      <td>${esc(r.name)}</td>
+      <td>${esc(r.timeIn)}</td>
+      <td>${esc(r.timeOut)}</td>
+      <td>${esc(formatDuration(r.durationMin))}</td>
+      <td>${esc(r.purpose)}</td>
+      <td>${esc(r.entryVehicle)}</td>
+      <td>${esc(r.exitVehicle)}</td>
+      <td>${esc(r.vehicleWashExit)}</td>
+      <td>${esc(r.footwearExit)}</td>
+    </tr>`).join("");
+  matchedTable.innerHTML = head + body;
+}
+
+function paintOpen(rows){
+  if (!rows.length){ openTable.innerHTML = "<tr><td>None 🎉</td></tr>"; return; }
+  const head = `<tr><th>Date</th><th>Phone</th><th>Name</th><th>In</th><th>Purpose</th></tr>`;
+  const body = rows.map(r => `
+    <tr>
+      <td>${esc(r.date)}</td>
+      <td>${esc(r.phoneDisp)}</td>
+      <td>${esc(r.name)}</td>
+      <td>${esc(r.timeIn)}</td>
+      <td>${esc(r.purpose)}</td>
+    </tr>`).join("");
+  openTable.innerHTML = head + body;
+}
+
+function paintOrphans(rows){
+  if (!rows.length){ orphanTable.innerHTML = "<tr><td>None</td></tr>"; return; }
+  const head = `<tr><th>Date</th><th>Phone</th><th>Out</th><th>Vehicle (exit)</th><th>Vehicle wash (exit)</th></tr>`;
+  const body = rows.map(r => `
+    <tr>
+      <td>${esc(r.date)}</td>
+      <td>${esc(r.phoneDisp)}</td>
+      <td>${esc(r.timeOut)}</td>
+      <td>${esc(r.vehicleEnter)}</td>
+      <td>${esc(r.vehicleWashExit)}</td>
+    </tr>`).join("");
+  orphanTable.innerHTML = head + body;
+}
+
+/*** CSV export of current visible table ***/
+function exportCsvFromTable(tbl, prefix){
+  const rows = [...tbl.querySelectorAll("tr")].map(tr =>
+    [...tr.children].map(td => `"${td.innerText.replace(/\r?\n|\r/g," ").replace(/"/g,'""')}"`).join(",")
+  ).join("\n");
+  if (!rows) return;
+  const blob = new Blob([rows], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const d = dateFilter.value || "all-dates";
+  a.href = url; a.download = `${prefix}_${d}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/*** Utils ***/
+function esc(s){ return String(s)
+  .replaceAll("&","&amp;").replaceAll("<","&lt;")
+  .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+  .replaceAll("'","&#039;"); }
+
+loadAll();
+</script>
+</body>
+</html>
