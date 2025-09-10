@@ -106,33 +106,42 @@ const mAvgStay = document.getElementById("mAvgStay");
 const matchedCount = document.getElementById("matchedCount");
 const openCount = document.getElementById("openCount");
 const orphanCount = document.getElementById("orphanCount");
+
 document.getElementById("refreshBtn").addEventListener("click", loadAll);
 document.getElementById("exportMatched").addEventListener("click", () => exportCsvFromTable(matchedTable, "matched"));
 document.getElementById("exportOpen").addEventListener("click", () => exportCsvFromTable(openTable, "open"));
-
 phoneFilter.addEventListener("input", renderAll);
 dateFilter.addEventListener("change", renderAll);
-
-// Default date = today
 dateFilter.value = new Date().toISOString().slice(0,10);
 
 /*** Data holders ***/
-let entryRows = [];  // raw entry objects
-let exitRows = [];   // raw exit  objects
+let entryRows = [];
+let exitRows  = [];
 
+/*** JSONP helper (for exit feed to bypass CORS) ***/
+function jsonp(url){
+  return new Promise((resolve, reject) => {
+    const cb = "cb_" + Math.random().toString(36).slice(2);
+    window[cb] = (data) => { resolve(data); delete window[cb]; s.remove(); };
+    const s = document.createElement("script");
+    s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+    s.onerror = () => reject(new Error("JSONP load failed"));
+    document.body.appendChild(s);
+  });
+}
+
+/*** Load and correlate ***/
 async function loadAll(){
   try{
     const t0 = Date.now();
-    const [entryRes, exitRes] = await Promise.all([
-      fetch(ENTRY_SCRIPT_URL + "?t=" + t0, { cache: "no-store" }),
-      fetch(EXIT_SCRIPT_URL  + "?t=" + t0, { cache: "no-store" })
-    ]);
 
+    // Entry via normal fetch (must return public JSON)
+    const entryRes = await fetch(ENTRY_SCRIPT_URL + "?t=" + t0, { cache: "no-store" });
     if (!entryRes.ok) throw new Error("Entry fetch failed: " + entryRes.status);
-    if (!exitRes.ok)  throw new Error("Exit fetch failed: " + exitRes.status);
-
     entryRows = await entryRes.json();
-    exitRows  = await exitRes.json();
+
+    // Exit via JSONP (bypasses CORS)
+    exitRows = await jsonp(EXIT_SCRIPT_URL + "?t=" + t0);
 
     renderAll();
     meta.textContent = `Updated ${new Date().toLocaleString()} • ${Date.now() - t0} ms`;
@@ -144,21 +153,23 @@ async function loadAll(){
 
 function renderAll(){
   const d = dateFilter.value;              // yyyy-mm-dd or ""
-  const q = phoneFilter.value.trim();      // phone substring
+  const q = (phoneFilter.value || "").trim();
 
-  const entries = entryRows
-    .map(normalizeEntry)
-    .filter(r => r); // drop un-parseable
+  const entries = entryRows.map(normalizeEntry).filter(Boolean);
+  const exits   = exitRows.map(normalizeExit).filter(Boolean);
 
-  const exits = exitRows
-    .map(normalizeExit)
-    .filter(r => r);
+  // Filters (phone search works on display text OR canonical digits)
+  const qCanon = canonicalPhone(q);
+  const fEntries = entries.filter(r =>
+    (!d || r.date === d) &&
+    (!q || r.phoneDisp.includes(q) || (qCanon && r.phoneCanon.includes(qCanon)))
+  );
+  const fExits = exits.filter(r =>
+    (!d || r.date === d) &&
+    (!q || r.phoneDisp.includes(q) || (qCanon && r.phoneCanon.includes(qCanon)))
+  );
 
-  // Filter
-  const fEntries = entries.filter(r => (!d || r.date === d) && (!q || r.phoneDisp.includes(q)));
-  const fExits   = exits.filter(r => (!d || r.date === d) && (!q || r.phoneDisp.includes(q)));
-
-  // Correlate: map of exits by (phone,date) -> queue (in case multiple)
+  // Correlate exits by (phone,date)
   const exitMap = new Map();
   for (const x of fExits){
     const k = x.key;
@@ -171,17 +182,16 @@ function renderAll(){
   for (const e of fEntries){
     const arr = exitMap.get(e.key) || [];
     if (arr.length){
-      // match with the earliest exit not yet taken (FIFO)
       const x = arr.shift();
       matched.push(makeMatchRow(e, x));
-    }else{
+    } else {
       open.push(e);
     }
   }
 
-  // Orphan exits = remaining in exitMap
+  // Remaining exits are orphans
   const orphans = [];
-  for (const [k, arr] of exitMap.entries()){
+  for (const arr of exitMap.values()){
     for (const x of arr) orphans.push(x);
   }
 
@@ -192,7 +202,9 @@ function renderAll(){
   matchedCount.textContent = matched.length;
   openCount.textContent    = open.length;
   orphanCount.textContent  = orphans.length;
-  mAvgStay.textContent     = matched.length ? formatDuration(Math.round(avg(matched.map(r => r.durationMin)))) : "–";
+
+  const durations = matched.map(r => r.durationMin).filter(v => typeof v === "number");
+  mAvgStay.textContent = durations.length ? formatDuration(Math.round(avg(durations))) : "–";
 
   // Paint tables
   paintMatched(matched);
@@ -200,71 +212,82 @@ function renderAll(){
   paintOrphans(orphans);
 }
 
-/*** Normalisers ***/
-function normalizePhone(p){
-  return (p || "").toString().replace(/[^\d+]/g,""); // keep digits and +
+/*** Normalisers & helpers ***/
+function canonicalPhone(p){
+  // AU-friendly: digits only; convert leading 0 to 61
+  const digits = (p || "").toString().replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("0")) return "61" + digits.slice(1);
+  return digits;
 }
 function prettyPhone(p){
-  const n = normalizePhone(p);
-  // simple AU pretty: +61 4xx xxx xxx or 0x xx etc (best-effort)
-  return n.startsWith("+61") && n.length>=12
-    ? n.replace(/^\+61(\d)(\d{3})(\d{3})(\d{3}).*$/, "+61 $1$2 $3 $4")
-    : n;
+  const c = canonicalPhone(p);
+  if (c.startsWith("61") && c.length >= 3){
+    const national = c.slice(2);
+    if (national.length === 9 && national[0] === "4") {
+      // mobile: +61 4xx xxx xxx
+      return `+61 ${national[0]}${national.slice(1,4)} ${national.slice(4,7)} ${national.slice(7)}`;
+    } else if (national.length === 9) {
+      // landline-ish: +61 X xxxx xxxx
+      return `+61 ${national[0]} ${national.slice(1,5)} ${national.slice(5)}`;
+    }
+    return `+61 ${national}`;
+  }
+  return p || "";
 }
 function getKey(phone, date){
-  return normalizePhone(phone) + "|" + date;
+  return canonicalPhone(phone) + "|" + date;
 }
 function toYYYYMMDD(dateStr){
-  // Accepts "YYYY-MM-DD" or local "M/D/YYYY, HH:MM:SS AM/PM" etc; returns "YYYY-MM-DD" or ""
   if (!dateStr) return "";
-  // Already ISO?
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  // If there's a comma, split off date portion first
   let dPart = dateStr.split(",")[0].trim();
-  // Handle dd/mm/yyyy or m/d/yyyy
   const m = dPart.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
   if (m){
-    const dd = m[2].length===1 ? "0"+m[2] : m[2];
-    const mm = m[1].length===1 ? "0"+m[1] : m[1];
+    const dd = m[2].padStart(2,"0");
+    const mm = m[1].padStart(2,"0");
     const yyyy = m[3].length===2 ? ("20"+m[3]) : m[3];
     return `${yyyy}-${mm}-${dd}`;
   }
-  // Try Date parse fallback
   const d = new Date(dateStr);
   if (!isNaN(d)) return d.toISOString().slice(0,10);
   return "";
 }
 function extractTime(str){
-  // Returns a time string like "10:03 PM" if present, else ""
   if (!str) return "";
-  // If in "M/D/YYYY, HH:MM:SS AM/PM"
   const t = str.split(",")[1]?.trim() || "";
-  if (t) {
-    // Drop seconds if present
+  if (t){
     const m = t.match(/^(\d{1,2}:\d{2})(?::\d{2})?\s*([AP]M)?/i);
-    if (m) return (m[1] + (m[2] ? (" " + m[2].toUpperCase()) : ""));
+    if (m) return m[1] + (m[2] ? (" " + m[2].toUpperCase()) : "");
   }
-  // Already a short time like "10:51 PM"
   const m2 = str.match(/^(\d{1,2}:\d{2})\s*([AP]M)$/i);
   if (m2) return m2[1] + " " + m2[2].toUpperCase();
   return "";
 }
 function toDateObj(dateISO, timeStr){
-  // Compose as local time; tolerate "HH:MM" and "HH:MM AM/PM"
   if (!dateISO || !timeStr) return null;
-  let h=0,m=0,ampm="";
   const mm = timeStr.match(/^(\d{1,2}):(\d{2})(?:\s*([AP]M))?$/i);
   if (!mm) return null;
-  h = parseInt(mm[1],10); m = parseInt(mm[2],10); ampm = (mm[3]||"").toUpperCase();
+  let h = parseInt(mm[1],10), m = parseInt(mm[2],10);
+  const ampm = (mm[3]||"").toUpperCase();
   if (ampm === "PM" && h < 12) h += 12;
   if (ampm === "AM" && h === 12) h = 0;
-  const d = new Date(dateISO + "T" + String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0") + ":00");
+  const d = new Date(`${dateISO}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`);
   return isNaN(d) ? null : d;
+}
+
+function findKey(obj, patterns){
+  const keys = Object.keys(obj);
+  const lower = keys.map(k => k.toLowerCase());
+  for (const pat of patterns){
+    const idx = lower.findIndex(k => k.includes(pat));
+    if (idx >= 0) return keys[idx];
+  }
+  return null;
 }
 
 function normalizeEntry(o){
   if (!o || typeof o !== "object") return null;
-  // find keys
   const phoneKey = findKey(o, ["phone"]);
   const dtKey    = findKey(o, ["datetime","date time","entry"]);
   const dateKey  = findKey(o, ["date"]);
@@ -283,6 +306,7 @@ function normalizeEntry(o){
 
   const e = {
     phone: phone,
+    phoneCanon: canonicalPhone(phone),
     phoneDisp: prettyPhone(phone),
     name: o[nameKey] || "",
     date: dateISO,
@@ -313,6 +337,7 @@ function normalizeExit(o){
 
   const x = {
     phone: phone,
+    phoneCanon: canonicalPhone(phone),
     phoneDisp: prettyPhone(phone),
     date: dateISO,
     timeOut: timeOut,
@@ -323,16 +348,6 @@ function normalizeExit(o){
   };
   x.key = getKey(x.phone, x.date);
   return x;
-}
-
-function findKey(obj, patterns){
-  const keys = Object.keys(obj);
-  const lower = keys.map(k => k.toLowerCase());
-  for (const pat of patterns){
-    const idx = lower.findIndex(k => k.includes(pat));
-    if (idx >= 0) return keys[idx];
-  }
-  return null;
 }
 
 /*** Correlation helpers ***/
@@ -363,8 +378,7 @@ function formatDuration(min){
   return (h? h+"h ":"") + m + "m";
 }
 function avg(arr){
-  if (!arr.length) return 0;
-  return arr.reduce((a,b)=>a+b,0)/arr.length;
+  return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
 }
 
 /*** Painting ***/
