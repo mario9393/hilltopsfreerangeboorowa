@@ -120,20 +120,25 @@ dateFilter.value = new Date().toISOString().slice(0,10);
 let entryRows = [];  // raw entry objects
 let exitRows = [];   // raw exit  objects
 
-/*** Load and correlate ***/
 async function loadAll(){
   try{
     const t0 = Date.now();
-    const [entryRes, exitRes] = await Promise.all([fetch(ENTRY_SCRIPT_URL), fetch(EXIT_SCRIPT_URL)]);
+    const [entryRes, exitRes] = await Promise.all([
+      fetch(ENTRY_SCRIPT_URL + "?t=" + t0, { cache: "no-store" }),
+      fetch(EXIT_SCRIPT_URL  + "?t=" + t0, { cache: "no-store" })
+    ]);
+
+    if (!entryRes.ok) throw new Error("Entry fetch failed: " + entryRes.status);
+    if (!exitRes.ok)  throw new Error("Exit fetch failed: " + exitRes.status);
+
     entryRows = await entryRes.json();
-    exitRows = await exitRes.json();
+    exitRows  = await exitRes.json();
 
     renderAll();
-
-    const ms = Date.now() - t0;
-    meta.textContent = `Updated ${new Date().toLocaleString()} • ${ms} ms`;
-  }catch(e){
+    meta.textContent = `Updated ${new Date().toLocaleString()} • ${Date.now() - t0} ms`;
+  } catch (e) {
     meta.textContent = "Failed to fetch data – check endpoints.";
+    console.error(e);
   }
 }
 
