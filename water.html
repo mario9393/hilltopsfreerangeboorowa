@@ -18,13 +18,15 @@
       max-width: 700px;
       margin: auto;
     }
-    input, select {
+    input, select, textarea {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
       border-radius: 5px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
+    textarea { min-height: 64px; }
     button[type="submit"] {
       width: 100%;
       padding: 12px;
@@ -52,7 +54,7 @@
       margin: 10px 0;
       font-weight: bold;
     }
-    .fixAttemptDiv, .fixResultDiv {
+    .fixAttemptDiv, .fixResultDiv, .repairItemsDiv {
       margin-left: 10px;
     }
   </style>
@@ -125,6 +127,11 @@
             <option value="Fixed temporarily">Fixed temporarily</option>
           </select>
         </div>
+        <!-- NEW: Repair items -->
+        <div class="repairItemsDiv" id="waterFlowRepairDiv" style="display:none;">
+          <label>What stuff required for repairing it?</label>
+          <textarea id="waterFlowRepairItems" name="waterFlowRepairItems" rows="2" placeholder='e.g., 25mm joiner, ball valve, PTFE tape, 10m 25mm poly pipe'></textarea>
+        </div>
       </div>
     </div>
 
@@ -163,6 +170,11 @@
             <option value="Fixed temporarily">Fixed temporarily</option>
           </select>
         </div>
+        <!-- NEW: Repair items -->
+        <div class="repairItemsDiv" id="drinkerRepairDiv" style="display:none;">
+          <label>What stuff required for repairing it?</label>
+          <textarea id="drinkerRepairItems" name="drinkerRepairItems" rows="2" placeholder='e.g., nipple drinkers, line brush, end cap, sealant'></textarea>
+        </div>
       </div>
     </div>
 
@@ -192,6 +204,11 @@
             <option value="Not fixed">Not fixed</option>
             <option value="Fixed temporarily">Fixed temporarily</option>
           </select>
+        </div>
+        <!-- NEW: Repair items -->
+        <div class="repairItemsDiv" id="troughRepairDiv" style="display:none;">
+          <label>What stuff required for repairing it?</label>
+          <textarea id="troughRepairItems" name="troughRepairItems" rows="2" placeholder='e.g., float valve, hose clamp, 19mm hose, thread tape'></textarea>
         </div>
       </div>
     </div>
@@ -224,6 +241,11 @@
               <option value="Fixed temporarily">Fixed temporarily</option>
             </select>
           </div>
+          <!-- NEW: Repair items -->
+          <div class="repairItemsDiv" id="valveRepairDiv" style="display:none;">
+            <label>What stuff required for repairing it?</label>
+            <textarea id="valveRepairItems" name="valveRepairItems" rows="2" placeholder='e.g., 3/4&quot; ball valve, handle, unions, thread sealant'></textarea>
+          </div>
         </div>
       </div>
     </div>
@@ -254,7 +276,9 @@
     "Flock 41": { lat: -34.353400, lng: 148.706169 },
     "Flock 42": { lat: -34.353883, lng: 148.705925 },
     "Flock 43": { lat: -34.353933, lng: 148.706528 },
-    "Flock 44": { lat: -34.348578, lng: 148.705606 }
+    "Flock 44": { lat: -34.348578, lng: 148.705606 },
+    "Flock 45": { lat: -34.345740, lng: 148.702910 }, 
+    "Flock 46": { lat: -34.345625, lng: 148.702940 }
   };
 
   let submitLat = "", submitLng = "", proximityStatus = "Unknown";
@@ -282,7 +306,9 @@
 
   // Conditional Display Handlers
   function show(id, condition) {
-    document.getElementById(id).style.display = condition ? "block" : "none";
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = condition ? "block" : "none";
   }
 
   // Water Flow Logic
@@ -338,6 +364,20 @@
     show("valveOpenedReasonDiv", valveOpened.value === "No");
   });
 
+  // Helper: show repair items when a fix attempt is answered (Yes OR No)
+  function bindRepairField(attemptSelectId, repairDivId) {
+    const sel = document.getElementById(attemptSelectId);
+    if (!sel) return;
+    const toggle = () => show(repairDivId, sel.value === "Yes" || sel.value === "No");
+    sel.addEventListener("change", toggle);
+    toggle(); // initialize
+  }
+  // Bind all four repair fields
+  bindRepairField("waterFlowFixAttempt", "waterFlowRepairDiv");
+  bindRepairField("drinkerFixAttempt", "drinkerRepairDiv");
+  bindRepairField("troughFixAttempt", "troughRepairDiv");
+  bindRepairField("valveFixAttempt", "valveRepairDiv");
+
   // Submit Handler
   document.getElementById("waterForm").addEventListener("submit", async function(e) {
     e.preventDefault();
@@ -374,6 +414,13 @@
       valveLeftOpenReason: valveLeftOpenReason.value,
       valveFixAttempt: valveFixAttempt.value,
       valveFixResult: valveFixResult.value,
+
+      // NEW: repair items captured
+      waterFlowRepairItems: document.getElementById("waterFlowRepairItems")?.value || "",
+      drinkerRepairItems: document.getElementById("drinkerRepairItems")?.value || "",
+      troughRepairItems: document.getElementById("troughRepairItems")?.value || "",
+      valveRepairItems: document.getElementById("valveRepairItems")?.value || "",
+
       "Submitter Latitude": submitLat,
       "Submitter Longitude": submitLng,
       "Proximity Status": proximityStatus
