@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>End of Day Egg Stock Register</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #message {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<form id="stockForm">
+  <h2>End of Day Egg Stock Register</h2>
+
+  <label>Date:</label>
+  <input type="date" id="date" required />
+
+  <label>Time:</label>
+  <input type="time" id="time" required />
+
+  <label>Supervisor Name:</label>
+  <input type="text" id="name" placeholder="Enter your name" required />
+
+  <label>Egg Category:</label>
+  <select id="eggType" required>
+    <option value="">-- Select Category --</option>
+    <option>Cleaned Eggs from the Field</option>
+    <option>Dirty Eggs</option>
+    <option>Washed Dirty Eggs</option>
+    <option>Super Dirty Eggs</option>
+    <option>Washed Super Dirty Eggs</option>
+    <option>Ground Eggs</option>
+    <option>Washed Ground Eggs</option>
+    <option>Packed 800g Eggs</option>
+    <option>Packed 700g Eggs</option>
+    <option>Packed 600g Eggs</option>
+    <option>Packed Extra Large Eggs</option>
+    <option>Packed Extra Small Eggs</option>
+  </select>
+
+  <label>Number of Eggs:</label>
+  <input type="number" id="eggCount" min="0" required />
+
+  <button type="submit">Submit Stock</button>
+  <div id="message"></div>
+</form>
+
+<script>
+document.getElementById("stockForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  
+  const payload = {
+    timestamp: new Date().toLocaleString('en-AU'),
+    date: document.getElementById("date").value,
+    time: document.getElementById("time").value,
+    name: document.getElementById("name").value,
+    eggType: document.getElementById("eggType").value,
+    eggCount: document.getElementById("eggCount").value
+  };
+
+  const btn = this.querySelector("button");
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbx0Dt1c6JiWPw-sKgY9eqnD0Iweaa7Tf4zfqCmXVmdfKP8_LH241qlIY3S0ZCAnnSX4/exec", {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    document.getElementById("message").textContent = "✅ Stock recorded successfully.";
+    this.reset();
+  } catch (err) {
+    document.getElementById("message").textContent = "❌ Failed to submit.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Submit Stock";
+  }
+});
+</script>
+
+</body>
+</html>
