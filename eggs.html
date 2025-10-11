@@ -68,6 +68,20 @@
       <label>Time Leaving Flock</label>
       <input type="time" id="leaveTime" required />
 
+    <fieldset class="prechecks">
+    <legend>Pre-leave safety checks</legend>
+
+    <label>
+    <input type="checkbox" id="tapClosed" required>
+    Trough taps are closed
+    </label><br>
+
+    <label>
+    <input type="checkbox" id="feederLidsClosed" required>
+    All feeder lids are properly closed
+  </label>
+</fieldset>
+      
       <button type="submit">Submit</button>
     </form>
     <div id="message"></div>
