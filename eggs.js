@@ -11,32 +11,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const giant = document.getElementById("giant");
   const totalSpan = document.getElementById("total");
 
+  const submitButton = form.querySelector("button[type='submit']");
+
+  // NEW: safety checkboxes (defensive if HTML not updated yet)
+  const tapClosed = document.getElementById("tapClosed");
+  const feederLidsClosed = document.getElementById("feederLidsClosed");
+
+  // Pre-fill date & time (Sydney time via local browser)
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  dateInput.value = `${yyyy}-${mm}-${dd}`;
+  timeInput.value = now.toTimeString().slice(0, 5);
+
+  // Pre-select flock from URL (?flock=Flock%2034)
   const urlParams = new URLSearchParams(window.location.search);
-  const flock = urlParams.get("flock");
-  if (flock) {
-    document.getElementById("flockId").value = flock;
+  const flockFromUrl = urlParams.get("flock");
+  if (flockFromUrl) {
+    document.getElementById("flockId").value = flockFromUrl;
   }
 
-function updateTotal() {
-  // Only exclude broken eggs from total
-  const total = [clean, dirty, superDirty, ground, giant].reduce((sum, field) => {
-    return sum + (parseInt(field.value) || 0);
-  }, 0);
-  totalSpan.textContent = total;
-}
-
+  // Total = exclude "Broken Eggs"
+  function updateTotal() {
+    const toInt = (el) => parseInt(el.value, 10) || 0;
+    const total = [clean, dirty, superDirty, ground, giant].reduce((sum, field) => sum + toInt(field), 0);
+    totalSpan.textContent = String(total);
+  }
   [clean, dirty, superDirty, ground, broken, giant].forEach(input => {
     input.addEventListener("input", updateTotal);
   });
+  updateTotal();
 
-const now = new Date();
-const yyyy = now.getFullYear();
-const mm = String(now.getMonth() + 1).padStart(2, '0');
-const dd = String(now.getDate()).padStart(2, '0');
-dateInput.value = `${yyyy}-${mm}-${dd}`;
-timeInput.value = now.toTimeString().slice(0, 5);
-
-  // Define known flock coordinates (replace with your real locations)
+  // Known flock coordinates (unchanged)
   const flockCoordinates = {
     "Flock 24": { lat: -34.352939, lng: 148.700403 },
     "Flock 29": { lat: -34.349811, lng: 148.701231 },
@@ -61,19 +68,41 @@ timeInput.value = now.toTimeString().slice(0, 5);
     const toRad = x => x * Math.PI / 180;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    const a = Math.sin(dLat / 2) ** 2 +
               Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+              Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // in meters
+    return R * c; // meters
   }
-  const submitButton = form.querySelector("button[type='submit']"); // ✅ Added
-  
+
+  // NEW: disable submit until both safety checks ticked
+  function safetyChecksTicked() {
+    // If checkboxes exist, both must be checked; if not present, allow submit (backward compatible)
+    if (tapClosed && feederLidsClosed) {
+      return tapClosed.checked && feederLidsClosed.checked;
+    }
+    return true;
+  }
+  function updateSubmitEnabled() {
+    submitButton.disabled = !safetyChecksTicked();
+  }
+  if (tapClosed) tapClosed.addEventListener("change", updateSubmitEnabled);
+  if (feederLidsClosed) feederLidsClosed.addEventListener("change", updateSubmitEnabled);
+  updateSubmitEnabled(); // initial state
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    submitButton.disabled = true; // ✅ Added
-    submitButton.textContent = "Submitting..."; // ✅ Added
-    
+
+    // Ensure browser validations pass (and safety checks if present)
+    if (!form.checkValidity() || !safetyChecksTicked()) {
+      form.reportValidity();
+      updateSubmitEnabled();
+      return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
     const flockId = form.flockId.value;
     const target = flockCoordinates[flockId];
     let latitude = "";
@@ -86,7 +115,7 @@ timeInput.value = now.toTimeString().slice(0, 5);
           latitude = position.coords.latitude;
           longitude = position.coords.longitude;
           const distance = getDistance(latitude, longitude, target.lat, target.lng);
-          proximityStatus = distance <= 100 ? "Near" : "Away"; // 100 meters threshold
+          proximityStatus = distance <= 100 ? "Near" : "Away"; // 100 m threshold
           resolve();
         }, () => {
           proximityStatus = "Location Denied";
@@ -115,7 +144,11 @@ timeInput.value = now.toTimeString().slice(0, 5);
       "Time Leaving": form.leaveTime.value,
       "Latitude": latitude,
       "Longitude": longitude,
-      "Proximity Status": proximityStatus
+      "Proximity Status": proximityStatus,
+      // NEW: include safety checks
+      "Precheck - Trough taps closed": tapClosed ? (tapClosed.checked ? "Yes" : "No") : "N/A",
+      "Precheck - Feeder lids closed": feederLidsClosed ? (feederLidsClosed.checked ? "Yes" : "No") : "N/A",
+      "Submitted At ISO": new Date().toISOString()
     };
 
     try {
@@ -125,16 +158,22 @@ timeInput.value = now.toTimeString().slice(0, 5);
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+
       document.getElementById("message").textContent = "✅ Submission successful!";
       form.reset();
       totalSpan.textContent = "0";
-      submitButton.disabled = false; // ✅ Added
-      submitButton.textContent = "Submit"; // ✅ Added
-      
+
+      // After reset, reapply date/time defaults and disable submit until checks ticked again
+      dateInput.value = `${yyyy}-${mm}-${dd}`;
+      timeInput.value = now.toTimeString().slice(0, 5);
+      submitButton.disabled = true;
+      submitButton.textContent = "Submit";
+      updateSubmitEnabled();
+
     } catch (err) {
       document.getElementById("message").textContent = "❌ Failed to submit.";
-      submitButton.disabled = false; // ✅ Added
-      submitButton.textContent = "Submit"; // ✅ Added
+      submitButton.disabled = false;
+      submitButton.textContent = "Submit";
     }
   });
 });
