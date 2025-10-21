@@ -54,8 +54,27 @@
 
 <div class="row">
   <label>Meal Break (unpaid)</label>
-  <input type="time" id="breakTime" value="00:00" step="60">
-  <small>Tip: pick hours:minutes (e.g., 01:35 = 1h 35m)</small>
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+    <select id="breakPreset">
+      <option value="custom">Choose preset…</option>
+      <option value="0">None (0 min)</option>
+      <option value="10">10 min</option>
+      <option value="15">15 min</option>
+      <option value="20">20 min</option>
+      <option value="25">25 min</option>
+      <option value="30">30 min</option>
+      <option value="45">45 min</option>
+      <option value="60">1 hour</option>
+      <option value="75">1 h 15 m</option>
+      <option value="90">1 h 30 m</option>
+    </select>
+
+    <!-- numeric minute box -->
+    <input type="number" id="breakMins"
+           min="0" max="180" step="1" value="0"
+           placeholder="Custom minutes">
+  </div>
+  <small>Select a preset or type any custom minutes (e.g. 23 = 23 min, 65 = 1 h 5 m)</small>
 </div>
 
       <div class="row">
