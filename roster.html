@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Hilltops Roster Timesheet</title>
+  <link rel="stylesheet" href="roster.css">
+</head>
+<body>
+  <div class="wrap">
+    <h1>Hilltops Roster / Timesheet</h1>
+
+    <form id="timesheetForm">
+      <div class="row">
+        <label>Employee</label>
+        <select id="name" required>
+          <option value="">Select</option>
+          <option>Treena</option>
+          <option>Amelia</option>
+          <option>Holli</option>
+          <option>Peter</option>
+          <option>Jay</option>
+          <option>Riley</option>
+          <option>Daniel</option>
+          <option>Karl</option>
+          <option>Einar</option>
+          <option>Marni</option>
+          <option>Emili</option>
+          <option>Yao</option>
+          <option>Marianella</option>
+          <option>Sam</option>
+          <option>Lisa</option>
+          <option>Sam</option>
+          <option>Diego</option>
+          <!-- Add your staff list or fetch from sheet later -->
+        </select>
+      </div>
+
+      <div class="row">
+        <label>Date</label>
+        <input type="date" id="date" required>
+      </div>
+
+      <div class="row two">
+        <div>
+          <label>Start time</label>
+          <input type="time" id="start" required>
+        </div>
+        <div>
+          <label>End time</label>
+          <input type="time" id="end" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Meal Break (unpaid)</label>
+        <select id="breakMins">
+          <option value="0">None</option>
+          <option value="30">30 min</option>
+          <option value="40">40 min</option>
+          <option value="60">1 hour</option>
+          <option value="90">1 h 30 m</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>Location</label>
+        <select id="location" required>
+          <option value="">Select</option>
+          <option>Factory Washing</option>
+          <option>Factory Packing</option>
+          <option>Factory Washing & Packing</option>
+          <option>Maintanance</option>
+          <option>Collecting</option>
+          <option>Moving Flocks</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>Notes (optional)</label>
+        <textarea id="notes" placeholder="Anything special to record"></textarea>
+      </div>
+
+      <div class="total-box">
+        <strong>Total Worked:</strong> <span id="totalText">0h 00m</span>
+      </div>
+
+      <button type="submit" class="primary">Submit</button>
+      <p id="msg"></p>
+    </form>
+  </div>
+
+  <script src="roster.js"></script>
+</body>
+</html>
