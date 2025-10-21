@@ -52,16 +52,11 @@
         </div>
       </div>
 
-      <div class="row">
-        <label>Meal Break (unpaid)</label>
-        <select id="breakMins">
-          <option value="0">None</option>
-          <option value="30">30 min</option>
-          <option value="40">40 min</option>
-          <option value="60">1 hour</option>
-          <option value="90">1 h 30 m</option>
-        </select>
-      </div>
+<div class="row">
+  <label>Meal Break (unpaid)</label>
+  <input type="time" id="breakTime" value="00:00" step="60">
+  <small>Tip: pick hours:minutes (e.g., 01:35 = 1h 35m)</small>
+</div>
 
       <div class="row">
         <label>Location</label>
