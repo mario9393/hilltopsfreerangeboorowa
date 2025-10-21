@@ -70,10 +70,11 @@ async function onSubmit(e) {
 
   try {
     const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
+const res = await fetch(SCRIPT_URL, {
+method: 'POST',
+// no headers -> browser sends text/plain; no preflight
+body: JSON.stringify(payload)
+});
     const out = await res.json();
     if (out.ok) {
       msg.textContent = 'Timesheet submitted (Pending approval).';
