@@ -69,7 +69,6 @@ async function onSubmit(e) {
   };
 
   try {
-    const res = await fetch(SCRIPT_URL, {
 const res = await fetch(SCRIPT_URL, {
 method: 'POST',
 // no headers -> browser sends text/plain; no preflight
