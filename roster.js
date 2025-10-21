@@ -5,14 +5,28 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwEc2kAoiL7wTKsic-0
 document.addEventListener('DOMContentLoaded', () => {
   const d = new Date();
   const iso = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-                .toISOString().slice(0, 10);
+    .toISOString().slice(0, 10);
   document.getElementById('date').value = iso;
 
-  ['start', 'end', 'breakTime'].forEach(id =>
+  // Time & break listeners
+  ['start', 'end'].forEach(id =>
     document.getElementById(id).addEventListener('change', updateTotal)
   );
-  updateTotal();
 
+  // Sync preset <-> custom minutes
+  document.getElementById('breakPreset').addEventListener('change', (e) => {
+    const v = e.target.value;
+    if (v !== 'custom') {
+      document.getElementById('breakMins').value = Number(v);
+    }
+    updateTotal();
+  });
+  document.getElementById('breakMins').addEventListener('input', () => {
+    document.getElementById('breakPreset').value = 'custom';
+    updateTotal();
+  });
+
+  updateTotal();
   document.getElementById('timesheetForm').addEventListener('submit', onSubmit);
 });
 
@@ -25,8 +39,7 @@ function parseHM(val) { // "09:50" -> minutes
 function updateTotal() {
   const startM = parseHM(document.getElementById('start').value);
   const endM   = parseHM(document.getElementById('end').value);
-  const breakVal = document.getElementById('breakTime').value || '00:00';
-  const breakM = parseHM(breakVal) ?? 0;
+  const breakM = Number(document.getElementById('breakMins').value || 0);
 
   let txt = '0h 00m';
   if (startM != null && endM != null) {
@@ -48,8 +61,7 @@ async function onSubmit(e) {
   const date = document.getElementById('date').value;
   const start = document.getElementById('start').value;
   const end = document.getElementById('end').value;
-  const breakVal = document.getElementById('breakTime').value || '00:00';
-  const breakMins = parseHM(breakVal) ?? 0;   // minutes
+  const breakMins = Number(document.getElementById('breakMins').value || 0);
   const location = document.getElementById('location').value;
   const notes = document.getElementById('notes').value.trim();
 
