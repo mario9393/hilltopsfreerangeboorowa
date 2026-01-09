@@ -1,4 +1,4 @@
-const WEB_APP_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzuYDGdrFOE0kTnRNsRfvXjvFWn9OrX-XSRCjvYvXlItOtj-h1urs7iN5yTb4QbJo_M/exec";
 
 function submitForm() {
   const data = {
