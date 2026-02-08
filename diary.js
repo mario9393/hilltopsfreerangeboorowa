@@ -1,5 +1,5 @@
 // ✅ Paste your Apps Script Web App URL here:
-const WEB_APP_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzx9EKoA0QnIy9F8vHaV3xRqI71bcUf8zTiQ5fXYM2Y8SHFhOdsVADQJOIRfkKFuQID/exec";
 
 const $ = (id) => document.getElementById(id);
 
