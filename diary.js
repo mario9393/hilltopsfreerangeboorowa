@@ -272,3 +272,97 @@ async function submitDiary() {
     breakMins: nval("breakMins"),
     travelHours: travelFinal,
     workHours: computedWork,
+
+    // Egg collection
+    eggsCollected: nval("eggsCollected"),
+
+    // Maintenance
+    maintenanceType: sval("maintenanceType"),
+    maintenanceDetails: sval("maintenanceDetails"),
+
+    // Washing
+    dirtyEggs: nval("dirtyEggs"),
+    washedEggs: nval("washedEggs"),
+
+    // Packing
+    eggsToPack: nval("eggsToPack"),
+    eggsPacked: nval("eggsPacked"),
+    brokenPacked: nval("brokenPacked"),
+
+    remarks: sval("remarks"),
+    submittedBy,
+
+    signatureDataURL: canvas ? canvas.toDataURL("image/png") : "",
+  };
+
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = "Submitting…";
+
+  try {
+    // ✅ Use URLSearchParams to avoid CORS preflight with Apps Script
+    const body = new URLSearchParams();
+    body.append("data", JSON.stringify(payload));
+
+    await fetch(WEB_APP_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: body,
+    });
+
+    if (status) status.textContent = "✅ Submitted! (Saved to sheet)";
+    resetFormKeepDateAndSubmitter();
+  } catch (e) {
+    if (status) status.textContent = "❌ Network error: " + String(e);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ---------- Init ----------
+window.addEventListener("load", () => {
+  const t = todayISO();
+  if ($("date")) $("date").value = t;
+  if ($("todayPill")) $("todayPill").textContent = `Today: ${t}`;
+
+  // Signature setup
+  canvas = $("sigCanvas");
+  if (canvas) {
+    ctx = canvas.getContext("2d");
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousemove", moveDraw);
+    canvas.addEventListener("mouseup", endDraw);
+    canvas.addEventListener("mouseleave", endDraw);
+
+    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("touchmove", moveDraw, { passive: false });
+    canvas.addEventListener("touchend", endDraw, { passive: false });
+  }
+
+  if ($("clearSig")) $("clearSig").addEventListener("click", clearSignature);
+  if ($("submitBtn")) $("submitBtn").addEventListener("click", submitDiary);
+
+  // Work type switching
+  if ($("workType")) {
+    showSection($("workType").value);
+    $("workType").addEventListener("change", (e) => showSection(e.target.value));
+  }
+
+  // Recalc on relevant inputs
+  [
+    "numWorkers",
+    "workerNames",
+    "startTime",
+    "endTime",
+    "breakMins",
+    "travelHours",
+    "eggsCollected",
+    "dirtyEggs",
+    "washedEggs",
+    "eggsPacked",
+  ].forEach((id) => {
+    const el = $(id);
+    if (el) el.addEventListener("input", recalc);
+  });
+
+  recalc();
+});
