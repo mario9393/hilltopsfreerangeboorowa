@@ -1,7 +1,9 @@
-// Hilltops Daily Staff Diary - diary.js (FULL CLEAN VERSION)
+// Hilltops Daily Staff Diary - diary.js (iPhone-safe FULL CLEAN VERSION)
 // Break is NOT paid. Travel is paid (for Egg Collection only).
 // Labour Hours (person-hours) = (Shift Hours - Break) × Number of Workers
 // Work Time (hours) = (Shift - Break - Travel)  [productive time excluding travel]
+
+"use strict";
 
 const WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbzx9EKoA0QnIy9F8vHaV3xRqI71bcUf8zTiQ5fXYM2Y8SHFhOdsVADQJOIRfkKFuQID/exec";
@@ -73,7 +75,6 @@ function calcPaidShiftHoursPerPerson() {
 // Productive work hours (per person) = (Shift - Break - Travel(for egg collection))
 function calcWorkHoursPerPerson() {
   const type = sval("workType");
-
   const start = parseTimeToMinutes(sval("startTime"));
   const end = parseTimeToMinutes(sval("endTime"));
   const breakMins = Number(nval("breakMins") || 0);
@@ -94,20 +95,15 @@ function calcWorkHoursPerPerson() {
 
 // ---------- UI Sections ----------
 function showSection(type) {
-  const egg = $("secEgg");
-  const maint = $("secMaint");
-  const wash = $("secWash");
-  const pack = $("secPack");
+  hide($("secEgg"));
+  hide($("secMaint"));
+  hide($("secWash"));
+  hide($("secPack"));
 
-  hide(egg);
-  hide(maint);
-  hide(wash);
-  hide(pack);
-
-  if (type === "Egg Collection") show(egg);
-  if (type === "Maintenance") show(maint);
-  if (type === "Washing") show(wash);
-  if (type === "Packing") show(pack);
+  if (type === "Egg Collection") show($("secEgg"));
+  if (type === "Maintenance") show($("secMaint"));
+  if (type === "Washing") show($("secWash"));
+  if (type === "Packing") show($("secPack"));
 
   // Travel shown only for egg collection
   const travelWrap = $("travelWrap");
@@ -131,24 +127,24 @@ function recalc() {
   const workPerPerson = calcWorkHoursPerPerson(); // excludes break AND travel (egg collection)
 
   // Write Work Time field (productive, per person)
-  if ($("workHours")) {
-    $("workHours").value =
-      workPerPerson === "" ? "" : Number(workPerPerson).toFixed(2);
+  const workHoursEl = $("workHours");
+  if (workHoursEl) {
+    workHoursEl.value = workPerPerson === "" ? "" : Number(workPerPerson).toFixed(2);
   }
 
   // Labour hours (person-hours) = paid shift per person × workers
   const labourHours =
-    Number.isFinite(paidShiftPerPerson) && workers > 0
-      ? paidShiftPerPerson * workers
-      : "";
+    Number.isFinite(paidShiftPerPerson) && workers > 0 ? paidShiftPerPerson * workers : "";
 
-  if ($("labourHours")) {
-    $("labourHours").value = labourHours === "" ? "" : labourHours.toFixed(2);
+  const labourEl = $("labourHours");
+  if (labourEl) {
+    labourEl.value = labourHours === "" ? "" : labourHours.toFixed(2);
   }
 
   // Total Hours box shows labour hours (person-hours)
-  if ($("totalHoursOut")) {
-    $("totalHoursOut").textContent = fmt(labourHours);
+  const totalOut = $("totalHoursOut");
+  if (totalOut) {
+    totalOut.textContent = fmt(labourHours);
   }
 
   // ---- Task-specific calculations ----
@@ -161,8 +157,10 @@ function recalc() {
     const avgHr = w > 0 ? eggs / w : "";
     const avgPerson = workers > 0 ? eggs / workers : "";
 
-    if ($("avgEggsHourOut")) $("avgEggsHourOut").textContent = fmt(avgHr);
-    if ($("avgEggsPersonOut")) $("avgEggsPersonOut").textContent = fmt(avgPerson);
+    const a1 = $("avgEggsHourOut");
+    const a2 = $("avgEggsPersonOut");
+    if (a1) a1.textContent = fmt(avgHr);
+    if (a2) a2.textContent = fmt(avgPerson);
   }
 
   // Washing
@@ -173,11 +171,12 @@ function recalc() {
 
     const broken =
       Number.isFinite(dirty) && Number.isFinite(washed) ? Math.max(0, dirty - washed) : "";
-    const rate =
-      Number.isFinite(washed) && w > 0 ? washed / w : "";
+    const rate = Number.isFinite(washed) && w > 0 ? washed / w : "";
 
-    if ($("brokenEggsOut")) $("brokenEggsOut").textContent = fmt(broken);
-    if ($("washRateOut")) $("washRateOut").textContent = fmt(rate);
+    const b1 = $("brokenEggsOut");
+    const b2 = $("washRateOut");
+    if (b1) b1.textContent = fmt(broken);
+    if (b2) b2.textContent = fmt(rate);
   }
 
   // Packing
@@ -185,25 +184,39 @@ function recalc() {
     const packed = nval("eggsPacked");
     const w = Number.isFinite(workPerPerson) ? workPerPerson : 0;
 
-    const rate =
-      Number.isFinite(packed) && w > 0 ? packed / w : "";
-    if ($("packRateOut")) $("packRateOut").textContent = fmt(rate);
+    const rate = Number.isFinite(packed) && w > 0 ? packed / w : "";
+    const p1 = $("packRateOut");
+    if (p1) p1.textContent = fmt(rate);
   }
 }
 
-// ---------- Signature Pad ----------
+// ---------- Signature Pad (iPhone safe resize) ----------
 let canvas, ctx;
 let drawing = false;
 let last = null;
+
+function resizeCanvasToCSS() {
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+
+  // Set internal canvas size to match displayed size (important for iPhone touch)
+  canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+  canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+
+  ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS pixels
+}
 
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   const touch = e.touches && e.touches[0];
   const clientX = touch ? touch.clientX : e.clientX;
   const clientY = touch ? touch.clientY : e.clientY;
+
   return {
-    x: (clientX - rect.left) * (canvas.width / rect.width),
-    y: (clientY - rect.top) * (canvas.height / rect.height),
+    x: clientX - rect.left,
+    y: clientY - rect.top,
   };
 }
 
@@ -216,12 +229,14 @@ function startDraw(e) {
 function moveDraw(e) {
   if (!drawing) return;
   const p = getPos(e);
+
   ctx.lineWidth = 4;
   ctx.lineCap = "round";
   ctx.beginPath();
   ctx.moveTo(last.x, last.y);
   ctx.lineTo(p.x, p.y);
   ctx.stroke();
+
   last = p;
   e.preventDefault();
 }
@@ -290,17 +305,14 @@ async function submitDiary() {
     return;
   }
 
-  // Recalc once more before sending
   recalc();
 
   const workers = Number(nval("numWorkers") || 0);
   const travelFinal = workType === "Egg Collection" ? Number(nval("travelHours") || 0) : 0;
 
-  // Per-person hours (calculated from times)
   const paidShiftPerPerson = calcPaidShiftHoursPerPerson(); // shift - break
-  const workPerPerson = calcWorkHoursPerPerson(); // shift - break - travel (egg collection)
+  const workPerPerson = calcWorkHoursPerPerson(); // shift - break - travel
 
-  // Labour hours person-hours (paid time) = (shift - break) × workers
   const labourHours =
     Number.isFinite(paidShiftPerPerson) && workers > 0 ? paidShiftPerPerson * workers : "";
 
@@ -315,21 +327,17 @@ async function submitDiary() {
     breakMins: nval("breakMins"),
 
     travelHours: travelFinal,
-    workHours: Number.isFinite(workPerPerson) ? Number(workPerPerson) : 0, // productive per person
-    labourHours: labourHours, // paid person-hours
+    workHours: Number.isFinite(workPerPerson) ? Number(workPerPerson) : 0,
+    labourHours: labourHours,
 
-    // Egg collection
     eggsCollected: nval("eggsCollected"),
 
-    // Maintenance
     maintenanceType: sval("maintenanceType"),
     maintenanceDetails: sval("maintenanceDetails"),
 
-    // Washing
     dirtyEggs: nval("dirtyEggs"),
     washedEggs: nval("washedEggs"),
 
-    // Packing
     eggsToPack: nval("eggsToPack"),
     eggsPacked: nval("eggsPacked"),
     brokenPacked: nval("brokenPacked"),
@@ -344,15 +352,10 @@ async function submitDiary() {
   if (status) status.textContent = "Submitting…";
 
   try {
-    // ✅ Use URLSearchParams to avoid CORS preflight with Apps Script
     const body = new URLSearchParams();
     body.append("data", JSON.stringify(payload));
 
-    await fetch(WEB_APP_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: body,
-    });
+    await fetch(WEB_APP_URL, { method: "POST", mode: "no-cors", body });
 
     if (status) status.textContent = "✅ Submitted! (Saved to sheet)";
     resetFormKeepDateAndSubmitter();
@@ -363,16 +366,22 @@ async function submitDiary() {
   }
 }
 
-// ---------- Init ----------
-window.addEventListener("load", () => {
+// ---------- Init (more reliable on iPhone) ----------
+document.addEventListener("DOMContentLoaded", () => {
+  // Show any JS errors in the status area (helps iPhone debugging)
+  window.addEventListener("error", (ev) => {
+    const status = $("status");
+    if (status) status.textContent = "❌ JS error: " + (ev.message || "Unknown");
+  });
+
   const t = todayISO();
   if ($("date")) $("date").value = t;
   if ($("todayPill")) $("todayPill").textContent = `Today: ${t}`;
 
-  // Signature setup
   canvas = $("sigCanvas");
   if (canvas) {
-    ctx = canvas.getContext("2d");
+    resizeCanvasToCSS();
+
     canvas.addEventListener("mousedown", startDraw);
     canvas.addEventListener("mousemove", moveDraw);
     canvas.addEventListener("mouseup", endDraw);
@@ -381,19 +390,24 @@ window.addEventListener("load", () => {
     canvas.addEventListener("touchstart", startDraw, { passive: false });
     canvas.addEventListener("touchmove", moveDraw, { passive: false });
     canvas.addEventListener("touchend", endDraw, { passive: false });
+
+    window.addEventListener("resize", () => {
+      const old = canvas.toDataURL("image/png");
+      resizeCanvasToCSS();
+      // we don't restore old drawing to keep it simple; optional
+    });
   }
 
   if ($("clearSig")) $("clearSig").addEventListener("click", clearSignature);
   if ($("submitBtn")) $("submitBtn").addEventListener("click", submitDiary);
 
-  // Work type switching
   if ($("workType")) {
     showSection($("workType").value);
     $("workType").addEventListener("change", (e) => showSection(e.target.value));
   }
 
-  // Recalc on relevant inputs
-  [
+  // Recalc on relevant inputs (use BOTH input + change for iPhone)
+  const ids = [
     "numWorkers",
     "workerNames",
     "startTime",
@@ -404,9 +418,13 @@ window.addEventListener("load", () => {
     "dirtyEggs",
     "washedEggs",
     "eggsPacked",
-  ].forEach((id) => {
+  ];
+
+  ids.forEach((id) => {
     const el = $(id);
-    if (el) el.addEventListener("input", recalc);
+    if (!el) return;
+    el.addEventListener("input", recalc);
+    el.addEventListener("change", recalc);
   });
 
   recalc();
