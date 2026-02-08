@@ -61,34 +61,56 @@
       </div>
     </div>
 
-    <!-- Common staff fields -->
-    <div class="card">
-      <h2>Staff & Hours</h2>
-      <div class="row">
-        <div class="field">
-          <label>Number of Workers</label>
-          <input type="number" id="numWorkers" min="0" step="1" />
-        </div>
-        <div class="field">
-          <label>Worker Names</label>
-          <input type="text" id="workerNames" placeholder="e.g., A, B, C" />
-          <small>Comma separated is fine.</small>
-        </div>
-        <div class="field" id="travelWrap">
-          <label>Travel Time (hours)</label>
-          <input type="number" id="travelHours" step="0.25" />
-          <small>Default fixed at 2.0 for egg collection.</small>
-        </div>
-        <div class="field">
-          <label>Work Time (hours)</label>
-          <input type="number" id="workHours" step="0.25" />
-        </div>
-      </div>
+<!-- Common staff fields -->
+<div class="card">
+  <h2>Staff & Hours</h2>
 
-      <div class="calc" id="totalHoursBox">
-        <strong>Total Hours:</strong> <span id="totalHoursOut">—</span>
-      </div>
+  <div class="row">
+    <div class="field">
+      <label>Number of Workers</label>
+      <input type="number" id="numWorkers" min="0" step="1" />
     </div>
+
+    <div class="field">
+      <label>Worker Names</label>
+      <input type="text" id="workerNames" placeholder="e.g., A, B, C" />
+      <small>Comma separated is fine.</small>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>Start Time</label>
+      <input type="time" id="startTime" />
+    </div>
+
+    <div class="field">
+      <label>End Time</label>
+      <input type="time" id="endTime" />
+    </div>
+
+    <div class="field">
+      <label>Break (minutes)</label>
+      <input type="number" id="breakMins" min="0" step="5" value="0" />
+    </div>
+
+    <div class="field" id="travelWrap">
+      <label>Travel Time (hours)</label>
+      <input type="number" id="travelHours" step="0.25" value="2" />
+      <small>Editable for egg collection only.</small>
+    </div>
+
+    <div class="field">
+      <label>Work Time (hours)</label>
+      <input type="number" id="workHours" step="0.25" readonly />
+      <small>Auto-calculated from start/end minus break & travel.</small>
+    </div>
+  </div>
+
+  <div class="calc" id="totalHoursBox">
+    <strong>Total Hours:</strong> <span id="totalHoursOut">—</span>
+  </div>
+</div>
 
     <!-- Egg Collection -->
     <div class="card" id="secEgg">
