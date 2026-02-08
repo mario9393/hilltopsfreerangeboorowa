@@ -270,22 +270,22 @@ async function submitDiary() {
   if (btn) btn.disabled = true;
   if (status) status.textContent = "Submitting…";
 
-  try {
-    // ✅ no-cors avoids Apps Script CORS block from GitHub Pages
-    await fetch(WEB_APP_URL, {
-      method: "POST",
-      mode: "no-cors",
-      body: JSON.stringify(payload),
-    });
+try {
+  const body = new URLSearchParams();
+  body.append("data", JSON.stringify(payload));
 
-    // With no-cors we cannot read a response, but the request is sent.
-    if (status) status.textContent = "✅ Submitted! (Saved to sheet)";
-    resetFormKeepDate();
-  } catch (e) {
-    if (status) status.textContent = "❌ Network error: " + String(e);
-  } finally {
-    if (btn) btn.disabled = false;
-  }
+  await fetch(WEB_APP_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: body
+  });
+
+  status.textContent = "✅ Submitted! (Saved to sheet)";
+  // reset form...
+} catch (e) {
+  status.textContent = "❌ Network error: " + String(e);
+}
+
 }
 
 // Init
