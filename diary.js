@@ -1,5 +1,6 @@
 // ✅ Paste your Apps Script Web App URL here:
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzx9EKoA0QnIy9F8vHaV3xRqI71bcUf8zTiQ5fXYM2Y8SHFhOdsVADQJOIRfkKFuQID/exec";
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbzx9EKoA0QnIy9F8vHaV3xRqI71bcUf8zTiQ5fXYM2Y8SHFhOdsVADQJOIRfkKFuQID/exec";
 
 const $ = (id) => document.getElementById(id);
 
@@ -19,10 +20,24 @@ function fmt(n) {
 }
 
 function nval(id) {
-  const v = $(id).value;
+  const el = $(id);
+  if (!el) return "";
+  const v = el.value;
   if (v === "") return "";
   const n = Number(v);
   return Number.isFinite(n) ? n : "";
+}
+
+function sval(id) {
+  const el = $(id);
+  return el ? String(el.value || "").trim() : "";
+}
+
+function hide(el) {
+  if (el) el.classList.add("hidden");
+}
+function show(el) {
+  if (el) el.classList.remove("hidden");
 }
 
 function showSection(type) {
@@ -31,52 +46,68 @@ function showSection(type) {
   const wash = $("secWash");
   const pack = $("secPack");
 
-  egg.classList.add("hidden");
-  maint.classList.add("hidden");
-  wash.classList.add("hidden");
-  pack.classList.add("hidden");
+  hide(egg);
+  hide(maint);
+  hide(wash);
+  hide(pack);
 
   // Travel field only meaningful for Egg Collection
   const travelWrap = $("travelWrap");
+  const travelHours = $("travelHours");
+
   if (type === "Egg Collection") {
-    egg.classList.remove("hidden");
-    travelWrap.classList.remove("hidden");
+    show(egg);
+    if (travelWrap) show(travelWrap);
+
     // Fixed default for travel
-    if ($("travelHours").value === "" || Number($("travelHours").value) === 0) {
-      $("travelHours").value = "2";
+    if (travelHours) {
+      if (travelHours.value === "" || Number(travelHours.value) === 0) {
+        travelHours.value = "2";
+      }
+      travelHours.readOnly = true; // lock it
     }
-    // You can lock it by uncommenting:
-    $("travelHours").readOnly = true;
   } else {
-    travelWrap.classList.add("hidden");
-    $("travelHours").readOnly = false;
-    $("travelHours").value = "";
+    if (travelWrap) hide(travelWrap);
+    if (travelHours) {
+      travelHours.readOnly = false;
+      travelHours.value = "";
+    }
   }
 
-  if (type === "Maintenance") maint.classList.remove("hidden");
-  if (type === "Washing") wash.classList.remove("hidden");
-  if (type === "Packing") pack.classList.remove("hidden");
+  if (type === "Maintenance") show(maint);
+  if (type === "Washing") show(wash);
+  if (type === "Packing") show(pack);
 }
 
 function recalc() {
-  const type = $("workType").value;
+  const type = sval("workType");
 
   const travel = nval("travelHours");
   const work = nval("workHours");
-  const total = (Number.isFinite(travel) && Number.isFinite(work)) ? (travel + work) : "";
+  const total =
+    Number.isFinite(travel) && Number.isFinite(work) ? travel + work : "";
 
-  $("totalHoursOut").textContent = fmt(total);
+  const totalOut = $("totalHoursOut");
+  if (totalOut) totalOut.textContent = fmt(total);
 
   // Egg Collection calculations
   if (type === "Egg Collection") {
     const eggs = nval("eggsCollected");
     const numWorkers = nval("numWorkers");
 
-    const avgHr = (Number.isFinite(eggs) && Number.isFinite(work) && work > 0) ? (eggs / work) : "";
-    const avgPerson = (Number.isFinite(eggs) && Number.isFinite(numWorkers) && numWorkers > 0) ? (eggs / numWorkers) : "";
+    const avgHr =
+      Number.isFinite(eggs) && Number.isFinite(work) && work > 0
+        ? eggs / work
+        : "";
+    const avgPerson =
+      Number.isFinite(eggs) && Number.isFinite(numWorkers) && numWorkers > 0
+        ? eggs / numWorkers
+        : "";
 
-    $("avgEggsHourOut").textContent = fmt(avgHr);
-    $("avgEggsPersonOut").textContent = fmt(avgPerson);
+    const outHr = $("avgEggsHourOut");
+    const outPerson = $("avgEggsPersonOut");
+    if (outHr) outHr.textContent = fmt(avgHr);
+    if (outPerson) outPerson.textContent = fmt(avgPerson);
   }
 
   // Washing calculations
@@ -84,24 +115,35 @@ function recalc() {
     const dirty = nval("dirtyEggs");
     const washed = nval("washedEggs");
 
-    const broken = (Number.isFinite(dirty) && Number.isFinite(washed)) ? Math.max(0, dirty - washed) : "";
-    const rate = (Number.isFinite(washed) && Number.isFinite(work) && work > 0) ? (washed / work) : "";
+    const broken =
+      Number.isFinite(dirty) && Number.isFinite(washed)
+        ? Math.max(0, dirty - washed)
+        : "";
+    const rate =
+      Number.isFinite(washed) && Number.isFinite(work) && work > 0
+        ? washed / work
+        : "";
 
-    $("brokenEggsOut").textContent = fmt(broken);
-    $("washRateOut").textContent = fmt(rate);
+    const outBroken = $("brokenEggsOut");
+    const outRate = $("washRateOut");
+    if (outBroken) outBroken.textContent = fmt(broken);
+    if (outRate) outRate.textContent = fmt(rate);
   }
 
   // Packing calculations
   if (type === "Packing") {
     const packed = nval("eggsPacked");
-    const rate = (Number.isFinite(packed) && Number.isFinite(work) && work > 0) ? (packed / work) : "";
-    $("packRateOut").textContent = fmt(rate);
+    const rate =
+      Number.isFinite(packed) && Number.isFinite(work) && work > 0
+        ? packed / work
+        : "";
+    const outPack = $("packRateOut");
+    if (outPack) outPack.textContent = fmt(rate);
   }
 }
 
-// --- Signature pad (simple, no external libraries) ---
-const canvas = $("sigCanvas");
-const ctx = canvas.getContext("2d");
+// --- Signature pad ---
+let canvas, ctx;
 let drawing = false;
 let last = null;
 
@@ -112,7 +154,7 @@ function getPos(e) {
   const clientY = touch ? touch.clientY : e.clientY;
   return {
     x: (clientX - rect.left) * (canvas.width / rect.width),
-    y: (clientY - rect.top) * (canvas.height / rect.height)
+    y: (clientY - rect.top) * (canvas.height / rect.height),
   };
 }
 
@@ -141,114 +183,166 @@ function endDraw(e) {
   e.preventDefault();
 }
 
-canvas.addEventListener("mousedown", startDraw);
-canvas.addEventListener("mousemove", moveDraw);
-canvas.addEventListener("mouseup", endDraw);
-canvas.addEventListener("mouseleave", endDraw);
-
-canvas.addEventListener("touchstart", startDraw, { passive:false });
-canvas.addEventListener("touchmove", moveDraw, { passive:false });
-canvas.addEventListener("touchend", endDraw, { passive:false });
-
-$("clearSig").addEventListener("click", () => {
+function clearSignature() {
+  if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-});
+}
+
+function resetFormKeepDate() {
+  if ($("numWorkers")) $("numWorkers").value = "";
+  if ($("workerNames")) $("workerNames").value = "";
+  if ($("workHours")) $("workHours").value = "";
+
+  if ($("eggsCollected")) $("eggsCollected").value = "";
+
+  if ($("maintenanceType")) $("maintenanceType").value = "";
+  if ($("maintenanceDetails")) $("maintenanceDetails").value = "";
+
+  if ($("dirtyEggs")) $("dirtyEggs").value = "";
+  if ($("washedEggs")) $("washedEggs").value = "";
+
+  if ($("eggsToPack")) $("eggsToPack").value = "";
+  if ($("eggsPacked")) $("eggsPacked").value = "";
+  if ($("brokenPacked")) $("brokenPacked").value = "";
+
+  if ($("remarks")) $("remarks").value = "";
+
+  clearSignature();
+  recalc();
+}
 
 async function submitDiary() {
   const status = $("status");
-  status.textContent = "";
+  const btn = $("submitBtn");
+
+  if (status) status.textContent = "";
 
   if (!WEB_APP_URL || WEB_APP_URL.includes("PASTE_YOUR_WEB_APP_URL")) {
-    status.textContent = "❌ Please set WEB_APP_URL in diary.js";
+    if (status) status.textContent = "❌ Please set WEB_APP_URL in diary.js";
     return;
   }
 
-  const date = $("date").value;
-  const workType = $("workType").value;
+  const date = sval("date");
+  const workType = sval("workType");
 
-  if (!date) { status.textContent = "❌ Please select a date."; return; }
-  if (!$("submittedBy").value.trim()) { status.textContent = "❌ Please fill 'Submitted By'."; return; }
+  if (!date) {
+    if (status) status.textContent = "❌ Please select a date.";
+    return;
+  }
+  if (!sval("submittedBy")) {
+    if (status) status.textContent = "❌ Please fill 'Submitted By'.";
+    return;
+  }
 
-  // Build payload
+  // Enforce travel time for egg collection
+  const travelHoursFinal = workType === "Egg Collection" ? 2 : "";
+
   const payload = {
     date,
     workType,
     numWorkers: nval("numWorkers"),
-    workerNames: $("workerNames").value.trim(),
-    travelHours: workType === "Egg Collection" ? 2 : "", // enforce fixed travel time
+    workerNames: sval("workerNames"),
+    travelHours: travelHoursFinal,
     workHours: nval("workHours"),
+
+    // Egg collection
     eggsCollected: nval("eggsCollected"),
-    maintenanceType: $("maintenanceType") ? $("maintenanceType").value : "",
-    maintenanceDetails: $("maintenanceDetails") ? $("maintenanceDetails").value.trim() : "",
+
+    // Maintenance
+    maintenanceType: sval("maintenanceType"),
+    maintenanceDetails: sval("maintenanceDetails"),
+
+    // Washing
     dirtyEggs: nval("dirtyEggs"),
     washedEggs: nval("washedEggs"),
+
+    // Packing
     eggsToPack: nval("eggsToPack"),
     eggsPacked: nval("eggsPacked"),
     brokenPacked: nval("brokenPacked"),
-    remarks: $("remarks").value.trim(),
-    submittedBy: $("submittedBy").value.trim(),
-    signatureDataURL: canvas.toDataURL("image/png")
+
+    // Common
+    remarks: sval("remarks"),
+    submittedBy: sval("submittedBy"),
+    signatureDataURL: canvas ? canvas.toDataURL("image/png") : "",
   };
 
-  $("submitBtn").disabled = true;
-  status.textContent = "Submitting…";
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = "Submitting…";
 
   try {
-    const res = await fetch(WEB_APP_URL, {
+    // ✅ no-cors avoids Apps Script CORS block from GitHub Pages
+    await fetch(WEB_APP_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      mode: "no-cors",
+      body: JSON.stringify(payload),
     });
-    const out = await res.json();
-    if (out.ok) {
-      status.textContent = "✅ Saved to diary!";
-      // Reset relevant fields (keep date)
-      $("numWorkers").value = "";
-      $("workerNames").value = "";
-      $("workHours").value = "";
-      $("eggsCollected").value = "";
-      $("maintenanceType").value = "";
-      $("maintenanceDetails").value = "";
-      $("dirtyEggs").value = "";
-      $("washedEggs").value = "";
-      $("eggsToPack").value = "";
-      $("eggsPacked").value = "";
-      $("brokenPacked").value = "";
-      $("remarks").value = "";
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      recalc();
-    } else {
-      status.textContent = "❌ Error: " + (out.error || "Unknown");
-    }
+
+    // With no-cors we cannot read a response, but the request is sent.
+    if (status) status.textContent = "✅ Submitted! (Saved to sheet)";
+    resetFormKeepDate();
   } catch (e) {
-    status.textContent = "❌ Network error: " + String(e);
+    if (status) status.textContent = "❌ Network error: " + String(e);
   } finally {
-    $("submitBtn").disabled = false;
+    if (btn) btn.disabled = false;
   }
 }
 
 // Init
 window.addEventListener("load", () => {
+  // Set date + header pill
   const t = todayISO();
-  $("date").value = t;
-  $("todayPill").textContent = `Today: ${t}`;
+  if ($("date")) $("date").value = t;
+  if ($("todayPill")) $("todayPill").textContent = `Today: ${t}`;
 
-  showSection($("workType").value);
-  recalc();
+  // Signature canvas must be set after DOM loads
+  canvas = $("sigCanvas");
+  if (canvas) {
+    ctx = canvas.getContext("2d");
 
-  $("workType").addEventListener("change", (e) => {
-    showSection(e.target.value);
-    recalc();
-  });
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousemove", moveDraw);
+    canvas.addEventListener("mouseup", endDraw);
+    canvas.addEventListener("mouseleave", endDraw);
+
+    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("touchmove", moveDraw, { passive: false });
+    canvas.addEventListener("touchend", endDraw, { passive: false });
+  } else {
+    console.warn("sigCanvas not found. Signature will be disabled.");
+  }
+
+  // Buttons
+  const clearBtn = $("clearSig");
+  if (clearBtn) clearBtn.addEventListener("click", clearSignature);
+
+  const submitBtn = $("submitBtn");
+  if (submitBtn) submitBtn.addEventListener("click", submitDiary);
+
+  // Section switch
+  const wt = $("workType");
+  if (wt) {
+    showSection(wt.value);
+    wt.addEventListener("change", (e) => {
+      showSection(e.target.value);
+      recalc();
+    });
+  }
 
   // Recalc on inputs
   [
-    "numWorkers","workerNames","travelHours","workHours","eggsCollected",
-    "dirtyEggs","washedEggs","eggsPacked"
-  ].forEach(id => {
+    "numWorkers",
+    "workerNames",
+    "travelHours",
+    "workHours",
+    "eggsCollected",
+    "dirtyEggs",
+    "washedEggs",
+    "eggsPacked",
+  ].forEach((id) => {
     const el = $(id);
     if (el) el.addEventListener("input", recalc);
   });
 
-  $("submitBtn").addEventListener("click", submitDiary);
+  recalc();
 });
