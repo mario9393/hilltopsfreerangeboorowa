@@ -1,9 +1,12 @@
+// Hilltops Daily Staff Diary - diary.js (clean version)
+
 // ✅ Paste your Apps Script Web App URL here:
 const WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbzx9EKoA0QnIy9F8vHaV3xRqI71bcUf8zTiQ5fXYM2Y8SHFhOdsVADQJOIRfkKFuQID/exec";
 
 const $ = (id) => document.getElementById(id);
 
+// ---------- Helpers ----------
 function todayISO() {
   const d = new Date();
   const yyyy = d.getFullYear();
@@ -40,6 +43,38 @@ function show(el) {
   if (el) el.classList.remove("hidden");
 }
 
+function parseTimeToMinutes(t) {
+  // "08:30" -> 510
+  if (!t || !t.includes(":")) return null;
+  const [hh, mm] = t.split(":").map(Number);
+  if (!Number.isFinite(hh) || !Number.isFinite(mm)) return null;
+  return hh * 60 + mm;
+}
+
+// Auto-calculate work hours from Start/End minus Break and (optional) Travel
+function calcWorkHours() {
+  const type = sval("workType");
+
+  const start = parseTimeToMinutes(sval("startTime"));
+  const end = parseTimeToMinutes(sval("endTime"));
+  const breakMins = Number(nval("breakMins") || 0);
+
+  if (start === null || end === null) return "";
+
+  // Handle overnight (if end earlier than start)
+  let totalMins = end - start;
+  if (totalMins < 0) totalMins += 24 * 60;
+
+  const travelHours = type === "Egg Collection" ? Number(nval("travelHours") || 0) : 0;
+  const travelMins = travelHours * 60;
+
+  let workMins = totalMins - breakMins - travelMins;
+  if (workMins < 0) workMins = 0;
+
+  return workMins / 60; // hours
+}
+
+// ---------- UI Sections ----------
 function showSection(type) {
   const egg = $("secEgg");
   const maint = $("secMaint");
@@ -51,63 +86,51 @@ function showSection(type) {
   hide(wash);
   hide(pack);
 
-  // Travel field only meaningful for Egg Collection
-  const travelWrap = $("travelWrap");
-  const travelHours = $("travelHours");
-
-  if (type === "Egg Collection") {
-    show(egg);
-    if (travelWrap) show(travelWrap);
-
-    // Fixed default for travel
-    if (travelHours) {
-      if (travelHours.value === "" || Number(travelHours.value) === 0) {
-        travelHours.value = "2";
-      }
-      travelHours.readOnly = true; // lock it
-    }
-  } else {
-    if (travelWrap) hide(travelWrap);
-    if (travelHours) {
-      travelHours.readOnly = false;
-      travelHours.value = "";
-    }
-  }
-
+  if (type === "Egg Collection") show(egg);
   if (type === "Maintenance") show(maint);
   if (type === "Washing") show(wash);
   if (type === "Packing") show(pack);
+
+  // Travel shown only for egg collection
+  const travelWrap = $("travelWrap");
+  if (type === "Egg Collection") {
+    show(travelWrap);
+    // Default 2 hours (editable)
+    const th = $("travelHours");
+    if (th && (th.value === "" || Number(th.value) === 0)) th.value = "2";
+  } else {
+    hide(travelWrap);
+  }
+
+  recalc();
 }
 
 function recalc() {
   const type = sval("workType");
 
-  const travel = nval("travelHours");
-  const work = nval("workHours");
-  const total =
-    Number.isFinite(travel) && Number.isFinite(work) ? travel + work : "";
+  // Compute work hours from time fields
+  const computedWork = calcWorkHours();
+  if ($("workHours")) $("workHours").value = computedWork === "" ? "" : computedWork.toFixed(2);
 
-  const totalOut = $("totalHoursOut");
-  if (totalOut) totalOut.textContent = fmt(total);
+  const work = computedWork === "" ? "" : computedWork;
 
-  // Egg Collection calculations
+  // Total hours shown (shift total = end-start minus break, but still useful to show)
+  // Here we'll show: work + travel (only for egg collection)
+  const travel = type === "Egg Collection" ? Number(nval("travelHours") || 0) : 0;
+  const total = Number.isFinite(work) ? (work + travel) : "";
+
+  if ($("totalHoursOut")) $("totalHoursOut").textContent = fmt(total);
+
+  // Egg Collection calculations (avg per collection hour uses work only)
   if (type === "Egg Collection") {
-    const eggs = nval("eggsCollected");
-    const numWorkers = nval("numWorkers");
+    const eggs = Number(nval("eggsCollected") || 0);
+    const numWorkers = Number(nval("numWorkers") || 0);
 
-    const avgHr =
-      Number.isFinite(eggs) && Number.isFinite(work) && work > 0
-        ? eggs / work
-        : "";
-    const avgPerson =
-      Number.isFinite(eggs) && Number.isFinite(numWorkers) && numWorkers > 0
-        ? eggs / numWorkers
-        : "";
+    const avgHr = work && work > 0 ? eggs / work : "";
+    const avgPerson = numWorkers > 0 ? eggs / numWorkers : "";
 
-    const outHr = $("avgEggsHourOut");
-    const outPerson = $("avgEggsPersonOut");
-    if (outHr) outHr.textContent = fmt(avgHr);
-    if (outPerson) outPerson.textContent = fmt(avgPerson);
+    if ($("avgEggsHourOut")) $("avgEggsHourOut").textContent = fmt(avgHr);
+    if ($("avgEggsPersonOut")) $("avgEggsPersonOut").textContent = fmt(avgPerson);
   }
 
   // Washing calculations
@@ -116,33 +139,24 @@ function recalc() {
     const washed = nval("washedEggs");
 
     const broken =
-      Number.isFinite(dirty) && Number.isFinite(washed)
-        ? Math.max(0, dirty - washed)
-        : "";
+      Number.isFinite(dirty) && Number.isFinite(washed) ? Math.max(0, dirty - washed) : "";
     const rate =
-      Number.isFinite(washed) && Number.isFinite(work) && work > 0
-        ? washed / work
-        : "";
+      Number.isFinite(washed) && Number.isFinite(work) && work > 0 ? washed / work : "";
 
-    const outBroken = $("brokenEggsOut");
-    const outRate = $("washRateOut");
-    if (outBroken) outBroken.textContent = fmt(broken);
-    if (outRate) outRate.textContent = fmt(rate);
+    if ($("brokenEggsOut")) $("brokenEggsOut").textContent = fmt(broken);
+    if ($("washRateOut")) $("washRateOut").textContent = fmt(rate);
   }
 
-  // Packing calculations
+  // Packing rate calculation
   if (type === "Packing") {
     const packed = nval("eggsPacked");
     const rate =
-      Number.isFinite(packed) && Number.isFinite(work) && work > 0
-        ? packed / work
-        : "";
-    const outPack = $("packRateOut");
-    if (outPack) outPack.textContent = fmt(rate);
+      Number.isFinite(packed) && Number.isFinite(work) && work > 0 ? packed / work : "";
+    if ($("packRateOut")) $("packRateOut").textContent = fmt(rate);
   }
 }
 
-// --- Signature pad ---
+// ---------- Signature Pad ----------
 let canvas, ctx;
 let drawing = false;
 let last = null;
@@ -188,161 +202,73 @@ function clearSignature() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function resetFormKeepDate() {
+// ---------- Form Reset ----------
+function resetFormKeepDateAndSubmitter() {
   if ($("numWorkers")) $("numWorkers").value = "";
   if ($("workerNames")) $("workerNames").value = "";
+
+  if ($("startTime")) $("startTime").value = "";
+  if ($("endTime")) $("endTime").value = "";
+  if ($("breakMins")) $("breakMins").value = "0";
   if ($("workHours")) $("workHours").value = "";
 
-  if ($("eggsCollected")) $("eggsCollected").value = "";
+  // Keep travel default for egg collection (editable)
+  if (sval("workType") === "Egg Collection") {
+    if ($("travelHours")) $("travelHours").value = $("travelHours").value || "2";
+  }
 
+  if ($("eggsCollected")) $("eggsCollected").value = "";
   if ($("maintenanceType")) $("maintenanceType").value = "";
   if ($("maintenanceDetails")) $("maintenanceDetails").value = "";
-
   if ($("dirtyEggs")) $("dirtyEggs").value = "";
   if ($("washedEggs")) $("washedEggs").value = "";
-
   if ($("eggsToPack")) $("eggsToPack").value = "";
   if ($("eggsPacked")) $("eggsPacked").value = "";
   if ($("brokenPacked")) $("brokenPacked").value = "";
-
   if ($("remarks")) $("remarks").value = "";
 
   clearSignature();
   recalc();
 }
 
+// ---------- Submit ----------
 async function submitDiary() {
   const status = $("status");
   const btn = $("submitBtn");
-
   if (status) status.textContent = "";
 
-  if (!WEB_APP_URL || WEB_APP_URL.includes("PASTE_YOUR_WEB_APP_URL")) {
-    if (status) status.textContent = "❌ Please set WEB_APP_URL in diary.js";
+  if (!WEB_APP_URL) {
+    if (status) status.textContent = "❌ Web App URL missing in diary.js";
     return;
   }
 
   const date = sval("date");
   const workType = sval("workType");
+  const submittedBy = sval("submittedBy");
 
   if (!date) {
     if (status) status.textContent = "❌ Please select a date.";
     return;
   }
-  if (!sval("submittedBy")) {
+  if (!submittedBy) {
     if (status) status.textContent = "❌ Please fill 'Submitted By'.";
     return;
   }
 
-  // Enforce travel time for egg collection
-  const travelHoursFinal = workType === "Egg Collection" ? 2 : "";
+  // Recalc once more before sending
+  recalc();
+
+  const computedWork = Number(nval("workHours") || 0);
+  const travelFinal = workType === "Egg Collection" ? Number(nval("travelHours") || 0) : 0;
 
   const payload = {
     date,
     workType,
     numWorkers: nval("numWorkers"),
     workerNames: sval("workerNames"),
-    travelHours: travelHoursFinal,
-    workHours: nval("workHours"),
 
-    // Egg collection
-    eggsCollected: nval("eggsCollected"),
-
-    // Maintenance
-    maintenanceType: sval("maintenanceType"),
-    maintenanceDetails: sval("maintenanceDetails"),
-
-    // Washing
-    dirtyEggs: nval("dirtyEggs"),
-    washedEggs: nval("washedEggs"),
-
-    // Packing
-    eggsToPack: nval("eggsToPack"),
-    eggsPacked: nval("eggsPacked"),
-    brokenPacked: nval("brokenPacked"),
-
-    // Common
-    remarks: sval("remarks"),
-    submittedBy: sval("submittedBy"),
-    signatureDataURL: canvas ? canvas.toDataURL("image/png") : "",
-  };
-
-  if (btn) btn.disabled = true;
-  if (status) status.textContent = "Submitting…";
-
-try {
-  const body = new URLSearchParams();
-  body.append("data", JSON.stringify(payload));
-
-  await fetch(WEB_APP_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: body
-  });
-
-  status.textContent = "✅ Submitted! (Saved to sheet)";
-  // reset form...
-} catch (e) {
-  status.textContent = "❌ Network error: " + String(e);
-}
-
-}
-
-// Init
-window.addEventListener("load", () => {
-  // Set date + header pill
-  const t = todayISO();
-  if ($("date")) $("date").value = t;
-  if ($("todayPill")) $("todayPill").textContent = `Today: ${t}`;
-
-  // Signature canvas must be set after DOM loads
-  canvas = $("sigCanvas");
-  if (canvas) {
-    ctx = canvas.getContext("2d");
-
-    canvas.addEventListener("mousedown", startDraw);
-    canvas.addEventListener("mousemove", moveDraw);
-    canvas.addEventListener("mouseup", endDraw);
-    canvas.addEventListener("mouseleave", endDraw);
-
-    canvas.addEventListener("touchstart", startDraw, { passive: false });
-    canvas.addEventListener("touchmove", moveDraw, { passive: false });
-    canvas.addEventListener("touchend", endDraw, { passive: false });
-  } else {
-    console.warn("sigCanvas not found. Signature will be disabled.");
-  }
-
-  // Buttons
-  const clearBtn = $("clearSig");
-  if (clearBtn) clearBtn.addEventListener("click", clearSignature);
-
-  const submitBtn = $("submitBtn");
-  if (submitBtn) submitBtn.addEventListener("click", submitDiary);
-
-  // Section switch
-  const wt = $("workType");
-  if (wt) {
-    showSection(wt.value);
-    wt.addEventListener("change", (e) => {
-      showSection(e.target.value);
-      recalc();
-    });
-  }
-
-  // Recalc on inputs
-  [
-    "numWorkers",
-    "workerNames",
-    "travelHours",
-    "workHours",
-    "eggsCollected",
-    "dirtyEggs",
-    "washedEggs",
-    "eggsPacked",
-  ].forEach((id) => {
-    const el = $(id);
-    if (el) el.addEventListener("input", recalc);
-  });
-
-  recalc();
-});
+    startTime: sval("startTime"),
+    endTime: sval("endTime"),
+    breakMins: nval("breakMins"),
+    travelHours: travelFinal,
+    workHours: computedWork,
