@@ -1,6 +1,8 @@
-// Hilltops Daily Staff Diary - diary.js (clean version)
+// Hilltops Daily Staff Diary - diary.js (FULL CLEAN VERSION)
+// Break is NOT paid. Travel is paid (for Egg Collection only).
+// Labour Hours (person-hours) = (Shift Hours - Break) × Number of Workers
+// Work Time (hours) = (Shift - Break - Travel)  [productive time excluding travel]
 
-// ✅ Paste your Apps Script Web App URL here:
 const WEB_APP_URL =
   "https://script.google.com/macros/s/AKfycbzx9EKoA0QnIy9F8vHaV3xRqI71bcUf8zTiQ5fXYM2Y8SHFhOdsVADQJOIRfkKFuQID/exec";
 
@@ -51,8 +53,25 @@ function parseTimeToMinutes(t) {
   return hh * 60 + mm;
 }
 
-// Auto-calculate work hours from Start/End minus Break and (optional) Travel
-function calcWorkHours() {
+// Shift hours (paid per person) = (End - Start - Break)
+function calcPaidShiftHoursPerPerson() {
+  const start = parseTimeToMinutes(sval("startTime"));
+  const end = parseTimeToMinutes(sval("endTime"));
+  const breakMins = Number(nval("breakMins") || 0);
+
+  if (start === null || end === null) return "";
+
+  let totalMins = end - start;
+  if (totalMins < 0) totalMins += 24 * 60; // overnight
+
+  let paidMins = totalMins - breakMins; // break NOT paid
+  if (paidMins < 0) paidMins = 0;
+
+  return paidMins / 60;
+}
+
+// Productive work hours (per person) = (Shift - Break - Travel(for egg collection))
+function calcWorkHoursPerPerson() {
   const type = sval("workType");
 
   const start = parseTimeToMinutes(sval("startTime"));
@@ -61,9 +80,8 @@ function calcWorkHours() {
 
   if (start === null || end === null) return "";
 
-  // Handle overnight (if end earlier than start)
   let totalMins = end - start;
-  if (totalMins < 0) totalMins += 24 * 60;
+  if (totalMins < 0) totalMins += 24 * 60; // overnight
 
   const travelHours = type === "Egg Collection" ? Number(nval("travelHours") || 0) : 0;
   const travelMins = travelHours * 60;
@@ -71,7 +89,7 @@ function calcWorkHours() {
   let workMins = totalMins - breakMins - travelMins;
   if (workMins < 0) workMins = 0;
 
-  return workMins / 60; // hours (per person, excludes travel)
+  return workMins / 60;
 }
 
 // ---------- UI Sections ----------
@@ -95,12 +113,10 @@ function showSection(type) {
   const travelWrap = $("travelWrap");
   if (type === "Egg Collection") {
     show(travelWrap);
-    // Default 2 hours (editable)
     const th = $("travelHours");
-    if (th && (th.value === "" || Number(th.value) === 0)) th.value = "2";
+    if (th && (th.value === "" || Number(th.value) === 0)) th.value = "2"; // default, editable
   } else {
     hide(travelWrap);
-    // keep value but it won't be used
   }
 
   recalc();
@@ -108,61 +124,69 @@ function showSection(type) {
 
 function recalc() {
   const type = sval("workType");
-
-  // Compute work hours from time fields
-  const computedWork = calcWorkHours();
-  if ($("workHours")) $("workHours").value = computedWork === "" ? "" : computedWork.toFixed(2);
-
-  const work = computedWork === "" ? "" : Number(computedWork);
-
-  // Travel (per person) — only for Egg Collection
-  const travel = type === "Egg Collection" ? Number(nval("travelHours") || 0) : 0;
-
-  // Workers
   const workers = Number(nval("numWorkers") || 0);
 
-  // ✅ Labour hours (person-hours) = (work + travel) × workers
-  // (recommended because travel time is paid time)
+  // Per-person hours
+  const paidShiftPerPerson = calcPaidShiftHoursPerPerson(); // includes travel (paid), excludes break
+  const workPerPerson = calcWorkHoursPerPerson(); // excludes break AND travel (egg collection)
+
+  // Write Work Time field (productive, per person)
+  if ($("workHours")) {
+    $("workHours").value =
+      workPerPerson === "" ? "" : Number(workPerPerson).toFixed(2);
+  }
+
+  // Labour hours (person-hours) = paid shift per person × workers
   const labourHours =
-    Number.isFinite(work) && Number.isFinite(travel) && workers > 0
-      ? (work + travel) * workers
+    Number.isFinite(paidShiftPerPerson) && workers > 0
+      ? paidShiftPerPerson * workers
       : "";
 
-  if ($("labourHours")) $("labourHours").value = labourHours === "" ? "" : labourHours.toFixed(2);
+  if ($("labourHours")) {
+    $("labourHours").value = labourHours === "" ? "" : labourHours.toFixed(2);
+  }
 
-  // ✅ Total Hours box should show Labour Hours (person-hours)
-  if ($("totalHoursOut")) $("totalHoursOut").textContent = fmt(labourHours);
+  // Total Hours box shows labour hours (person-hours)
+  if ($("totalHoursOut")) {
+    $("totalHoursOut").textContent = fmt(labourHours);
+  }
 
-  // Egg Collection calculations (avg per collection hour uses WORK only, not travel)
+  // ---- Task-specific calculations ----
+
+  // Egg Collection: averages use PRODUCTIVE work time (excluding travel)
   if (type === "Egg Collection") {
     const eggs = Number(nval("eggsCollected") || 0);
+    const w = Number.isFinite(workPerPerson) ? workPerPerson : 0;
 
-    const avgHr = Number.isFinite(work) && work > 0 ? eggs / work : "";
+    const avgHr = w > 0 ? eggs / w : "";
     const avgPerson = workers > 0 ? eggs / workers : "";
 
     if ($("avgEggsHourOut")) $("avgEggsHourOut").textContent = fmt(avgHr);
     if ($("avgEggsPersonOut")) $("avgEggsPersonOut").textContent = fmt(avgPerson);
   }
 
-  // Washing calculations
+  // Washing
   if (type === "Washing") {
     const dirty = nval("dirtyEggs");
     const washed = nval("washedEggs");
+    const w = Number.isFinite(workPerPerson) ? workPerPerson : 0;
 
     const broken =
       Number.isFinite(dirty) && Number.isFinite(washed) ? Math.max(0, dirty - washed) : "";
     const rate =
-      Number.isFinite(washed) && Number.isFinite(work) && work > 0 ? washed / work : "";
+      Number.isFinite(washed) && w > 0 ? washed / w : "";
 
     if ($("brokenEggsOut")) $("brokenEggsOut").textContent = fmt(broken);
     if ($("washRateOut")) $("washRateOut").textContent = fmt(rate);
   }
 
-  // Packing rate calculation
+  // Packing
   if (type === "Packing") {
     const packed = nval("eggsPacked");
+    const w = Number.isFinite(workPerPerson) ? workPerPerson : 0;
+
     const rate =
-      Number.isFinite(packed) && Number.isFinite(work) && work > 0 ? packed / work : "";
+      Number.isFinite(packed) && w > 0 ? packed / w : "";
     if ($("packRateOut")) $("packRateOut").textContent = fmt(rate);
   }
 }
@@ -224,7 +248,6 @@ function resetFormKeepDateAndSubmitter() {
   if ($("workHours")) $("workHours").value = "";
   if ($("labourHours")) $("labourHours").value = "";
 
-  // Keep travel default for egg collection (editable)
   if (sval("workType") === "Egg Collection") {
     if ($("travelHours")) $("travelHours").value = $("travelHours").value || "2";
   }
@@ -271,12 +294,15 @@ async function submitDiary() {
   recalc();
 
   const workers = Number(nval("numWorkers") || 0);
-  const workHours = Number(nval("workHours") || 0);
   const travelFinal = workType === "Egg Collection" ? Number(nval("travelHours") || 0) : 0;
 
-  // ✅ labourHours sent to Apps Script
+  // Per-person hours (calculated from times)
+  const paidShiftPerPerson = calcPaidShiftHoursPerPerson(); // shift - break
+  const workPerPerson = calcWorkHoursPerPerson(); // shift - break - travel (egg collection)
+
+  // Labour hours person-hours (paid time) = (shift - break) × workers
   const labourHours =
-    workers > 0 ? (workHours + travelFinal) * workers : "";
+    Number.isFinite(paidShiftPerPerson) && workers > 0 ? paidShiftPerPerson * workers : "";
 
   const payload = {
     date,
@@ -287,9 +313,10 @@ async function submitDiary() {
     startTime: sval("startTime"),
     endTime: sval("endTime"),
     breakMins: nval("breakMins"),
+
     travelHours: travelFinal,
-    workHours: workHours,
-    labourHours: labourHours,
+    workHours: Number.isFinite(workPerPerson) ? Number(workPerPerson) : 0, // productive per person
+    labourHours: labourHours, // paid person-hours
 
     // Egg collection
     eggsCollected: nval("eggsCollected"),
