@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hilltops Vehicle Checklist</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f6f7fb;
+    }
+    header {
+      background: #1f3b2c;
+      color: #fff;
+      padding: 16px 18px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    .wrap {
+      max-width: 900px;
+      margin: 18px auto;
+      padding: 0 14px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .field {
+      flex: 1 1 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    label {
+      font-weight: 700;
+      font-size: 13px;
+      color: #222;
+    }
+    input, select, textarea {
+      padding: 10px;
+      border: 1px solid #d7dbe7;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    .btn {
+      background: #1f3b2c;
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 10px;
+      font-weight: 700;
+    }
+    .hidden {
+      display: none;
+    }
+    .notice {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      color: #5c4300;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+    .danger-note {
+      background: #fdecec;
+      border: 2px solid #dc3545;
+      color: #8a1c1c;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+    .checkline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      font-weight: 700;
+    }
+    .checkline input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    small {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hilltops Free Range — Vehicle Checklist</h1>
+  </header>
+
+  <div class="wrap">
+
+    <div class="card">
+      <div class="notice">
+        ⚠️ IMPORTANT FUEL NOTICE<br><br>
+        🟡 YELLOW CANS = DIESEL<br>
+        🔴 RED CANS = PETROL<br><br>
+        Using the wrong fuel will damage the vehicle.
+      </div>
+
+      <div class="danger-note">
+        Before submitting, the driver must confirm fuel colour understanding.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>Action Type</label>
+        <select id="entryType" onchange="toggleSections()">
+          <option value="Pre-Start">Before Use / Pre-Start Checklist</option>
+          <option value="Post-Use">After Use / Cleaning Confirmation</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Name</label>
+          <input type="text" id="name" placeholder="Enter your name" />
+        </div>
+
+        <div class="field">
+          <label>Vehicle Type</label>
+          <select id="vehicleType">
+            <option value="">Select vehicle</option>
+            <option value="New UTE">New UTE</option>
+            <option value="Old UTE">Old UTE</option>
+            <option value="Kubota Tractor">Kubota Tractor</option>
+            <option value="Polaris">Polaris</option>
+            <option value="Quad Bike">Quad Bike</option>
+            <option value="John Deere Tractor">John Deere Tractor</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="checkline">
+        <input type="checkbox" id="fuelConfirm" />
+        <label for="fuelConfirm" style="margin:0;">
+          I confirm I understand: Yellow = Diesel, Red = Petrol
+        </label>
+      </div>
+    </div>
+
+    <!-- PRE START -->
+    <div class="card" id="preStartSection">
+      <h2>Pre-Start Checklist</h2>
+
+      <div class="row">
+        <div class="field">
+          <label>Fuel Type</label>
+          <select id="fuelType">
+            <option value="">Select fuel type</option>
+            <option value="Diesel">Diesel</option>
+            <option value="Petrol">Petrol</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Fuel Level</label>
+          <input type="text" id="fuelLevel" placeholder="e.g. Full / Half / Low / 3 bars" />
+        </div>
+
+        <div class="field">
+          <label>Oil Level</label>
+          <input type="text" id="oilLevel" placeholder="e.g. OK / Full / Low" />
+        </div>
+
+        <div class="field">
+          <label>Water Level</label>
+          <input type="text" id="waterLevel" placeholder="e.g. OK / Full / Low" />
+        </div>
+
+        <div class="field">
+          <label>Coolant Level</label>
+          <input type="text" id="coolantLevel" placeholder="e.g. OK / Full / Low" />
+        </div>
+      </div>
+
+      <div class="checkline">
+        <input type="checkbox" id="allCheckedOk" onchange="toggleIssueRequired()" />
+        <label for="allCheckedOk" style="margin:0;">All checks completed and OK</label>
+      </div>
+
+      <div class="field">
+        <label>Issue / Problem Found</label>
+        <textarea id="issueNote" placeholder="If any issue is found, write it here"></textarea>
+        <small>If not all OK, this field must be filled.</small>
+      </div>
+    </div>
+
+    <!-- POST USE -->
+    <div class="card hidden" id="postUseSection">
+      <h2>After Use / Cleaning Confirmation</h2>
+
+      <div class="checkline">
+        <input type="checkbox" id="cleanedInside" />
+        <label for="cleanedInside" style="margin:0;">Vehicle cleaned inside</label>
+      </div>
+
+      <div class="checkline">
+        <input type="checkbox" id="cleanedOutside" />
+        <label for="cleanedOutside" style="margin:0;">Vehicle cleaned outside</label>
+      </div>
+
+      <div class="field">
+        <label>Post-Use Notes</label>
+        <textarea id="postUseNotes" placeholder="Any note after using the vehicle"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <button class="btn" id="submitBtn" onclick="submitForm()">Submit Vehicle Log</button>
+      <div class="status" id="status"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const WEB_APP_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function toggleSections() {
+      const type = $("entryType").value;
+      $("preStartSection").classList.toggle("hidden", type !== "Pre-Start");
+      $("postUseSection").classList.toggle("hidden", type !== "Post-Use");
+    }
+
+    function toggleIssueRequired() {
+      const allOk = $("allCheckedOk").checked;
+      if (allOk) {
+        $("issueNote").placeholder = "Leave blank if everything is OK";
+      } else {
+        $("issueNote").placeholder = "Please describe the issue found";
+      }
+    }
+
+    function validateForm() {
+      const type = $("entryType").value;
+      const name = $("name").value.trim();
+      const vehicleType = $("vehicleType").value;
+      const fuelConfirm = $("fuelConfirm").checked;
+
+      if (!name) {
+        alert("Please enter the name.");
+        return false;
+      }
+
+      if (!vehicleType) {
+        alert("Please select the vehicle type.");
+        return false;
+      }
+
+      if (!fuelConfirm) {
+        alert("Please confirm that Yellow = Diesel and Red = Petrol before submitting.");
+        return false;
+      }
+
+      if (type === "Pre-Start") {
+        const fuelType = $("fuelType").value;
+        const fuelLevel = $("fuelLevel").value.trim();
+        const oilLevel = $("oilLevel").value.trim();
+        const waterLevel = $("waterLevel").value.trim();
+        const coolantLevel = $("coolantLevel").value.trim();
+        const allOk = $("allCheckedOk").checked;
+        const issue = $("issueNote").value.trim();
+
+        if (!fuelType) {
+          alert("Please select the fuel type.");
+          return false;
+        }
+
+        if (!fuelLevel || !oilLevel || !waterLevel || !coolantLevel) {
+          alert("Please fill fuel level, oil level, water level, and coolant level.");
+          return false;
+        }
+
+        if (!allOk && !issue) {
+          alert("Please write the issue/problem found.");
+          return false;
+        }
+      }
+
+      if (type === "Post-Use") {
+        const cleanedInside = $("cleanedInside").checked;
+        const cleanedOutside = $("cleanedOutside").checked;
+
+        if (!cleanedInside && !cleanedOutside) {
+          alert("Please confirm at least one cleaning action, or add a note.");
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    async function submitForm() {
+      if (!validateForm()) return;
+
+      const btn = $("submitBtn");
+      const status = $("status");
+      btn.disabled = true;
+      status.textContent = "Submitting...";
+
+      const payload = {
+        entryType: $("entryType").value,
+        name: $("name").value.trim(),
+        vehicleType: $("vehicleType").value,
+        fuelConfirm: $("fuelConfirm").checked ? "Yes" : "No",
+
+        fuelType: $("fuelType").value,
+        fuelLevel: $("fuelLevel").value.trim(),
+        oilLevel: $("oilLevel").value.trim(),
+        waterLevel: $("waterLevel").value.trim(),
+        coolantLevel: $("coolantLevel").value.trim(),
+        allCheckedOk: $("allCheckedOk").checked ? "Yes" : "No",
+        issueNote: $("issueNote").value.trim(),
+
+        cleanedInside: $("cleanedInside").checked ? "Yes" : "No",
+        cleanedOutside: $("cleanedOutside").checked ? "Yes" : "No",
+        postUseNotes: $("postUseNotes").value.trim()
+      };
+
+      try {
+        const body = new URLSearchParams();
+        body.append("data", JSON.stringify(payload));
+
+        await fetch(WEB_APP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          body: body
+        });
+
+        status.textContent = "✅ Submitted successfully.";
+
+        // reset form
+        $("name").value = "";
+        $("vehicleType").value = "";
+        $("fuelConfirm").checked = false;
+
+        $("fuelType").value = "";
+        $("fuelLevel").value = "";
+        $("oilLevel").value = "";
+        $("waterLevel").value = "";
+        $("coolantLevel").value = "";
+        $("allCheckedOk").checked = false;
+        $("issueNote").value = "";
+
+        $("cleanedInside").checked = false;
+        $("cleanedOutside").checked = false;
+        $("postUseNotes").value = "";
+
+        toggleIssueRequired();
+        toggleSections();
+      } catch (err) {
+        status.textContent = "❌ Submit failed: " + err;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    toggleSections();
+  </script>
+</body>
+</html>
