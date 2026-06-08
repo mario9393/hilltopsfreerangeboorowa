@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hilltops Visitor Log</title>
+
   <style>
     html, body {
       margin: 0;
@@ -11,15 +12,6 @@
       font-family: Arial, sans-serif;
       background: url('https://www.hilltopsfreerangeboorowa.org/background.jpg') no-repeat center center fixed;
       background-size: cover;
-    }
-
-    .form-container {
-      background: rgba(255, 255, 255, 0.90);
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      max-width: 500px;
-      margin: auto;
     }
 
     .wrapper {
@@ -30,23 +22,27 @@
       padding: 30px 15px;
     }
 
-    .logo {
-      display: block;
-      max-width: 150px;
+    .form-container {
+      background: rgba(255, 255, 255, 0.90);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      max-width: 500px;
       width: 100%;
-      height: auto;
-      margin: 0 auto 10px;
+      margin: auto;
     }
 
     input, select {
       width: 100%;
+      box-sizing: border-box;
       padding: 10px;
       margin: 10px 0;
       border-radius: 5px;
       border: 1px solid #ccc;
+      font-size: 16px;
     }
 
-    button[type="submit"] {
+    button {
       width: 100%;
       padding: 12px;
       margin: 10px 0;
@@ -56,27 +52,31 @@
       font-weight: bold;
       border: none;
       cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.1s ease;
+      font-size: 16px;
     }
-    button[type="submit"]:hover { background-color: #45a049; }
-    button[type="submit"]:active { background-color: #3e8e41; transform: scale(0.97); }
+
+    button[type="button"] {
+      background-color: #777;
+    }
 
     canvas {
       border: 1px solid #ccc;
       width: 100%;
-      height: 200px;
+      height: 180px;
       touch-action: none;
+      background: #fff;
     }
 
-    #farmNamesGroup { display: none; }
+    #farmNamesGroup {
+      display: none;
+    }
 
-    .biosecurity-notice{
+    .biosecurity-notice {
       background: #fff;
       border-left: 6px solid #2e7d32;
       border-radius: 10px;
       padding: 12px 16px;
       margin: 10px 0 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.06);
       line-height: 1.35;
     }
 
@@ -84,44 +84,52 @@
       text-align: center;
       font-size: 14px;
       padding: 20px;
-      background-color: rgba(255,255,255,0.9);
-      margin-top: 20px;
+      background-color: #f5f5f5;
     }
 
     @media screen and (max-width: 600px) {
-      .form-container { border-radius: 10px; padding: 15px; }
-      h2 { font-size: 20px; }
-      canvas { height: 150px; }
+      .form-container {
+        padding: 15px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      canvas {
+        height: 150px;
+      }
     }
   </style>
 </head>
+
 <body>
 <div class="wrapper">
   <div class="form-container">
-    <div style="text-align: center; margin-bottom: 20px;">
-      <div style="font-size: 40px;">🐓</div>
-      <div style="
-        font-family: 'Georgia', serif;
-        font-size: 32px;
-        color: #EBC191;
-        font-weight: bold;
-        letter-spacing: 2px;
-      ">HILLTOPS</div>
-      <div style="width: 60px; height: 2px; background-color: #EBC191; margin: 5px auto;"></div>
-      <div style="font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 4px; color: #EBC191;">FREE RANGE EGGS</div>
+
+    <div style="text-align:center; margin-bottom:20px;">
+      <div style="font-size:40px;">🐓</div>
+      <div style="font-family:Georgia, serif; font-size:32px; color:#EBC191; font-weight:bold; letter-spacing:2px;">
+        HILLTOPS
+      </div>
+      <div style="width:60px; height:2px; background-color:#EBC191; margin:5px auto;"></div>
+      <div style="font-size:12px; letter-spacing:4px; color:#EBC191;">
+        FREE RANGE EGGS
+      </div>
     </div>
 
-    <h2 style="text-align: center;">Hilltops Free Range Visitor Log</h2>
+    <h2 style="text-align:center;">Hilltops Free Range Visitor Log</h2>
 
-    <!-- NEW: Biosecurity contact banner -->
-    <div class="biosecurity-notice" role="alert">
+    <div class="biosecurity-notice">
       <strong>Biosecurity notice:</strong>
       A control order made under the <em>Biosecurity Act 2015</em> applies to this farm.
-      <br>
-      <strong>Before entering the production area, contact the Farm Manager:
+      <br><br>
+      <strong>
+        Before entering the production area, contact the Farm Manager:
         <span class="manager-name"></span> —
-        <a class="manager-phone" href="#" rel="nofollow noopener"></a>.
+        <span class="manager-phone"></span>.
       </strong>
+      <br>
       Unauthorised entry may be an offence.
     </div>
 
@@ -153,9 +161,9 @@
 
       <input type="text" name="disinfect" placeholder="Disinfect Vehicle and Shoes?" required>
 
-      <p style="margin-top: 20px; font-weight: bold;">
+      <p style="margin-top:20px; font-weight:bold;">
         I have received and agree to follow the biosecurity measures explained to me, as required under the
-        <strong>NSW Biosecurity (Salmonella Enteritidis) Control Order 2024 (as amended)</strong>. (Sign if agreed)
+        <strong>NSW Biosecurity (Salmonella Enteritidis) Control Order 2024 as amended</strong>.
       </p>
 
       <label>Signature:</label>
@@ -165,96 +173,112 @@
 
       <p>
         Please read the NSW Salmonella Enteritidis Control Order here:
-        <a href="https://www.dpi.nsw.gov.au/__data/assets/pdf_file/0011/1565381/SE-Control-Order-Guide-2024.pdf" target="_blank" rel="noopener">Read the full Control Order</a>
+        <a href="https://www.dpi.nsw.gov.au/__data/assets/pdf_file/0011/1565381/SE-Control-Order-Guide-2024.pdf" target="_blank" rel="noopener">
+          Read the full Control Order
+        </a>
       </p>
 
-      <!-- NEW: Permission/Contact confirmation -->
       <label style="display:block; margin:10px 0;">
-        <input type="checkbox" id="permissionConfirm" required>
-        I have contacted the Farm Manager, <span class="manager-name"></span>
-        (<a class="manager-phone" href="#"></a>) and received permission/instructions to enter the production area.
+        <input type="checkbox" id="permissionConfirm" required style="width:auto;">
+        I have contacted the Farm Manager,
+        <span class="manager-name"></span>
+        (<span class="manager-phone"></span>) and received permission/instructions to enter the production area.
       </label>
 
       <label style="display:block; margin:10px 0;">
-        <input type="checkbox" id="agreeOrder" required>
+        <input type="checkbox" id="agreeOrder" required style="width:auto;">
         I have read and understood the NSW SE Control Order and agree to comply.
       </label>
 
       <button type="submit">Submit</button>
     </form>
+
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
 <script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCaqwB_S49bulVaNhTIvzhnCOvsp43rF5m-cbMSdR-BQB6olSWx2x6VlZlXhvDYQ4A7Q/exec";
+
   const MANAGER_NAME = "Dr Anthony Jude de Silva";
-  const MANAGER_PHONE_RAW = "+61417031299";
   const MANAGER_PHONE_PRETTY = "+61 417 031 299";
 
-  document.querySelectorAll(".manager-name").forEach(el => el.textContent = MANAGER_NAME);
-  document.querySelectorAll(".manager-phone").forEach(el => {
-    el.textContent = MANAGER_PHONE_PRETTY;
-    el.setAttribute("href", "tel:" + MANAGER_PHONE_RAW);
+  document.querySelectorAll(".manager-name").forEach(el => {
+    el.textContent = MANAGER_NAME;
   });
 
-  const form = document.getElementById('visitorForm');
-  const canvas = document.getElementById('signature-pad');
-  const signaturePad = new SignaturePad(canvas);
-  const signatureInput = document.getElementById('signature');
-  const contactSelect = document.getElementById('contactSelect');
-  const farmNamesGroup = document.getElementById('farmNamesGroup');
-  const farmNamesInput = document.getElementById('farmNames');
+  document.querySelectorAll(".manager-phone").forEach(el => {
+    el.textContent = MANAGER_PHONE_PRETTY;
+  });
 
-  document.getElementById('datetime').value = new Date().toLocaleString();
+  const form = document.getElementById("visitorForm");
+  const canvas = document.getElementById("signature-pad");
+  const signaturePad = new SignaturePad(canvas);
+  const signatureInput = document.getElementById("signature");
+  const contactSelect = document.getElementById("contactSelect");
+  const farmNamesGroup = document.getElementById("farmNamesGroup");
+  const farmNamesInput = document.getElementById("farmNames");
+
+  document.getElementById("datetime").value = new Date().toLocaleString();
 
   function clearSignature() {
     signaturePad.clear();
   }
 
-  contactSelect.addEventListener('change', () => {
-    if (contactSelect.value === 'Yes') {
-      farmNamesGroup.style.display = 'block';
+  contactSelect.addEventListener("change", () => {
+    if (contactSelect.value === "Yes") {
+      farmNamesGroup.style.display = "block";
       farmNamesInput.required = true;
     } else {
-      farmNamesGroup.style.display = 'none';
+      farmNamesGroup.style.display = "none";
       farmNamesInput.required = false;
-      farmNamesInput.value = '';
+      farmNamesInput.value = "";
     }
   });
 
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(position => {
-      document.getElementById('latitude').value = position.coords.latitude;
-      document.getElementById('longitude').value = position.coords.longitude;
-    }, () => {
-      alert("Location permission is required to submit the visitor log near the entrance.");
-    });
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        document.getElementById("latitude").value = position.coords.latitude;
+        document.getElementById("longitude").value = position.coords.longitude;
+      },
+      error => {
+        alert("Location permission is required to submit the visitor log.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      }
+    );
   } else {
     alert("Geolocation is not supported by this browser.");
   }
 
-  form.addEventListener('submit', async function(e) {
+  form.addEventListener("submit", async function(e) {
     e.preventDefault();
 
-    if (!document.getElementById('agreeOrder').checked) {
-      alert('Please read and agree to the SE Control Order before submitting.');
+    if (!document.getElementById("permissionConfirm").checked) {
+      alert("Please confirm you have contacted the Farm Manager.");
       return;
     }
 
-    if (!document.getElementById('permissionConfirm').checked) {
-      alert('Please confirm you have contacted the Farm Manager and received instructions.');
+    if (!document.getElementById("agreeOrder").checked) {
+      alert("Please agree to the SE Control Order before submitting.");
       return;
     }
 
     if (signaturePad.isEmpty()) {
-      alert('Please provide a signature.');
+      alert("Please provide a signature.");
       return;
     }
 
-    const lat = document.getElementById('latitude').value;
-    const lng = document.getElementById('longitude').value;
+    const lat = document.getElementById("latitude").value;
+    const lng = document.getElementById("longitude").value;
+
     if (!lat || !lng) {
-      alert('Location is required. Please allow location access and try again.');
+      alert("Location is required. Please allow location access and try again.");
       return;
     }
 
@@ -262,49 +286,46 @@
     submitButton.disabled = true;
     submitButton.textContent = "Submitting...";
 
-    signatureInput.value = signaturePad.toDataURL();
+    signatureInput.value = signaturePad.toDataURL("image/png");
 
     const formData = new FormData(form);
     const plainFormData = Object.fromEntries(formData.entries());
     const jsonFormData = JSON.stringify(plainFormData);
 
     try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbyCaqwB_S49bulVaNhTIvzhnCOvsp43rF5m-cbMSdR-BQB6olSWx2x6VlZlXhvDYQ4A7Q/exec', {
-        method: 'POST',
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
         headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
+          "Content-Type": "text/plain;charset=utf-8"
         },
         body: jsonFormData
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        form.innerHTML = `
-          <div style="text-align: center; font-size: 18px; padding: 20px;">
-            ✅ Thank you! Your visit has been logged successfully.
-          </div>
-          <div class="biosecurity-notice">
-            If you haven't already, please call the Farm Manager,
-            <strong>${MANAGER_NAME}</strong> on
-            <a href="tel:${MANAGER_PHONE_RAW}">${MANAGER_PHONE_PRETTY}</a>
-            before entering the production area.
-          </div>
-        `;
-      } else {
-        throw new Error(result.error || 'Submission failed');
-      }
+      form.innerHTML = `
+        <div style="text-align:center; font-size:18px; padding:20px;">
+          ✅ Thank you! Your visit has been logged successfully.
+        </div>
+        <div class="biosecurity-notice">
+          Please contact the Farm Manager before entering the production area:
+          <br><br>
+          <strong>${MANAGER_NAME}</strong><br>
+          <strong>${MANAGER_PHONE_PRETTY}</strong>
+        </div>
+      `;
 
     } catch (error) {
-      alert('Submission failed: ' + error.message);
+      alert("Submission failed: " + error.message);
       submitButton.disabled = false;
       submitButton.textContent = "Submit";
     }
   });
 </script>
-<footer style="text-align: center; font-size: 14px; padding: 20px; background-color: #f5f5f5;">
+
+<footer>
   <p>&copy; 2025 Hilltops Free Range Pty Ltd. All rights reserved.</p>
   <p>This is an internal operations platform of Hilltops Free Range. Unauthorized use of any content is prohibited.</p>
 </footer>
+
 </body>
 </html>
